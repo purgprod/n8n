@@ -1,0 +1,723 @@
+{
+  "updatedAt": "2026-05-12T20:30:04.791Z",
+  "createdAt": "2026-05-11T16:18:46.156Z",
+  "id": "EctlFxtdfb0pqXiy",
+  "name": "Nami - Respostas Grupo WhatsApp da Purg",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "purg-grupo-resposta",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-evolution",
+      "name": "Webhook Evolution API",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "purg-grupo-resposta"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-grupo",
+              "leftValue": "={{ $json.body.data.key.remoteJid }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "cond-nao-bot",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "cond-tem-texto",
+              "leftValue": "={{ $json.body.data.message.conversation }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filtro-mensagem",
+      "name": "Filtro Mensagem",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-hoje",
+      "name": "Buscar Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=7",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-semana",
+      "name": "Buscar Semana",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-report",
+      "name": "Buscar 30 dias",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=90",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-trimestre",
+      "name": "Buscar Trimestre",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const d1  = $('Buscar Hoje').first().json;\nconst d7  = $('Buscar Semana').first().json;\nconst d30 = $('Buscar 30 dias').first().json;\nconst d90 = $input.first().json;\nconst pergunta = $('Filtro Mensagem').first().json.body.data.message.conversation;\nconst grupoJid = $('Filtro Mensagem').first().json.body.data.key.remoteJid;\n\nfunction fmt(s) {\n  const [y, m, d] = s.split('-'); return d + '/' + m + '/' + y;\n}\nfunction fmtShort(s) {\n  const [y, m, d] = s.split('-'); return d + '/' + m;\n}\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction pct(a, b) {\n  if (!b) return '0,00'; return (a / b * 100).toFixed(2).replace('.', ',');\n}\nfunction deltaLabel(v) {\n  return parseFloat(v) >= 0 ? 'delta positivo de' : 'delta negativo de';\n}\n\nconst u1 = d1.usuarios;\nconst taxaConversao = Math.round(u1.investindo / u1.total * 100);\nconst pendentes = d1.financeiro.saques_pendentes || 0;\n\nconst meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];\nfunction fmtMes(s) {\n  const [y, m] = s.split('-'); return meses[parseInt(m,10)-1] + '/' + y;\n}\nconst projecao = (d1.projecao_6_meses || []).map(function(p) {\n  return fmtMes(p.mes) + ': ' + brl(p.total_previsto);\n}).join(', ');\n\nreturn [{ json: { grupoJid, chatInput: [\n  'Voce e um assistente executivo da Purg. Responda a pergunta do socio de forma direta e concisa.',\n  'Se o socio perguntar o que voce sabe, o que pode responder ou quais informacoes tem, liste em bullet points:',\n  '- Total de usuarios cadastrados e quantos estao investindo (taxa de conversao)',\n  '- Novos cadastros do dia',\n  '- Depositos, saques e delta do dia',\n  '- Saques pendentes e volume total investido',\n  '- Novos usuarios e movimentacao financeira dos ultimos 7 dias',\n  '- Novos usuarios e movimentacao financeira dos ultimos 30 dias',\n  '- Novos usuarios e movimentacao financeira dos ultimos 90 dias',\n  '- Projecao de metas para os proximos 6 meses (quando houver)',\n  'Regras: texto simples, sem markdown, sem asteriscos; numeros sempre em algarismos;',\n  'valores monetarios com formato brasileiro (ex: R$ 1.200,50); datas no formato DD/MM/YYYY.',\n  '',\n  'Data de referencia: ' + fmt(d1.data_referencia),\n  '',\n  'HOJE:',\n  '- Usuarios: ' + u1.total + ' (investindo: ' + u1.investindo + ', taxa de conversao: ' + taxaConversao + '%)',\n  '- Novos cadastros hoje: ' + u1.novos,\n  '- Depositos: ' + brl(d1.financeiro.depositos) + ' | Saques: ' + brl(d1.financeiro.saques) + ' | ' + deltaLabel(d1.financeiro.delta) + ' ' + brl(d1.financeiro.delta),\n  '- Saques pendentes: ' + pendentes,\n  '- Volume investido: ' + brl(d1.financeiro.volume_investido),\n  '',\n  'ULTIMOS 7 DIAS (' + fmtShort(d7.data_inicio) + ' a ' + fmtShort(d7.data_referencia) + '):',\n  '- Novos usuarios: ' + d7.usuarios.novos + ' (aumento de ' + pct(d7.usuarios.novos, d7.usuarios.total - d7.usuarios.novos) + '%)',\n  '- Depositos: ' + brl(d7.financeiro.depositos) + ' | Saques: ' + brl(d7.financeiro.saques) + ' | ' + deltaLabel(d7.financeiro.delta) + ' ' + brl(d7.financeiro.delta),\n  '',\n  'ULTIMOS 30 DIAS (' + fmtShort(d30.data_inicio) + ' a ' + fmtShort(d30.data_referencia) + '):',\n  '- Novos usuarios: ' + d30.usuarios.novos + ' (aumento de ' + pct(d30.usuarios.novos, d30.usuarios.total - d30.usuarios.novos) + '%)',\n  '- Depositos: ' + brl(d30.financeiro.depositos) + ' | Saques: ' + brl(d30.financeiro.saques) + ' | ' + deltaLabel(d30.financeiro.delta) + ' ' + brl(d30.financeiro.delta),\n  '',\n  'ULTIMO TRIMESTRE (' + fmtShort(d90.data_inicio) + ' a ' + fmtShort(d90.data_referencia) + '):',\n  '- Novos usuarios: ' + d90.usuarios.novos + ' (aumento de ' + pct(d90.usuarios.novos, d90.usuarios.total - d90.usuarios.novos) + '%)',\n  '- Depositos: ' + brl(d90.financeiro.depositos) + ' | Saques: ' + brl(d90.financeiro.saques) + ' | ' + deltaLabel(d90.financeiro.delta) + ' ' + brl(d90.financeiro.delta),\n  '',\n  projecao ? 'PROJECAO METAS (6 meses): ' + projecao : '',\n  '',\n  'Pergunta do socio: ' + pergunta,\n].join('\\n') } }];"
+      },
+      "id": "monta-prompt",
+      "name": "Monta Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "auto",
+        "options": {}
+      },
+      "id": "llm-chain",
+      "name": "Gemini Resposta",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "id": "gemini-model",
+      "name": "Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        400
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vW6hLLZSK4uh0bxJ",
+          "name": "Google Gemini - Purg"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Monta Prompt').item.json.grupoJid, text: $json.text }) }}",
+        "options": {}
+      },
+      "id": "send-resposta",
+      "name": "Enviar Resposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Evolution API": {
+      "main": [
+        [
+          {
+            "node": "Filtro Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Buscar Hoje",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Gemini Resposta": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gemini Resposta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monta Prompt": {
+      "main": [
+        [
+          {
+            "node": "Gemini Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Trimestre": {
+      "main": [
+        [
+          {
+            "node": "Monta Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Hoje": {
+      "main": [
+        [
+          {
+            "node": "Buscar Semana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Semana": {
+      "main": [
+        [
+          {
+            "node": "Buscar 30 dias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar 30 dias": {
+      "main": [
+        [
+          {
+            "node": "Buscar Trimestre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "143d6029-db82-46eb-80ef-74f096b69a6a",
+  "activeVersionId": "143d6029-db82-46eb-80ef-74f096b69a6a",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-11T16:18:46.158Z",
+      "createdAt": "2026-05-11T16:18:46.158Z",
+      "role": "workflow:owner",
+      "workflowId": "EctlFxtdfb0pqXiy",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-12T20:30:04.791Z",
+    "createdAt": "2026-05-12T20:30:04.791Z",
+    "versionId": "143d6029-db82-46eb-80ef-74f096b69a6a",
+    "workflowId": "EctlFxtdfb0pqXiy",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "purg-grupo-resposta",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "webhook-evolution",
+        "name": "Webhook Evolution API",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          100,
+          300
+        ],
+        "webhookId": "purg-grupo-resposta"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-grupo",
+                "leftValue": "={{ $json.body.data.key.remoteJid }}",
+                "rightValue": "@g.us",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              },
+              {
+                "id": "cond-nao-bot",
+                "leftValue": "={{ $json.body.data.key.fromMe }}",
+                "rightValue": "true",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                }
+              },
+              {
+                "id": "cond-tem-texto",
+                "leftValue": "={{ $json.body.data.message.conversation }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "filtro-mensagem",
+        "name": "Filtro Mensagem",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          320,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=1",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-hoje",
+        "name": "Buscar Hoje",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          320,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=7",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-semana",
+        "name": "Buscar Semana",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          540,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=30",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-report",
+        "name": "Buscar 30 dias",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          760,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=90",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-trimestre",
+        "name": "Buscar Trimestre",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          980,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const d1  = $('Buscar Hoje').first().json;\nconst d7  = $('Buscar Semana').first().json;\nconst d30 = $('Buscar 30 dias').first().json;\nconst d90 = $input.first().json;\nconst pergunta = $('Filtro Mensagem').first().json.body.data.message.conversation;\nconst grupoJid = $('Filtro Mensagem').first().json.body.data.key.remoteJid;\n\nfunction fmt(s) {\n  const [y, m, d] = s.split('-'); return d + '/' + m + '/' + y;\n}\nfunction fmtShort(s) {\n  const [y, m, d] = s.split('-'); return d + '/' + m;\n}\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction pct(a, b) {\n  if (!b) return '0,00'; return (a / b * 100).toFixed(2).replace('.', ',');\n}\nfunction deltaLabel(v) {\n  return parseFloat(v) >= 0 ? 'delta positivo de' : 'delta negativo de';\n}\n\nconst u1 = d1.usuarios;\nconst taxaConversao = Math.round(u1.investindo / u1.total * 100);\nconst pendentes = d1.financeiro.saques_pendentes || 0;\n\nconst meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];\nfunction fmtMes(s) {\n  const [y, m] = s.split('-'); return meses[parseInt(m,10)-1] + '/' + y;\n}\nconst projecao = (d1.projecao_6_meses || []).map(function(p) {\n  return fmtMes(p.mes) + ': ' + brl(p.total_previsto);\n}).join(', ');\n\nreturn [{ json: { grupoJid, chatInput: [\n  'Voce e um assistente executivo da Purg. Responda a pergunta do socio de forma direta e concisa.',\n  'Se o socio perguntar o que voce sabe, o que pode responder ou quais informacoes tem, liste em bullet points:',\n  '- Total de usuarios cadastrados e quantos estao investindo (taxa de conversao)',\n  '- Novos cadastros do dia',\n  '- Depositos, saques e delta do dia',\n  '- Saques pendentes e volume total investido',\n  '- Novos usuarios e movimentacao financeira dos ultimos 7 dias',\n  '- Novos usuarios e movimentacao financeira dos ultimos 30 dias',\n  '- Novos usuarios e movimentacao financeira dos ultimos 90 dias',\n  '- Projecao de metas para os proximos 6 meses (quando houver)',\n  'Regras: texto simples, sem markdown, sem asteriscos; numeros sempre em algarismos;',\n  'valores monetarios com formato brasileiro (ex: R$ 1.200,50); datas no formato DD/MM/YYYY.',\n  '',\n  'Data de referencia: ' + fmt(d1.data_referencia),\n  '',\n  'HOJE:',\n  '- Usuarios: ' + u1.total + ' (investindo: ' + u1.investindo + ', taxa de conversao: ' + taxaConversao + '%)',\n  '- Novos cadastros hoje: ' + u1.novos,\n  '- Depositos: ' + brl(d1.financeiro.depositos) + ' | Saques: ' + brl(d1.financeiro.saques) + ' | ' + deltaLabel(d1.financeiro.delta) + ' ' + brl(d1.financeiro.delta),\n  '- Saques pendentes: ' + pendentes,\n  '- Volume investido: ' + brl(d1.financeiro.volume_investido),\n  '',\n  'ULTIMOS 7 DIAS (' + fmtShort(d7.data_inicio) + ' a ' + fmtShort(d7.data_referencia) + '):',\n  '- Novos usuarios: ' + d7.usuarios.novos + ' (aumento de ' + pct(d7.usuarios.novos, d7.usuarios.total - d7.usuarios.novos) + '%)',\n  '- Depositos: ' + brl(d7.financeiro.depositos) + ' | Saques: ' + brl(d7.financeiro.saques) + ' | ' + deltaLabel(d7.financeiro.delta) + ' ' + brl(d7.financeiro.delta),\n  '',\n  'ULTIMOS 30 DIAS (' + fmtShort(d30.data_inicio) + ' a ' + fmtShort(d30.data_referencia) + '):',\n  '- Novos usuarios: ' + d30.usuarios.novos + ' (aumento de ' + pct(d30.usuarios.novos, d30.usuarios.total - d30.usuarios.novos) + '%)',\n  '- Depositos: ' + brl(d30.financeiro.depositos) + ' | Saques: ' + brl(d30.financeiro.saques) + ' | ' + deltaLabel(d30.financeiro.delta) + ' ' + brl(d30.financeiro.delta),\n  '',\n  'ULTIMO TRIMESTRE (' + fmtShort(d90.data_inicio) + ' a ' + fmtShort(d90.data_referencia) + '):',\n  '- Novos usuarios: ' + d90.usuarios.novos + ' (aumento de ' + pct(d90.usuarios.novos, d90.usuarios.total - d90.usuarios.novos) + '%)',\n  '- Depositos: ' + brl(d90.financeiro.depositos) + ' | Saques: ' + brl(d90.financeiro.saques) + ' | ' + deltaLabel(d90.financeiro.delta) + ' ' + brl(d90.financeiro.delta),\n  '',\n  projecao ? 'PROJECAO METAS (6 meses): ' + projecao : '',\n  '',\n  'Pergunta do socio: ' + pergunta,\n].join('\\n') } }];"
+        },
+        "id": "monta-prompt",
+        "name": "Monta Prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "auto",
+          "options": {}
+        },
+        "id": "llm-chain",
+        "name": "Gemini Resposta",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.4,
+        "position": [
+          1200,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "modelName": "gemini-2.5-flash-lite",
+          "options": {}
+        },
+        "id": "gemini-model",
+        "name": "Google Gemini",
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          1200,
+          400
+        ],
+        "credentials": {
+          "googlePalmApi": {
+            "id": "vW6hLLZSK4uh0bxJ",
+            "name": "Google Gemini - Purg"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ number: $('Monta Prompt').item.json.grupoJid, text: $json.text }) }}",
+          "options": {}
+        },
+        "id": "send-resposta",
+        "name": "Enviar Resposta",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1420,
+          200
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook Evolution API": {
+        "main": [
+          [
+            {
+              "node": "Filtro Mensagem",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filtro Mensagem": {
+        "main": [
+          [
+            {
+              "node": "Buscar Hoje",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Gemini Resposta": {
+        "main": [
+          [
+            {
+              "node": "Enviar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Gemini Resposta",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Monta Prompt": {
+        "main": [
+          [
+            {
+              "node": "Gemini Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Trimestre": {
+        "main": [
+          [
+            {
+              "node": "Monta Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Hoje": {
+        "main": [
+          [
+            {
+              "node": "Buscar Semana",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Semana": {
+        "main": [
+          [
+            {
+              "node": "Buscar 30 dias",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar 30 dias": {
+        "main": [
+          [
+            {
+              "node": "Buscar Trimestre",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

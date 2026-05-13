@@ -1,0 +1,874 @@
+{
+  "updatedAt": "2026-05-13T21:33:52.443Z",
+  "createdAt": "2026-05-11T22:41:53.934Z",
+  "id": "21pWlMTU3P0iPcbT",
+  "name": "Nami - Avisos Para Usuarios WhatsApp",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/5 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-5min",
+      "name": "A cada 5 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/nami/pendentes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-pendentes",
+      "name": "Buscar Pendentes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nif (!data.notificacoes || data.notificacoes.length === 0) return [];\nreturn data.notificacoes.map(n => ({ json: n }));"
+      },
+      "id": "split-notif",
+      "name": "Split Notificacoes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const n = $input.first().json;\nconst payload = n.payload || {};\nconst tipo = n.tipo;\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction num(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction num8(v) {\n  const parts = parseFloat(v).toFixed(8).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nlet mensagem = '';\nif (tipo === 'deposito_confirmado') {\n  mensagem = '🥳 Boa notícia, ' + apelido + '!\\n\\nRecebemos seu depósito de ' + brl(payload.valor) + '.\\n\\nJá estamos trabalhando para atingir nossas metas! 🎯\\n\\nSe quiser conferir todos os detalhes, acesse a sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'saque_confirmado') {\n  mensagem = '💰 Dinheiro a caminho, ' + apelido + '!\\n\\nSeu pedido de saque de ' + brl(payload.valor) + ' foi processado.\\n\\nEm até 1 dia útil o valor estará disponível na sua conta cadastrada.\\n\\nConfira os detalhes da transação na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'saque_falhou') {\n  mensagem = '⚠️ Ops, ' + apelido + '! Tivemos um problema.\\n\\nNão conseguimos concluir seu saque de ' + brl(payload.valor) + '.\\n\\nMotivo: ' + (payload.motivo || 'erro interno') + '\\n\\nMas não se preocupe! Você pode ajustar isso e tentar novamente na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_atingida') {\n  mensagem = '🎯 Meta batida, ' + apelido + '!\\n\\nEstamos mandando muito bem no nosso objetivo de ' + payload.objetivo_nome + '!!\\n\\n💰 Resumo do Objetivo\\n\\nObjetivo: ' + brl(payload.objetivo_valor_total) + '\\nTotal Investido: ' + brl(payload.investido) + '\\nPercentual Atingido: ' + payload.percentual_atingido + '%\\nMetas Concluídas: ' + payload.metas_concluidas + '/' + payload.metas_totais + '\\n\\nVamos juntos continuar evoluindo seu patrimônio para alcançarmos novos objetivos.\\n\\nSe quiser mais detalhes, acesse a sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_mensal_incompleta') {\n  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n  const metas = payload.metas || [];\n  const nomeMes = metas.length > 0 ? meses[new Date(metas[0].data_limite).getMonth()] : '';\n  const titulo = metas.length === 1 ? '*Nossa meta mensal:*' : '*Nossas metas mensais:*';\n  const linhas = metas.map(function(m) {\n    const limite = new Date(m.data_limite).toLocaleDateString('pt-BR');\n    return '💰 Esse mês depositamos ' + brl(m.valor_alocado) + ' (' + m.percentual + '% da meta)\\n🎯 A nossa meta esse mês é de ' + brl(m.valor_meta) + '\\n🗓️ Precisamos depositar até ' + limite;\n  });\n  mensagem = '🎯 ' + apelido + ', falta pouco para atingirmos as nossas metas de ' + nomeMes + '!\\n\\n' + titulo + '\\n' + linhas.join('\\n\\n') + '\\n\\nNão deixe nada nos atrapalhar a alcançar o nosso objetivo!\\n\\nQue tal fazer o nosso aporte agora na sua conta?\\n\\nwww.purg.com.br';\n} else if (tipo === 'resumo_semanal') {\n  mensagem = '*📊 Resumo da Semana*\\n\\n' +\n    'Olá, ' + apelido + '! Confira o desempenho da nossa jornada financeira nos últimos 7 dias:\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Patrimônio: ' + brl(payload.saldo_alocado_total) + '\\n' +\n    'Patrimônio x Objetivo (%): ' + payload.objetivo_percentual_alcancado + '%\\n\\n' +\n    '*📈 Performance da Semana*\\n\\n' +\n    'Rendimento: R$ ' + num(payload.rendimento_semana) + '\\n' +\n    'Rendimento (%): ' + payload.rendimento_percentual + '%\\n' +\n    'Depósitos: R$ ' + num(payload.depositos_semana) + '\\n' +\n    'Saques: R$ ' + num(payload.saques_semana) + '\\n\\n' +\n    '*💰 Seu Patrimônio*\\n\\n' +\n    'Total Investido: R$ ' + num(payload.investido) + '\\n' +\n    'Saldo Disponível: R$ ' + num8(payload.saldo) + '\\n' +\n    'Rendimento Total Acumulado: R$ ' + num(payload.rendimento_total) + '\\n\\n' +\n    '*🏆 Rankings e Conquistas*\\n\\n' +\n    'Liga Atual: ' + payload.liga + '\\n' +\n    'Posição no Ranking Global: #' + payload.posicao_ranking + '\\n' +\n    'Pontuação Total: ' + payload.pontos_total + ' pontos\\n\\n' +\n    '*🎯 Rumo ao Objetivo*\\n' +\n    'Meta mensal: ' + brl(payload.proxima_meta_bruta_financeiro) + '\\n' +\n    'Nós já concluímos ' + payload.proxima_meta_percentual + '% dessa meta!\\n\\n' +\n    '*🗓️ Prazo final*\\n' +\n    'Temos até o dia ' + fmtDate(payload.proxima_meta_data) + ' para finalizarmos essa meta.\\n\\n' +\n    'Que tal fazer um novo depósito para atingirmos o nosso objetivo mais rápido?\\n\\n' +\n    'Acesse o painel completo na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'novo_objetivo') {\n  const parcelas = (payload.metas || []).map(function(v, i) {\n    return 'Parcela ' + (i + 1) + ': ' + brl(v);\n  }).join('\\n');\n  mensagem = '🎉 ' + apelido + ', seja bem-vindo(a)!\\n\\n' +\n    'Eu sou a Purg e estou aqui para te acompanhar em cada passo dessa jornada rumo ao seu objetivo. Vamos juntos chegar lá!\\n\\n' +\n    '🎯 Seu Objetivo\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Prazo final: ' + fmtDate(payload.data_limite) + '\\n' +\n    'Aporte inicial: ' + brl(payload.aporte) + '\\n\\n' +\n    '📅 Plano de Metas Mensais\\n\\n' +\n    parcelas + '\\n\\n' +\n    'Não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\n' +\n    'Se quiser ver mais ferramentas, acesse o nosso app:\\nwww.purg.com.br';\n}\nreturn [{ json: { id: n.id, phone, mensagem } }];"
+      },
+      "id": "build-msg",
+      "name": "Montar Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: $json.phone, text: $json.mensagem } }}",
+        "options": {}
+      },
+      "id": "send-evo",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        200
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ok",
+              "leftValue": "={{ $json.key }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-ok",
+      "name": "Enviou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/enviado' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-enviado",
+      "name": "Marcar Enviado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/falhou' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-falhou",
+      "name": "Marcar Falhou",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 25,30 * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-metas",
+      "name": "Dias 25 e 30 as 09h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jinx.purg.com.br/api/webhook/nami/verificar-metas-mensais",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "verificar-metas",
+      "name": "Verificar Metas Mensais",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nami-stop",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-stop",
+      "name": "Webhook STOP",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        660
+      ],
+      "webhookId": "nami-stop"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/' + $('Buscar Usuario por Celular').first().json.usuario_id + '/toggle' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { ativo: 0 } }}",
+        "options": {}
+      },
+      "id": "toggle-stop",
+      "name": "Desabilitar Usuario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        660
+      ]
+    },
+    {
+      "id": "lookup-usuario",
+      "name": "Buscar Usuario por Celular",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        660
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/por-celular?celular=' + $json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "purg-api-key",
+          "name": "Purg API Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "A cada 5 minutos": {
+      "main": [
+        [
+          {
+            "node": "Buscar Pendentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Pendentes": {
+      "main": [
+        [
+          {
+            "node": "Split Notificacoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Notificacoes": {
+      "main": [
+        [
+          {
+            "node": "Montar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Enviou?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar Falhou",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviou?": {
+      "main": [
+        [
+          {
+            "node": "Marcar Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar Falhou",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dias 25 e 30 as 09h": {
+      "main": [
+        [
+          {
+            "node": "Verificar Metas Mensais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook STOP": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuario por Celular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuario por Celular": {
+      "main": [
+        [
+          {
+            "node": "Desabilitar Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:A cada 5 minutos": {
+      "recurrenceRules": []
+    },
+    "node:Dias 25 e 30 as 09h": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "a5ade0a9-60a6-48fc-b946-dcb1963b5dfd",
+  "activeVersionId": "a5ade0a9-60a6-48fc-b946-dcb1963b5dfd",
+  "triggerCount": 3,
+  "shared": [
+    {
+      "updatedAt": "2026-05-11T22:41:53.937Z",
+      "createdAt": "2026-05-11T22:41:53.937Z",
+      "role": "workflow:owner",
+      "workflowId": "21pWlMTU3P0iPcbT",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-13T21:33:18.484Z",
+    "createdAt": "2026-05-13T21:33:18.484Z",
+    "versionId": "a5ade0a9-60a6-48fc-b946-dcb1963b5dfd",
+    "workflowId": "21pWlMTU3P0iPcbT",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "*/5 * * * *"
+              }
+            ]
+          }
+        },
+        "id": "cron-5min",
+        "name": "A cada 5 minutos",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/nami/pendentes",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "fetch-pendentes",
+        "name": "Buscar Pendentes",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          320,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const data = $input.first().json;\nif (!data.notificacoes || data.notificacoes.length === 0) return [];\nreturn data.notificacoes.map(n => ({ json: n }));"
+        },
+        "id": "split-notif",
+        "name": "Split Notificacoes",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          540,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const n = $input.first().json;\nconst payload = n.payload || {};\nconst tipo = n.tipo;\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction num(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction num8(v) {\n  const parts = parseFloat(v).toFixed(8).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nlet mensagem = '';\nif (tipo === 'deposito_confirmado') {\n  mensagem = '🥳 Boa notícia, ' + apelido + '!\\n\\nRecebemos seu depósito de ' + brl(payload.valor) + '.\\n\\nJá estamos trabalhando para atingir nossas metas! 🎯\\n\\nSe quiser conferir todos os detalhes, acesse a sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'saque_confirmado') {\n  mensagem = '💰 Dinheiro a caminho, ' + apelido + '!\\n\\nSeu pedido de saque de ' + brl(payload.valor) + ' foi processado.\\n\\nEm até 1 dia útil o valor estará disponível na sua conta cadastrada.\\n\\nConfira os detalhes da transação na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'saque_falhou') {\n  mensagem = '⚠️ Ops, ' + apelido + '! Tivemos um problema.\\n\\nNão conseguimos concluir seu saque de ' + brl(payload.valor) + '.\\n\\nMotivo: ' + (payload.motivo || 'erro interno') + '\\n\\nMas não se preocupe! Você pode ajustar isso e tentar novamente na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_atingida') {\n  mensagem = '🎯 Meta batida, ' + apelido + '!\\n\\nEstamos mandando muito bem no nosso objetivo de ' + payload.objetivo_nome + '!!\\n\\n💰 Resumo do Objetivo\\n\\nObjetivo: ' + brl(payload.objetivo_valor_total) + '\\nTotal Investido: ' + brl(payload.investido) + '\\nPercentual Atingido: ' + payload.percentual_atingido + '%\\nMetas Concluídas: ' + payload.metas_concluidas + '/' + payload.metas_totais + '\\n\\nVamos juntos continuar evoluindo seu patrimônio para alcançarmos novos objetivos.\\n\\nSe quiser mais detalhes, acesse a sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_mensal_incompleta') {\n  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n  const metas = payload.metas || [];\n  const nomeMes = metas.length > 0 ? meses[new Date(metas[0].data_limite).getMonth()] : '';\n  const titulo = metas.length === 1 ? '*Nossa meta mensal:*' : '*Nossas metas mensais:*';\n  const linhas = metas.map(function(m) {\n    const limite = new Date(m.data_limite).toLocaleDateString('pt-BR');\n    return '💰 Esse mês depositamos ' + brl(m.valor_alocado) + ' (' + m.percentual + '% da meta)\\n🎯 A nossa meta esse mês é de ' + brl(m.valor_meta) + '\\n🗓️ Precisamos depositar até ' + limite;\n  });\n  mensagem = '🎯 ' + apelido + ', falta pouco para atingirmos as nossas metas de ' + nomeMes + '!\\n\\n' + titulo + '\\n' + linhas.join('\\n\\n') + '\\n\\nNão deixe nada nos atrapalhar a alcançar o nosso objetivo!\\n\\nQue tal fazer o nosso aporte agora na sua conta?\\n\\nwww.purg.com.br';\n} else if (tipo === 'resumo_semanal') {\n  mensagem = '*📊 Resumo da Semana*\\n\\n' +\n    'Olá, ' + apelido + '! Confira o desempenho da nossa jornada financeira nos últimos 7 dias:\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Patrimônio: ' + brl(payload.saldo_alocado_total) + '\\n' +\n    'Patrimônio x Objetivo (%): ' + payload.objetivo_percentual_alcancado + '%\\n\\n' +\n    '*📈 Performance da Semana*\\n\\n' +\n    'Rendimento: R$ ' + num(payload.rendimento_semana) + '\\n' +\n    'Rendimento (%): ' + payload.rendimento_percentual + '%\\n' +\n    'Depósitos: R$ ' + num(payload.depositos_semana) + '\\n' +\n    'Saques: R$ ' + num(payload.saques_semana) + '\\n\\n' +\n    '*💰 Seu Patrimônio*\\n\\n' +\n    'Total Investido: R$ ' + num(payload.investido) + '\\n' +\n    'Saldo Disponível: R$ ' + num8(payload.saldo) + '\\n' +\n    'Rendimento Total Acumulado: R$ ' + num(payload.rendimento_total) + '\\n\\n' +\n    '*🏆 Rankings e Conquistas*\\n\\n' +\n    'Liga Atual: ' + payload.liga + '\\n' +\n    'Posição no Ranking Global: #' + payload.posicao_ranking + '\\n' +\n    'Pontuação Total: ' + payload.pontos_total + ' pontos\\n\\n' +\n    '*🎯 Rumo ao Objetivo*\\n' +\n    'Meta mensal: ' + brl(payload.proxima_meta_bruta_financeiro) + '\\n' +\n    'Nós já concluímos ' + payload.proxima_meta_percentual + '% dessa meta!\\n\\n' +\n    '*🗓️ Prazo final*\\n' +\n    'Temos até o dia ' + fmtDate(payload.proxima_meta_data) + ' para finalizarmos essa meta.\\n\\n' +\n    'Que tal fazer um novo depósito para atingirmos o nosso objetivo mais rápido?\\n\\n' +\n    'Acesse o painel completo na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'novo_objetivo') {\n  const parcelas = (payload.metas || []).map(function(v, i) {\n    return 'Parcela ' + (i + 1) + ': ' + brl(v);\n  }).join('\\n');\n  mensagem = '🎉 ' + apelido + ', seja bem-vindo(a)!\\n\\n' +\n    'Eu sou a Purg e estou aqui para te acompanhar em cada passo dessa jornada rumo ao seu objetivo. Vamos juntos chegar lá!\\n\\n' +\n    '🎯 Seu Objetivo\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Prazo final: ' + fmtDate(payload.data_limite) + '\\n' +\n    'Aporte inicial: ' + brl(payload.aporte) + '\\n\\n' +\n    '📅 Plano de Metas Mensais\\n\\n' +\n    parcelas + '\\n\\n' +\n    'Não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\n' +\n    'Se quiser ver mais ferramentas, acesse o nosso app:\\nwww.purg.com.br';\n}\nreturn [{ json: { id: n.id, phone, mensagem } }];"
+        },
+        "id": "build-msg",
+        "name": "Montar Mensagem",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          760,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: $json.phone, text: $json.mensagem } }}",
+          "options": {}
+        },
+        "id": "send-evo",
+        "name": "Enviar WhatsApp",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          980,
+          200
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.key }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-ok",
+        "name": "Enviou?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1200,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/enviado' }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "mark-enviado",
+        "name": "Marcar Enviado",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1420,
+          100
+        ]
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/falhou' }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "mark-falhou",
+        "name": "Marcar Falhou",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1420,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 25,30 * *"
+              }
+            ]
+          }
+        },
+        "id": "cron-metas",
+        "name": "Dias 25 e 30 as 09h",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://jinx.purg.com.br/api/webhook/nami/verificar-metas-mensais",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "verificar-metas",
+        "name": "Verificar Metas Mensais",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          320,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "nami-stop",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "webhook-stop",
+        "name": "Webhook STOP",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          100,
+          660
+        ],
+        "webhookId": "nami-stop"
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/' + $('Buscar Usuario por Celular').first().json.usuario_id + '/toggle' }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { ativo: 0 } }}",
+          "options": {}
+        },
+        "id": "toggle-stop",
+        "name": "Desabilitar Usuario",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          560,
+          660
+        ]
+      },
+      {
+        "id": "lookup-usuario",
+        "name": "Buscar Usuario por Celular",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          320,
+          660
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/por-celular?celular=' + $json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "purg-api-key",
+            "name": "Purg API Key"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "A cada 5 minutos": {
+        "main": [
+          [
+            {
+              "node": "Buscar Pendentes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Pendentes": {
+        "main": [
+          [
+            {
+              "node": "Split Notificacoes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Notificacoes": {
+        "main": [
+          [
+            {
+              "node": "Montar Mensagem",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Mensagem": {
+        "main": [
+          [
+            {
+              "node": "Enviar WhatsApp",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar WhatsApp": {
+        "main": [
+          [
+            {
+              "node": "Enviou?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Marcar Falhou",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviou?": {
+        "main": [
+          [
+            {
+              "node": "Marcar Enviado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Marcar Falhou",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dias 25 e 30 as 09h": {
+        "main": [
+          [
+            {
+              "node": "Verificar Metas Mensais",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook STOP": {
+        "main": [
+          [
+            {
+              "node": "Buscar Usuario por Celular",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Usuario por Celular": {
+        "main": [
+          [
+            {
+              "node": "Desabilitar Usuario",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
