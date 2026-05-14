@@ -1,0 +1,151 @@
+{
+  "id": "copom-aviso-reuniao",
+  "name": "Nami - Aviso Reunião COPOM",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 21 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-copom",
+      "name": "Todo dia às 18h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/proxima-reuniao-copom",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "buscar-copom",
+      "name": "Buscar Próxima Reunião COPOM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 200]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nconst reuniao = data.proxima_reuniao_copom;\n\n// Compara apenas a data, ignorando hora — ambas em UTC-3 (Brasília)\nconst hoje = new Date();\nconst hojeStr = hoje.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD\n\nreturn [{ json: { reuniao, hoje: hojeStr, disparar: hojeStr >= reuniao } }];"
+      },
+      "id": "verificar-data",
+      "name": "Verificar Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [540, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "deve-disparar",
+              "leftValue": "={{ $json.disparar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "checar-disparo",
+      "name": "É dia do COPOM?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [760, 200]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const { reuniao } = $input.first().json;\nconst [y, m, d] = reuniao.split('-');\nconst dataFmt = d + '/' + m + '/' + y;\n\nconst text = '🏦 Reunião do COPOM hoje!\\n\\n' +\n  'A reunião do COPOM está marcada para hoje, ' + dataFmt + '.\\n\\n' +\n  'Não esqueçam de atualizar o valor do CDI pago nos Pins e a atual Taxa de CDI paga pelos bancos!';\n\nreturn [{ json: { text } }];"
+      },
+      "id": "montar-mensagem",
+      "name": "Montar Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: \"120363425414158709@g.us\", text: $json.text } }}",
+        "options": {}
+      },
+      "id": "enviar-whatsapp",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 100],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Todo dia às 18h": {
+      "main": [[{ "node": "Buscar Próxima Reunião COPOM", "type": "main", "index": 0 }]]
+    },
+    "Buscar Próxima Reunião COPOM": {
+      "main": [[{ "node": "Verificar Data", "type": "main", "index": 0 }]]
+    },
+    "Verificar Data": {
+      "main": [[{ "node": "É dia do COPOM?", "type": "main", "index": 0 }]]
+    },
+    "É dia do COPOM?": {
+      "main": [
+        [{ "node": "Montar Mensagem", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Montar Mensagem": {
+      "main": [[{ "node": "Enviar WhatsApp", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Todo dia às 18h": { "recurrenceRules": [] }
+  },
+  "meta": null,
+  "pinData": null,
+  "tags": []
+}
