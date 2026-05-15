@@ -1,0 +1,1910 @@
+{
+  "updatedAt": "2026-05-14T20:19:15.372Z",
+  "createdAt": "2026-04-28T00:54:08.258Z",
+  "id": "0wpPd0SPkQ8y3GUx",
+  "name": "Nami - Atendimento Purg",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "purg-chat",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        208,
+        304
+      ],
+      "webhookId": "purg-chat-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-iniciar-sessao",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "iniciar_sessao",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-check-action",
+      "name": "É iniciar sessão?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        430,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/usuario/' + $('Webhook').first().json.body.usuario_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-fetch-usuario",
+      "name": "Buscar Dados do Usuário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const webhook = $('Webhook').first().json;\nconst sessionId = webhook.body.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId: sessionId } } }];"
+      },
+      "id": "node-build-ctx",
+      "name": "Montar Contexto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "Você é a Purg, assistente do aplicativo Purg. Fale de forma clara, simples e acolhedora, sem jargões financeiros complexos. Seja sempre sucinta — vá direto ao ponto, sem introduções ou repetições. Nunca use formatação markdown (negrito, itálico, títulos, asteriscos). Use apenas texto simples, listas numeradas ou com hífens quando necessário. Sempre encerre com uma pergunta ou sugestão relevante ao que foi dito. Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nTanto a assistente quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma.\n\n---\n\nESCOPO: Você responde exclusivamente sobre a Purg e educação financeira básica (juros, juros compostos, risco e patrimônio — sempre com exemplos simples e conectados ao contexto do usuário). Qualquer outro assunto deve ser gentilmente recusado: \"Só posso te ajudar com a Purg e educação financeira básica.\"\n\nPerguntas genéricas como \"como funciona?\" devem sempre ser interpretadas e respondidas com base nas funcionalidades da Purg. Nunca invente funcionalidades que não existam.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal. Esse é o valor que o usuário precisará aportar todo mês para atingir o objetivo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (pode ser CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado na conta vinculada em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nÉ uma senha numérica de 4 dígitos criada pelo usuário. Ela é obrigatória para realizar saques e alterar informações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins. Um Pin é a unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento, e os juros variam conforme o risco. A Purg faz a alocação dos Pins automaticamente — o usuário não escolhe onde seu dinheiro é investido.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga do usuário — quanto mais pontos, maior a liga. O ranking permite comparar a evolução com outros usuários, mas nunca exibe valores financeiros — apenas o progresso nas metas. Ninguém no ranking sabe quanto dinheiro você ou outra pessoa tem.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (que aparece no ranking) e pode personalizar seu avatar — são 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix no perfil: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O guardião envia um convite, o dependente aceita, e o guardião passa a acompanhar e operar a conta do dependente pelo app. Menores de idade têm restrições de uso definidas pelo guardião.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg através da área de indicação no app.\n\n10. AUTENTICAÇÃO\nO login pode ser feito com e-mail e senha ou com biometria (como impressão digital ou reconhecimento facial), disponível nos dispositivos que suportam essa tecnologia.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar antes de forma simples.\n\n---\n\nDADOS DO USUÁRIO:\nNo início de cada sessão você recebe um contexto com as informações da conta do usuário: apelido, saldo disponível, total investido, objetivos com progresso das metas, últimos depósitos e saques, liga, posição no ranking e pontuação. Use essas informações para responder perguntas sobre a conta do usuário de forma personalizada e precisa. Nunca diga que não tem acesso às informações do usuário — você as tem desde o início da sessão.\n\nSAUDAÇÃO INICIAL:\nA saudação deve ter no máximo 2 linhas. Quando o contexto indicar \"Usuário retornando: sim\", use exatamente: \"Oi {{apelido}}, que bom que voltou, como posso te ajudar?\" — substituindo {{apelido}} pelo apelido real. Quando for \"Usuário retornando: não\", apresente-se brevemente e cumprimente pelo apelido."
+        }
+      },
+      "id": "node-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        680,
+        340
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "id": "node-gemini",
+      "name": "Google Gemini Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        540
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vW6hLLZSK4uh0bxJ",
+          "name": "Google Gemini - Purg"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "id": "node-memory",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-no-error",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if",
+      "name": "Sucesso?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        920,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "let channel = 'app';\ntry {\n  const wa = $('Extrair Dados WA').all();\n  if (wa && wa.length > 0 && wa[0].json && wa[0].json.phone) channel = 'wa';\n} catch(e) {}\nconst input = $input.first().json;\nreturn [{ json: { ...input, channel } }];"
+      },
+      "id": "node-ch-detect",
+      "name": "Detectar Canal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-is-wa",
+              "leftValue": "={{ $json.channel }}",
+              "rightValue": "wa",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-is-wa",
+      "name": "É WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: $json.output } }}",
+        "options": {}
+      },
+      "id": "node-wa-ok-send",
+      "name": "Enviar Resposta WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        120
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-response",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "field-session",
+              "name": "sessionId",
+              "value": "={{ $('Webhook').item.json.body.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-set-success",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1560,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "let channel = 'app';\ntry {\n  const wa = $('Extrair Dados WA').all();\n  if (wa && wa.length > 0 && wa[0].json && wa[0].json.phone) channel = 'wa';\n} catch(e) {}\nconst input = $input.first().json;\nreturn [{ json: { ...input, channel } }];"
+      },
+      "id": "node-ch-detect-err",
+      "name": "Detectar Canal Erro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-is-wa-err",
+              "leftValue": "={{ $json.channel }}",
+              "rightValue": "wa",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-is-wa-err",
+      "name": "É WhatsApp Erro?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: 'Ops! Tive um probleminha aqui. Tente novamente em instantes.' } }}",
+        "options": {}
+      },
+      "id": "node-wa-err-send",
+      "name": "Enviar Erro WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        380
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-error",
+              "name": "response",
+              "value": "Ops! Tive um probleminha aqui. Tente novamente em instantes.",
+              "type": "string"
+            },
+            {
+              "id": "field-session-err",
+              "name": "sessionId",
+              "value": "={{ $('Webhook').item.json.body.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-set-error",
+      "name": "Formatar Erro",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1560,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1780,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "purg-chat-wa",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "node-wa-webhook",
+      "name": "Webhook WA",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        208,
+        720
+      ],
+      "webhookId": "purg-chat-wa-webhook"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const body = $input.first().json.body;\n\nif (!body || body.event !== 'messages.upsert') return [];\n\nconst data = body.data || {};\nconst key = data.key || {};\nconst msg = data.message || {};\n\nif (key.fromMe === true) return [];\nif (!msg.conversation) return [];\nif (key.remoteJid && key.remoteJid.endsWith('@g.us')) return [];\n\nreturn [{ json: {\n  phone: key.remoteJid.replace('@s.whatsapp.net', ''),\n  remoteJid: key.remoteJid,\n  text: msg.conversation\n} }];"
+      },
+      "id": "node-wa-filter",
+      "name": "Filtrar Mensagem WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        430,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst sessionId = 'wa_' + phone;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst isNewSession = !sessions[sessionId];\n\nif (isNewSession) {\n  sessions[sessionId] = { createdAt: new Date().toISOString() };\n  staticData.waSessions = sessions;\n}\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession\n} }];"
+      },
+      "id": "node-wa-extract",
+      "name": "Extrair Dados WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/por-celular?celular=' + $json.phone }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-wa-lookup",
+      "name": "Buscar Usuário por Celular",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        870,
+        720
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-usuario-found",
+              "leftValue": "={{ $json.usuario_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-wa-check",
+      "name": "Usuário Encontrado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1090,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-nova-sessao",
+              "leftValue": "={{ $('Extrair Dados WA').first().json.isNewSession }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-wa-session",
+      "name": "É Nova Sessão?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1310,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/usuario/' + $json.usuario_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-wa-fetch",
+      "name": "Buscar Dados Usuário WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1530,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId } } }];"
+      },
+      "id": "node-wa-ctx",
+      "name": "Montar Contexto WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1750,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nreturn [{ json: { body: {\n  message: waData.text,\n  sessionId: waData.sessionId\n} } }];"
+      },
+      "id": "node-wa-set-msg",
+      "name": "Preparar Mensagem WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1530,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: 'Oi! Ainda não encontrei uma conta Purg vinculada a esse número. Baixe o app e comece a investir!' } }}",
+        "options": {}
+      },
+      "id": "node-wa-nf-send",
+      "name": "Enviar Não Cadastrado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1310,
+        840
+      ],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "É iniciar sessão?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É iniciar sessão?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados do Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados do Usuário": {
+      "main": [
+        [
+          {
+            "node": "Montar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Contexto": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Sucesso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sucesso?": {
+      "main": [
+        [
+          {
+            "node": "Detectar Canal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Detectar Canal Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Canal": {
+      "main": [
+        [
+          {
+            "node": "É WhatsApp?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É WhatsApp?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Canal Erro": {
+      "main": [
+        [
+          {
+            "node": "É WhatsApp Erro?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É WhatsApp Erro?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Erro WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatar Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Erro": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook WA": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Mensagem WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Mensagem WA": {
+      "main": [
+        [
+          {
+            "node": "Extrair Dados WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados WA": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuário por Celular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuário por Celular": {
+      "main": [
+        [
+          {
+            "node": "Usuário Encontrado?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Não Cadastrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuário Encontrado?": {
+      "main": [
+        [
+          {
+            "node": "É Nova Sessão?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Não Cadastrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Nova Sessão?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Usuário WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Mensagem WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Usuário WA": {
+      "main": [
+        [
+          {
+            "node": "Montar Contexto WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Contexto WA": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Mensagem WA": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "9ffb302a-cf48-4c70-bd25-bec3da3a6b35",
+  "activeVersionId": "9ffb302a-cf48-4c70-bd25-bec3da3a6b35",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-04-28T00:54:08.261Z",
+      "createdAt": "2026-04-28T00:54:08.261Z",
+      "role": "workflow:owner",
+      "workflowId": "0wpPd0SPkQ8y3GUx",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-14T20:19:15.393Z",
+    "createdAt": "2026-05-14T20:19:15.393Z",
+    "versionId": "9ffb302a-cf48-4c70-bd25-bec3da3a6b35",
+    "workflowId": "0wpPd0SPkQ8y3GUx",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "purg-chat",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "node-webhook",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          208,
+          304
+        ],
+        "webhookId": "purg-chat-webhook"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-iniciar-sessao",
+                "leftValue": "={{ $json.body.action }}",
+                "rightValue": "iniciar_sessao",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "node-check-action",
+        "name": "É iniciar sessão?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          430,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/usuario/' + $('Webhook').first().json.body.usuario_id }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "node-fetch-usuario",
+        "name": "Buscar Dados do Usuário",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          640,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const webhook = $('Webhook').first().json;\nconst sessionId = webhook.body.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId: sessionId } } }];"
+        },
+        "id": "node-build-ctx",
+        "name": "Montar Contexto",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          860,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "agent": "conversationalAgent",
+          "promptType": "define",
+          "text": "={{ $json.body.message }}",
+          "options": {
+            "systemMessage": "Você é a Purg, assistente do aplicativo Purg. Fale de forma clara, simples e acolhedora, sem jargões financeiros complexos. Seja sempre sucinta — vá direto ao ponto, sem introduções ou repetições. Nunca use formatação markdown (negrito, itálico, títulos, asteriscos). Use apenas texto simples, listas numeradas ou com hífens quando necessário. Sempre encerre com uma pergunta ou sugestão relevante ao que foi dito. Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nTanto a assistente quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma.\n\n---\n\nESCOPO: Você responde exclusivamente sobre a Purg e educação financeira básica (juros, juros compostos, risco e patrimônio — sempre com exemplos simples e conectados ao contexto do usuário). Qualquer outro assunto deve ser gentilmente recusado: \"Só posso te ajudar com a Purg e educação financeira básica.\"\n\nPerguntas genéricas como \"como funciona?\" devem sempre ser interpretadas e respondidas com base nas funcionalidades da Purg. Nunca invente funcionalidades que não existam.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal. Esse é o valor que o usuário precisará aportar todo mês para atingir o objetivo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (pode ser CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado na conta vinculada em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nÉ uma senha numérica de 4 dígitos criada pelo usuário. Ela é obrigatória para realizar saques e alterar informações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins. Um Pin é a unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento, e os juros variam conforme o risco. A Purg faz a alocação dos Pins automaticamente — o usuário não escolhe onde seu dinheiro é investido.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga do usuário — quanto mais pontos, maior a liga. O ranking permite comparar a evolução com outros usuários, mas nunca exibe valores financeiros — apenas o progresso nas metas. Ninguém no ranking sabe quanto dinheiro você ou outra pessoa tem.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (que aparece no ranking) e pode personalizar seu avatar — são 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix no perfil: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O guardião envia um convite, o dependente aceita, e o guardião passa a acompanhar e operar a conta do dependente pelo app. Menores de idade têm restrições de uso definidas pelo guardião.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg através da área de indicação no app.\n\n10. AUTENTICAÇÃO\nO login pode ser feito com e-mail e senha ou com biometria (como impressão digital ou reconhecimento facial), disponível nos dispositivos que suportam essa tecnologia.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar antes de forma simples.\n\n---\n\nDADOS DO USUÁRIO:\nNo início de cada sessão você recebe um contexto com as informações da conta do usuário: apelido, saldo disponível, total investido, objetivos com progresso das metas, últimos depósitos e saques, liga, posição no ranking e pontuação. Use essas informações para responder perguntas sobre a conta do usuário de forma personalizada e precisa. Nunca diga que não tem acesso às informações do usuário — você as tem desde o início da sessão.\n\nSAUDAÇÃO INICIAL:\nA saudação deve ter no máximo 2 linhas. Quando o contexto indicar \"Usuário retornando: sim\", use exatamente: \"Oi {{apelido}}, que bom que voltou, como posso te ajudar?\" — substituindo {{apelido}} pelo apelido real. Quando for \"Usuário retornando: não\", apresente-se brevemente e cumprimente pelo apelido."
+          }
+        },
+        "id": "node-agent",
+        "name": "AI Agent",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.7,
+        "position": [
+          680,
+          340
+        ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "modelName": "gemini-2.5-flash-lite",
+          "options": {}
+        },
+        "id": "node-gemini",
+        "name": "Google Gemini Flash",
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          560,
+          540
+        ],
+        "credentials": {
+          "googlePalmApi": {
+            "id": "vW6hLLZSK4uh0bxJ",
+            "name": "Google Gemini - Purg"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "={{ $json.body.sessionId }}",
+          "contextWindowLength": 10
+        },
+        "id": "node-memory",
+        "name": "Window Buffer Memory",
+        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "typeVersion": 1.3,
+        "position": [
+          800,
+          540
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "cond-no-error",
+                "leftValue": "={{ $json.error }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "node-if",
+        "name": "Sucesso?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          920,
+          340
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "let channel = 'app';\ntry {\n  const wa = $('Extrair Dados WA').all();\n  if (wa && wa.length > 0 && wa[0].json && wa[0].json.phone) channel = 'wa';\n} catch(e) {}\nconst input = $input.first().json;\nreturn [{ json: { ...input, channel } }];"
+        },
+        "id": "node-ch-detect",
+        "name": "Detectar Canal",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1140,
+          220
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-is-wa",
+                "leftValue": "={{ $json.channel }}",
+                "rightValue": "wa",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "node-is-wa",
+        "name": "É WhatsApp?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1340,
+          220
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: $json.output } }}",
+          "options": {}
+        },
+        "id": "node-wa-ok-send",
+        "name": "Enviar Resposta WA",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1560,
+          120
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "field-response",
+                "name": "response",
+                "value": "={{ $json.output }}",
+                "type": "string"
+              },
+              {
+                "id": "field-session",
+                "name": "sessionId",
+                "value": "={{ $('Webhook').item.json.body.sessionId }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "node-set-success",
+        "name": "Formatar Resposta",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1560,
+          280
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "let channel = 'app';\ntry {\n  const wa = $('Extrair Dados WA').all();\n  if (wa && wa.length > 0 && wa[0].json && wa[0].json.phone) channel = 'wa';\n} catch(e) {}\nconst input = $input.first().json;\nreturn [{ json: { ...input, channel } }];"
+        },
+        "id": "node-ch-detect-err",
+        "name": "Detectar Canal Erro",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1140,
+          460
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-is-wa-err",
+                "leftValue": "={{ $json.channel }}",
+                "rightValue": "wa",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "node-is-wa-err",
+        "name": "É WhatsApp Erro?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1340,
+          460
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: 'Ops! Tive um probleminha aqui. Tente novamente em instantes.' } }}",
+          "options": {}
+        },
+        "id": "node-wa-err-send",
+        "name": "Enviar Erro WA",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1560,
+          380
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "field-error",
+                "name": "response",
+                "value": "Ops! Tive um probleminha aqui. Tente novamente em instantes.",
+                "type": "string"
+              },
+              {
+                "id": "field-session-err",
+                "name": "sessionId",
+                "value": "={{ $('Webhook').item.json.body.sessionId }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "node-set-error",
+        "name": "Formatar Erro",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1560,
+          540
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            }
+          }
+        },
+        "id": "node-respond",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1780,
+          340
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "purg-chat-wa",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "node-wa-webhook",
+        "name": "Webhook WA",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          208,
+          720
+        ],
+        "webhookId": "purg-chat-wa-webhook"
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const body = $input.first().json.body;\n\nif (!body || body.event !== 'messages.upsert') return [];\n\nconst data = body.data || {};\nconst key = data.key || {};\nconst msg = data.message || {};\n\nif (key.fromMe === true) return [];\nif (!msg.conversation) return [];\nif (key.remoteJid && key.remoteJid.endsWith('@g.us')) return [];\n\nreturn [{ json: {\n  phone: key.remoteJid.replace('@s.whatsapp.net', ''),\n  remoteJid: key.remoteJid,\n  text: msg.conversation\n} }];"
+        },
+        "id": "node-wa-filter",
+        "name": "Filtrar Mensagem WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          430,
+          720
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst sessionId = 'wa_' + phone;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst isNewSession = !sessions[sessionId];\n\nif (isNewSession) {\n  sessions[sessionId] = { createdAt: new Date().toISOString() };\n  staticData.waSessions = sessions;\n}\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession\n} }];"
+        },
+        "id": "node-wa-extract",
+        "name": "Extrair Dados WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          650,
+          720
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/por-celular?celular=' + $json.phone }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "node-wa-lookup",
+        "name": "Buscar Usuário por Celular",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          870,
+          720
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-usuario-found",
+                "leftValue": "={{ $json.usuario_id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "node-wa-check",
+        "name": "Usuário Encontrado?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1090,
+          720
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-nova-sessao",
+                "leftValue": "={{ $('Extrair Dados WA').first().json.isNewSession }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "node-wa-session",
+        "name": "É Nova Sessão?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1310,
+          620
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/usuario/' + $json.usuario_id }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "node-wa-fetch",
+        "name": "Buscar Dados Usuário WA",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1530,
+          540
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId } } }];"
+        },
+        "id": "node-wa-ctx",
+        "name": "Montar Contexto WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1750,
+          540
+        ]
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nreturn [{ json: { body: {\n  message: waData.text,\n  sessionId: waData.sessionId\n} } }];"
+        },
+        "id": "node-wa-set-msg",
+        "name": "Preparar Mensagem WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1530,
+          720
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: 'Oi! Ainda não encontrei uma conta Purg vinculada a esse número. Baixe o app e comece a investir!' } }}",
+          "options": {}
+        },
+        "id": "node-wa-nf-send",
+        "name": "Enviar Não Cadastrado",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1310,
+          840
+        ],
+        "onError": "continueErrorOutput"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "É iniciar sessão?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É iniciar sessão?": {
+        "main": [
+          [
+            {
+              "node": "Buscar Dados do Usuário",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Dados do Usuário": {
+        "main": [
+          [
+            {
+              "node": "Montar Contexto",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Contexto": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Sucesso?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Flash": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Window Buffer Memory": {
+        "ai_memory": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sucesso?": {
+        "main": [
+          [
+            {
+              "node": "Detectar Canal",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Detectar Canal Erro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Detectar Canal": {
+        "main": [
+          [
+            {
+              "node": "É WhatsApp?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É WhatsApp?": {
+        "main": [
+          [
+            {
+              "node": "Enviar Resposta WA",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Formatar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Detectar Canal Erro": {
+        "main": [
+          [
+            {
+              "node": "É WhatsApp Erro?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É WhatsApp Erro?": {
+        "main": [
+          [
+            {
+              "node": "Enviar Erro WA",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Formatar Erro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar Resposta": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar Erro": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook WA": {
+        "main": [
+          [
+            {
+              "node": "Filtrar Mensagem WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filtrar Mensagem WA": {
+        "main": [
+          [
+            {
+              "node": "Extrair Dados WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extrair Dados WA": {
+        "main": [
+          [
+            {
+              "node": "Buscar Usuário por Celular",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Usuário por Celular": {
+        "main": [
+          [
+            {
+              "node": "Usuário Encontrado?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Enviar Não Cadastrado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Usuário Encontrado?": {
+        "main": [
+          [
+            {
+              "node": "É Nova Sessão?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Enviar Não Cadastrado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É Nova Sessão?": {
+        "main": [
+          [
+            {
+              "node": "Buscar Dados Usuário WA",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Preparar Mensagem WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Dados Usuário WA": {
+        "main": [
+          [
+            {
+              "node": "Montar Contexto WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Contexto WA": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Mensagem WA": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
