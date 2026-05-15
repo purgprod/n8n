@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-14T20:19:15.372Z",
+  "updatedAt": "2026-05-15T17:21:43.829Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -84,7 +84,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const webhook = $('Webhook').first().json;\nconst sessionId = webhook.body.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId: sessionId } } }];"
+        "jsCode": "const webhook = $('Webhook').first().json;\nconst sessionId = webhook.body.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n    'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId: sessionId } } }];"
       },
       "id": "node-build-ctx",
       "name": "Montar Contexto",
@@ -101,7 +101,7 @@
         "promptType": "define",
         "text": "={{ $json.body.message }}",
         "options": {
-          "systemMessage": "Você é a Purg, assistente do aplicativo Purg. Fale de forma clara, simples e acolhedora, sem jargões financeiros complexos. Seja sempre sucinta — vá direto ao ponto, sem introduções ou repetições. Nunca use formatação markdown (negrito, itálico, títulos, asteriscos). Use apenas texto simples, listas numeradas ou com hífens quando necessário. Sempre encerre com uma pergunta ou sugestão relevante ao que foi dito. Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nTanto a assistente quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma.\n\n---\n\nESCOPO: Você responde exclusivamente sobre a Purg e educação financeira básica (juros, juros compostos, risco e patrimônio — sempre com exemplos simples e conectados ao contexto do usuário). Qualquer outro assunto deve ser gentilmente recusado: \"Só posso te ajudar com a Purg e educação financeira básica.\"\n\nPerguntas genéricas como \"como funciona?\" devem sempre ser interpretadas e respondidas com base nas funcionalidades da Purg. Nunca invente funcionalidades que não existam.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal. Esse é o valor que o usuário precisará aportar todo mês para atingir o objetivo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (pode ser CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado na conta vinculada em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nÉ uma senha numérica de 4 dígitos criada pelo usuário. Ela é obrigatória para realizar saques e alterar informações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins. Um Pin é a unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento, e os juros variam conforme o risco. A Purg faz a alocação dos Pins automaticamente — o usuário não escolhe onde seu dinheiro é investido.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga do usuário — quanto mais pontos, maior a liga. O ranking permite comparar a evolução com outros usuários, mas nunca exibe valores financeiros — apenas o progresso nas metas. Ninguém no ranking sabe quanto dinheiro você ou outra pessoa tem.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (que aparece no ranking) e pode personalizar seu avatar — são 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix no perfil: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O guardião envia um convite, o dependente aceita, e o guardião passa a acompanhar e operar a conta do dependente pelo app. Menores de idade têm restrições de uso definidas pelo guardião.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg através da área de indicação no app.\n\n10. AUTENTICAÇÃO\nO login pode ser feito com e-mail e senha ou com biometria (como impressão digital ou reconhecimento facial), disponível nos dispositivos que suportam essa tecnologia.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar antes de forma simples.\n\n---\n\nDADOS DO USUÁRIO:\nNo início de cada sessão você recebe um contexto com as informações da conta do usuário: apelido, saldo disponível, total investido, objetivos com progresso das metas, últimos depósitos e saques, liga, posição no ranking e pontuação. Use essas informações para responder perguntas sobre a conta do usuário de forma personalizada e precisa. Nunca diga que não tem acesso às informações do usuário — você as tem desde o início da sessão.\n\nSAUDAÇÃO INICIAL:\nA saudação deve ter no máximo 2 linhas. Quando o contexto indicar \"Usuário retornando: sim\", use exatamente: \"Oi {{apelido}}, que bom que voltou, como posso te ajudar?\" — substituindo {{apelido}} pelo apelido real. Quando for \"Usuário retornando: não\", apresente-se brevemente e cumprimente pelo apelido."
+          "systemMessage": "Você é a Purg, assistente do aplicativo Purg. Fale de forma clara, simples e acolhedora, sem jargões financeiros complexos. Responda APENAS o que foi perguntado — nada a mais. Não adicione detalhes extras, contextos ou informações que não foram solicitados. Se a pergunta foi sobre objetivos, responda só sobre objetivos. Nunca use formatação markdown (negrito, itálico, títulos, asteriscos). Use apenas texto simples; use listas com hífens somente quando a resposta for inerentemente uma lista de dados históricos (ex: depósitos, saques, objetivos múltiplos). Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nTanto a assistente quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma.\n\nFORMATO OBRIGATÓRIO DE RESPOSTA:\nCada frase termina com ponto final e deve estar em seu próprio parágrafo — nunca junte duas frases na mesma linha. Entre cada frase (e antes da pergunta final) deixe uma linha em branco. A resposta deve ter no máximo 2 frases. Depois, em parágrafo separado, escreva UMA única pergunta curta. Exemplo correto:\n\nA sua meta atual é de R$ 62,50, com R$ 29,61 investidos.\n\nVocê tem até 30/06/2026 para alcançá-la.\n\nJá quer fazer o depósito?\n\nExemplo ERRADO (nunca faça isso): \"A sua meta atual é de R$ 62,50, com R$ 29,61 investidos. Você tem até 30/06/2026 para alcançá-la.\"\n\nA única exceção ao limite de 2 frases é quando a resposta é uma lista de dados históricos (depósitos, saques, objetivos) — nesse caso liste normalmente, cada item em sua linha, e encerre com a pergunta em parágrafo separado.\n\nPERGUNTA FINAL — REGRA OBRIGATÓRIA:\nA pergunta de encerramento deve ser sempre sobre um dado concreto que você tem do usuário. Use apenas estes temas: total investido, objetivos e progresso das metas, próxima meta e prazo, últimos depósitos, últimos saques, posição no ranking, liga atual, pontuação. Nunca mencione saldo disponível — ele não é relevante para o usuário. Nunca faça perguntas genéricas, educativas ou sobre como a Purg funciona — apenas sobre os dados reais do usuário.\n\nHISTÓRICO — REGRA OBRIGATÓRIA:\nQuando o usuário perguntar sobre algo que tem histórico (depósitos, saques, objetivos, metas), antes de mostrar os dados pergunte sempre: \"Quer ver o último ou o histórico completo?\" — e aguarde a resposta. Só exiba os dados depois que o usuário escolher. Aplique essa regra a qualquer assunto que tenha mais de um registro no histórico.\n\nSAUDAÇÃO EM SESSÃO ATIVA:\nQuando o usuário enviar uma saudação ('Oi', 'Olá', 'Bom dia', 'Boa tarde', 'Boa noite') durante uma conversa já em andamento, responda sempre usando o apelido do usuário disponível no bloco [Dados do usuário:]: \"Oi {{apelido}}! Como posso te ajudar?\" — substituindo {{apelido}} pelo apelido real. Nunca responda saudações sem usar o apelido.\n\nRESPOSTAS CURTAS — REGRA CRÍTICA:\nQuando o usuário responder com uma palavra curta como \"sim\", \"não\", \"claro\", \"pode\", \"quero\", \"último\", \"completo\" ou similar:\n1. DESCONSIDERE completamente o bloco [Dados do usuário:] que chega junto com a mensagem.\n2. Consulte EXCLUSIVAMENTE o histórico da conversa para identificar qual foi a última pergunta que você fez.\n3. Responda diretamente com a informação correspondente àquela última pergunta.\nNUNCA responda com saudação para uma resposta curta. NUNCA trate respostas curtas como fora do escopo. NUNCA use os dados do bloco [Dados do usuário:] como base para respostas curtas — use apenas o histórico.\n\nDICAS — QUANDO O USUÁRIO NÃO SABE O QUE PERGUNTAR:\nQuando o usuário disser que não sabe o que perguntar, pedir dicas, ou usar expressões como \"não sei\", \"me dá dicas\", \"o que posso perguntar\", \"me ajuda\", responda com esta lista exata:\nClaro! Aqui estão algumas coisas que posso te contar:\n\n- Seus objetivos e o progresso das metas\n- Seus últimos depósitos e saques\n- Sua posição no ranking e pontuação\n- Quanto você já investiu no total\n- Fazer um depósito Pix\n\nQual desses você quer saber?\n\n---\n\nDEPÓSITO — QUANDO O USUÁRIO QUER DEPOSITAR:\nQuando o usuário disser que quer fazer um depósito, escolher a opção de depósito nas dicas, ou usar expressões como \"quero depositar\", \"fazer depósito\", \"depósito Pix\", responda informando o valor restante para atingir a próxima meta e perguntando se quer depositar esse valor. Use o formato:\nPara atingir sua próxima meta você precisa depositar R$ X,XX.\n\nJá quer fazer o depósito?\n\n---\n\n---\n\nESCOPO: Você responde exclusivamente sobre a Purg e educação financeira básica (juros, juros compostos, risco e patrimônio — sempre com exemplos simples e conectados ao contexto do usuário). Qualquer outro assunto deve ser gentilmente recusado: \"Só posso te ajudar com a Purg e educação financeira básica.\"\n\nPerguntas genéricas como \"como funciona?\" devem sempre ser interpretadas e respondidas com base nas funcionalidades da Purg. Nunca invente funcionalidades que não existam.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal. Esse é o valor que o usuário precisará aportar todo mês para atingir o objetivo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (pode ser CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado na conta vinculada em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nÉ uma senha numérica de 4 dígitos criada pelo usuário. Ela é obrigatória para realizar saques e alterar informações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins. Um Pin é a unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento, e os juros variam conforme o risco. A Purg faz a alocação dos Pins automaticamente — o usuário não escolhe onde seu dinheiro é investido.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga do usuário — quanto mais pontos, maior a liga. O ranking permite comparar a evolução com outros usuários, mas nunca exibe valores financeiros — apenas o progresso nas metas. Ninguém no ranking sabe quanto dinheiro você ou outra pessoa tem.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (que aparece no ranking) e pode personalizar seu avatar — são 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix no perfil: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O guardião envia um convite, o dependente aceita, e o guardião passa a acompanhar e operar a conta do dependente pelo app. Menores de idade têm restrições de uso definidas pelo guardião.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg através da área de indicação no app.\n\n10. AUTENTICAÇÃO\nO login pode ser feito com e-mail e senha ou com biometria (como impressão digital ou reconhecimento facial), disponível nos dispositivos que suportam essa tecnologia.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar antes de forma simples.\n\n---\n\nDADOS DO USUÁRIO:\nA cada mensagem você recebe um bloco [Dados do usuário: ...] com as informações atuais da conta: apelido, total investido, objetivos com progresso das metas, últimos depósitos e saques, liga, posição no ranking e pontuação. Use esses dados para responder perguntas diretas sobre a conta. Para respostas curtas ('sim', 'não', etc.), ignore esse bloco e use apenas o histórico da conversa. Nunca diga que não tem acesso às informações — você as tem em cada mensagem. Nunca mencione saldo disponível."
         }
       },
       "id": "node-agent",
@@ -141,7 +141,7 @@
       "parameters": {
         "sessionIdType": "customKey",
         "sessionKey": "={{ $json.body.sessionId }}",
-        "contextWindowLength": 10
+        "contextWindowLength": 20
       },
       "id": "node-memory",
       "name": "Window Buffer Memory",
@@ -262,6 +262,8 @@
     },
     {
       "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
         "assignments": {
           "assignments": [
             {
@@ -278,6 +280,7 @@
             }
           ]
         },
+        "includeOtherFields": false,
         "options": {}
       },
       "id": "node-set-success",
@@ -285,8 +288,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1560,
-        280
+        800,
+        340
       ]
     },
     {
@@ -425,7 +428,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "purg-chat-wa",
-        "responseMode": "onReceived",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "node-wa-webhook",
@@ -441,7 +444,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const body = $input.first().json.body;\n\nif (!body || body.event !== 'messages.upsert') return [];\n\nconst data = body.data || {};\nconst key = data.key || {};\nconst msg = data.message || {};\n\nif (key.fromMe === true) return [];\nif (!msg.conversation) return [];\nif (key.remoteJid && key.remoteJid.endsWith('@g.us')) return [];\n\nreturn [{ json: {\n  phone: key.remoteJid.replace('@s.whatsapp.net', ''),\n  remoteJid: key.remoteJid,\n  text: msg.conversation\n} }];"
+        "jsCode": "const body = $input.first().json.body;\n\nif (!body || body.event !== 'messages.upsert') return [];\n\nconst data = body.data || {};\nconst key = data.key || {};\nconst msg = data.message || {};\n\nif (key.fromMe === true) return [];\nif (!msg.conversation) return [];\nif (key.remoteJid && key.remoteJid.endsWith('@g.us')) return [];\n\nreturn [{ json: {\n  phone: key.remoteJid.replace('@s.whatsapp.net', '').replace(/^55/, ''),\n  remoteJid: key.remoteJid,\n  text: msg.conversation\n} }];"
       },
       "id": "node-wa-filter",
       "name": "Filtrar Mensagem WA",
@@ -455,7 +458,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst sessionId = 'wa_' + phone;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst isNewSession = !sessions[sessionId];\n\nif (isNewSession) {\n  sessions[sessionId] = { createdAt: new Date().toISOString() };\n  staticData.waSessions = sessions;\n}\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession\n} }];"
+        "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst now = new Date();\nconst ONE_HOUR = 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nconst existing = sessions['wa_' + phone];\nconst isExpired = !existing || (now - new Date(existing.lastMessageAt)) > ONE_HOUR;\n\nlet sessionSuffix;\nif (isExpired) {\n  sessionSuffix = Math.floor(now.getTime() / ONE_HOUR) + '_' + Math.random().toString(36).slice(2, 6);\n  sessions['wa_' + phone] = { lastMessageAt: now.toISOString(), sessionSuffix: sessionSuffix };\n} else {\n  sessionSuffix = existing.sessionSuffix;\n  sessions['wa_' + phone].lastMessageAt = now.toISOString();\n}\n\nstaticData.waSessions = sessions;\n\nconst sessionId = 'wa_' + phone + '_' + sessionSuffix;\nconst isNewSession = isExpired;\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession\n} }];"
       },
       "id": "node-wa-extract",
       "name": "Extrair Dados WA",
@@ -583,7 +586,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId } } }];"
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst apelido = u.apelido || 'usuário';\nconst contexto = 'Apelido: ' + apelido + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].contexto = contexto;\n  staticData.waSessions = sessions;\n}\n\nconst retornando = objetivos.length > 0 || depositos.length > 0;\nconst saudacao = retornando\n  ? 'Oi ' + apelido + ', que bom que voltou!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber me avisa que eu dou algumas dicas!'\n  : 'Oi ' + apelido + '! Sou a Purg, bem-vindo!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber me avisa que eu dou algumas dicas!';\n\n\n// Salvar usuarioId e valor da próxima meta para fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (sessions['wa_' + phone] && uid) {\n    sessions['wa_' + phone].usuarioId = uid;\n    // Valor restante para atingir a próxima meta\n    if (objetivos.length > 0) {\n      const obj = objetivos[0];\n      const pendentes = (obj.metas || []).filter(function(m) { return !m.objetivo_completo; });\n      if (pendentes.length > 0 && obj.primeiro_aporte_feito) {\n        const pm = pendentes[0];\n        const resto = parseFloat(pm.objetivo_investir) - parseFloat(pm.saldo_alocado);\n        if (resto > 0) sessions['wa_' + phone].proximaMetaValor = resto.toFixed(2);\n      }\n    }\n    staticData.waSessions = sessions;\n  }\n} catch(e) {}\n\nreturn [{ json: { output: saudacao, sessionId } }];"
       },
       "id": "node-wa-ctx",
       "name": "Montar Contexto WA",
@@ -597,7 +600,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nreturn [{ json: { body: {\n  message: waData.text,\n  sessionId: waData.sessionId\n} } }];"
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst text = waData.text;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone];\n\n// Salvar usuarioId para o fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (session && uid) { session.usuarioId = uid; staticData.waSessions = sessions; }\n} catch(e) {}\n\nconst contexto = session && session.contexto ? session.contexto : '';\nconst message = contexto\n  ? '[Dados do usuario:\\n' + contexto + ']\\n\\n' + text\n  : text;\n\nreturn [{ json: { body: { message, sessionId } } }];\n"
       },
       "id": "node-wa-set-msg",
       "name": "Preparar Mensagem WA",
@@ -623,7 +626,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: 'Oi! Ainda não encontrei uma conta Purg vinculada a esse número. Baixe o app e comece a investir!' } }}",
+        "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: \"👋 Oi! Eu sou a Purg, muito prazer!\\n\\nEu vi aqui e não encontrei nenhuma conta Purg vinculada a esse número.\\n\\nPara criarmos nosso objetivo e começarmos a nossa jornada se cadastre em:\\n\\nwww.purg.com.br/cadastro\" } }}",
         "options": {}
       },
       "id": "node-wa-nf-send",
@@ -635,6 +638,211 @@
         840
       ],
       "onError": "continueErrorOutput"
+    },
+    {
+      "id": "node-fmt-wa",
+      "name": "Formatar WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1450,
+        220
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $input.first().json;\nlet text = (item.output || '').trim();\n\n// Separar frases em parágrafos\ntext = text.replace(/\\.\\s+([A-Z\\u00C0-\\u00DC])/g, '.\\n\\n$1');\n\n// Garantir que termina com pergunta\nif (!text.trim().endsWith('?')) {\n  const lower = text.toLowerCase();\n  const isHistorico = (text.match(/^- /gm) || []).length >= 2;\n  const hasDepositAmount = /depositar r\\$\\s*[\\d.,]+/i.test(text) || /precisa depositar/i.test(text);\n  let pergunta;\n  if (hasDepositAmount) {\n    pergunta = 'J\\u00e1 quer fazer o dep\\u00f3sito?';\n  } else if (isHistorico) {\n    if (lower.includes('dep\\u00f3sito') || lower.includes('deposito')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de saques?';\n    } else if (lower.includes('saque')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de dep\\u00f3sitos?';\n    } else if (lower.includes('meta') || lower.includes('objetivo')) {\n      pergunta = 'Quer ver seus \\u00faltimos dep\\u00f3sitos?';\n    } else {\n      pergunta = 'Posso te ajudar com mais alguma coisa sobre a sua conta?';\n    }\n  } else {\n    if (lower.includes('meta') || lower.includes('objetivo')) {\n      pergunta = 'Quer ver o progresso das outras metas?';\n    } else if (lower.includes('dep\\u00f3sito') || lower.includes('deposito')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de dep\\u00f3sitos?';\n    } else if (lower.includes('saque')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de saques?';\n    } else if (lower.includes('rank') || lower.includes('liga') || lower.includes('ponto')) {\n      pergunta = 'Quer ver seu total investido?';\n    } else if (lower.includes('invest') || lower.includes('patrim')) {\n      pergunta = 'Quer ver o progresso das suas metas?';\n    } else {\n      pergunta = 'Posso te ajudar com mais alguma coisa sobre a sua conta?';\n    }\n  }\n  text = text.trim() + '\\n\\n' + pergunta;\n}\n\n// Detectar se a resposta final pede depósito → ativar fluxo\nif (/j\\u00e1 quer fazer o dep\\u00f3sito\\?/i.test(text) || /quer fazer o dep\\u00f3sito\\?/i.test(text)) {\n  try {\n    const waPhone = $('Extrair Dados WA').first().json.phone;\n    const sd = $getWorkflowStaticData('global');\n    const sess = sd.waSessions || {};\n    if (sess['wa_' + waPhone]) {\n      sess['wa_' + waPhone].depositStep = 'confirm_amount';\n      // Tentar extrair valor do texto\n      const valM = text.match(/depositar R\\$\\s*([\\d.,]+)/i);\n      if (valM) {\n        sess['wa_' + waPhone].depositValue = valM[1].replace(/\\./g,'').replace(',','.');\n      } else if (sess['wa_' + waPhone].proximaMetaValor) {\n        sess['wa_' + waPhone].depositValue = sess['wa_' + waPhone].proximaMetaValor;\n      }\n      sd.waSessions = sess;\n    }\n  } catch(e) {}\n}\n\nreturn [{ json: { output: text } }];\n"
+      }
+    },
+    {
+      "id": "node-wa-verif-dep",
+      "name": "Verificar Depósito WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1730,
+        720
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst text = waData.text.trim();\n\n// Pass-through do body para o AI Agent usar quando isDeposito = false\nconst prepBody = $('Preparar Mensagem WA').first().json.body;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone] || {};\nconst depositStep = session.depositStep || null;\n\nif (!depositStep) {\n  return [{ json: { isDeposito: false, body: prepBody } }];\n}\n\nreturn [{ json: {\n  isDeposito: true,\n  body: prepBody,\n  depositStep,\n  depositValue: session.depositValue || null,\n  usuarioId: session.usuarioId || null,\n  phone,\n  text,\n  sessionId: waData.sessionId\n} }];\n"
+      }
+    },
+    {
+      "id": "node-wa-is-dep",
+      "name": "É Depósito?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1930,
+        720
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-is-dep",
+              "leftValue": "={{ $json.isDeposito }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-wa-logica-dep",
+      "name": "Lógica Depósito WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2130,
+        620
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const info = $input.first().json;\nconst { depositStep, depositValue, phone, usuarioId, text, sessionId } = info;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nconst norm = text.trim().toLowerCase();\nconst isSim = /^(1|sim|s|yes|quero|pode|claro|ok|confirmo?|fa[cç]a?)/.test(norm);\nconst isNao = /^(2|n[aã]o|nao|n|nope|outro|outra|diferente|cancela|muda)/.test(norm);\n\nlet output = '';\nlet callPix = false;\nlet pixValue = null;\n\nif (depositStep === 'confirm_amount') {\n  if (isSim) {\n    callPix = true;\n    pixValue = depositValue;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else if (isNao) {\n    sessions['wa_' + phone].depositStep = 'ask_custom';\n    output = 'Tudo bem!\\n\\nQual valor voc\\u00ea quer depositar?';\n  } else {\n    output = 'Quer fazer o dep\\u00f3sito de ' + brl(depositValue) + '?\\n\\nDigite 1 para confirmar ou 2 para escolher outro valor.';\n  }\n} else if (depositStep === 'ask_custom') {\n  const clean = text.replace(/r\\$\\s*/i, '').replace(/\\./g, '').replace(',', '.');\n  const match = clean.match(/(\\d+(?:\\.\\d{1,2})?)/);\n  if (match && parseFloat(match[1]) >= 1) {\n    pixValue = parseFloat(match[1]).toFixed(2);\n    callPix = true;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else {\n    output = 'N\\u00e3o entendi o valor.\\n\\nMe diz quanto quer depositar. Exemplo: 50,00';\n  }\n}\n\nstaticData.waSessions = sessions;\n\nif (callPix) {\n  return [{ json: { callPix: true, pixValue, usuarioId, phone, sessionId } }];\n}\nreturn [{ json: { callPix: false, output, phone, sessionId } }];\n"
+      }
+    },
+    {
+      "id": "node-wa-is-pix",
+      "name": "É Chamar Pix?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2330,
+        620
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-call-pix",
+              "leftValue": "={{ $json.callPix }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-wa-criar-pix",
+      "name": "Criar Pix WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2530,
+        520
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/' + $json.usuarioId + '/pix/cobrar' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"valor\": $json.pixValue } }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-wa-fmt-pix",
+      "name": "Formatar Pix WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2730,
+        520
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const pix = $input.first().json;\nconst remoteJid = $('Extrair Dados WA').first().json.remoteJid;\n\nif (!pix.pixCopiaECola) {\n  return [{ json: {\n    output: 'Ops! Não consegui gerar o Pix agora.\\n\\nTente novamente em instantes.',\n    pixCode: null, remoteJid\n  } }];\n}\n\nconst brl = (v) => {\n  const p = parseFloat(v).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n};\n\nconst valorStr = pix.pixValue || pix.valor || '';\nconst output = 'Depósito de ' + brl(valorStr) + ' gerado! 💸\\n\\n'\n  + 'Já te mando o código Pix para copiar e colar no seu banco.';\n\nreturn [{ json: { output, pixCode: '```' + pix.pixCopiaECola + '```', remoteJid } }];\n"
+      }
+    },
+    {
+      "id": "node-wa-enviar-codigo-pix",
+      "name": "Enviar Código Pix WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2930,
+        520
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: $json.remoteJid, text: $json.pixCode } }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-wa-enviar-aviso-pix",
+      "name": "Enviar Aviso Pix WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2730,
+        520
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { number: $json.remoteJid, text: $json.output } }}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -755,7 +963,7 @@
       "main": [
         [
           {
-            "node": "Enviar Resposta WA",
+            "node": "Formatar WA",
             "type": "main",
             "index": 0
           }
@@ -922,7 +1130,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Enviar Resposta WA",
             "type": "main",
             "index": 0
           }
@@ -933,7 +1141,153 @@
       "main": [
         [
           {
+            "node": "Verificar Depósito WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Resposta WA": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Erro WA": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Não Cadastrado": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar WA": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Depósito WA": {
+      "main": [
+        [
+          {
+            "node": "É Depósito?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Depósito?": {
+      "main": [
+        [
+          {
+            "node": "Lógica Depósito WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lógica Depósito WA": {
+      "main": [
+        [
+          {
+            "node": "É Chamar Pix?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Chamar Pix?": {
+      "main": [
+        [
+          {
+            "node": "Criar Pix WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Resposta WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Pix WA": {
+      "main": [
+        [
+          {
+            "node": "Formatar Pix WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Pix WA": {
+      "main": [
+        [
+          {
+            "node": "Enviar Aviso Pix WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Código Pix WA": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Aviso Pix WA": {
+      "main": [
+        [
+          {
+            "node": "Enviar Código Pix WA",
             "type": "main",
             "index": 0
           }
@@ -945,11 +1299,24 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "staticData": null,
+  "staticData": {
+    "waSessions": {},
+    "global": {
+      "waSessions": {
+        "wa_11949496342": {
+          "lastMessageAt": "2026-05-15T17:03:42.149Z",
+          "sessionSuffix": "494128_si4c",
+          "contexto": "Apelido: Macacovizk\nLiga: Cobre II | Posição: #3 | Pontos: 110\nTotal investido: R$ 192,11\n\nObjetivos:\n- Patrimônio | 2/9 metas concluídas | Próxima meta: R$ 62,50 até 30/06/2026 (investido: R$ 29,61)\n\nÚltimos depósitos:\n- 12/05/2026: R$ 10,00 (Cancelado)\n- 01/05/2026: R$ 66,66 (Executado)\n- 23/04/2026: R$ 5,00 (Executado)\n\nÚltimos saques:\n- 31/01/2026: R$ 5,00 (Cancelado)",
+          "usuarioId": 2,
+          "proximaMetaValor": "32.89"
+        }
+      }
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "9ffb302a-cf48-4c70-bd25-bec3da3a6b35",
-  "activeVersionId": "9ffb302a-cf48-4c70-bd25-bec3da3a6b35",
+  "versionId": "d6eba923-063c-4e74-8a11-fc5344dde81f",
+  "activeVersionId": "d6eba923-063c-4e74-8a11-fc5344dde81f",
   "triggerCount": 2,
   "shared": [
     {
@@ -961,9 +1328,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-14T20:19:15.393Z",
-    "createdAt": "2026-05-14T20:19:15.393Z",
-    "versionId": "9ffb302a-cf48-4c70-bd25-bec3da3a6b35",
+    "updatedAt": "2026-05-15T17:21:43.830Z",
+    "createdAt": "2026-05-15T17:21:43.830Z",
+    "versionId": "d6eba923-063c-4e74-8a11-fc5344dde81f",
     "workflowId": "0wpPd0SPkQ8y3GUx",
     "nodes": [
       {
@@ -1044,7 +1411,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const webhook = $('Webhook').first().json;\nconst sessionId = webhook.body.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId: sessionId } } }];"
+          "jsCode": "const webhook = $('Webhook').first().json;\nconst sessionId = webhook.body.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n    'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId: sessionId } } }];"
         },
         "id": "node-build-ctx",
         "name": "Montar Contexto",
@@ -1061,7 +1428,7 @@
           "promptType": "define",
           "text": "={{ $json.body.message }}",
           "options": {
-            "systemMessage": "Você é a Purg, assistente do aplicativo Purg. Fale de forma clara, simples e acolhedora, sem jargões financeiros complexos. Seja sempre sucinta — vá direto ao ponto, sem introduções ou repetições. Nunca use formatação markdown (negrito, itálico, títulos, asteriscos). Use apenas texto simples, listas numeradas ou com hífens quando necessário. Sempre encerre com uma pergunta ou sugestão relevante ao que foi dito. Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nTanto a assistente quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma.\n\n---\n\nESCOPO: Você responde exclusivamente sobre a Purg e educação financeira básica (juros, juros compostos, risco e patrimônio — sempre com exemplos simples e conectados ao contexto do usuário). Qualquer outro assunto deve ser gentilmente recusado: \"Só posso te ajudar com a Purg e educação financeira básica.\"\n\nPerguntas genéricas como \"como funciona?\" devem sempre ser interpretadas e respondidas com base nas funcionalidades da Purg. Nunca invente funcionalidades que não existam.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal. Esse é o valor que o usuário precisará aportar todo mês para atingir o objetivo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (pode ser CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado na conta vinculada em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nÉ uma senha numérica de 4 dígitos criada pelo usuário. Ela é obrigatória para realizar saques e alterar informações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins. Um Pin é a unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento, e os juros variam conforme o risco. A Purg faz a alocação dos Pins automaticamente — o usuário não escolhe onde seu dinheiro é investido.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga do usuário — quanto mais pontos, maior a liga. O ranking permite comparar a evolução com outros usuários, mas nunca exibe valores financeiros — apenas o progresso nas metas. Ninguém no ranking sabe quanto dinheiro você ou outra pessoa tem.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (que aparece no ranking) e pode personalizar seu avatar — são 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix no perfil: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O guardião envia um convite, o dependente aceita, e o guardião passa a acompanhar e operar a conta do dependente pelo app. Menores de idade têm restrições de uso definidas pelo guardião.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg através da área de indicação no app.\n\n10. AUTENTICAÇÃO\nO login pode ser feito com e-mail e senha ou com biometria (como impressão digital ou reconhecimento facial), disponível nos dispositivos que suportam essa tecnologia.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar antes de forma simples.\n\n---\n\nDADOS DO USUÁRIO:\nNo início de cada sessão você recebe um contexto com as informações da conta do usuário: apelido, saldo disponível, total investido, objetivos com progresso das metas, últimos depósitos e saques, liga, posição no ranking e pontuação. Use essas informações para responder perguntas sobre a conta do usuário de forma personalizada e precisa. Nunca diga que não tem acesso às informações do usuário — você as tem desde o início da sessão.\n\nSAUDAÇÃO INICIAL:\nA saudação deve ter no máximo 2 linhas. Quando o contexto indicar \"Usuário retornando: sim\", use exatamente: \"Oi {{apelido}}, que bom que voltou, como posso te ajudar?\" — substituindo {{apelido}} pelo apelido real. Quando for \"Usuário retornando: não\", apresente-se brevemente e cumprimente pelo apelido."
+            "systemMessage": "Você é a Purg, assistente do aplicativo Purg. Fale de forma clara, simples e acolhedora, sem jargões financeiros complexos. Responda APENAS o que foi perguntado — nada a mais. Não adicione detalhes extras, contextos ou informações que não foram solicitados. Se a pergunta foi sobre objetivos, responda só sobre objetivos. Nunca use formatação markdown (negrito, itálico, títulos, asteriscos). Use apenas texto simples; use listas com hífens somente quando a resposta for inerentemente uma lista de dados históricos (ex: depósitos, saques, objetivos múltiplos). Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nTanto a assistente quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma.\n\nFORMATO OBRIGATÓRIO DE RESPOSTA:\nCada frase termina com ponto final e deve estar em seu próprio parágrafo — nunca junte duas frases na mesma linha. Entre cada frase (e antes da pergunta final) deixe uma linha em branco. A resposta deve ter no máximo 2 frases. Depois, em parágrafo separado, escreva UMA única pergunta curta. Exemplo correto:\n\nA sua meta atual é de R$ 62,50, com R$ 29,61 investidos.\n\nVocê tem até 30/06/2026 para alcançá-la.\n\nJá quer fazer o depósito?\n\nExemplo ERRADO (nunca faça isso): \"A sua meta atual é de R$ 62,50, com R$ 29,61 investidos. Você tem até 30/06/2026 para alcançá-la.\"\n\nA única exceção ao limite de 2 frases é quando a resposta é uma lista de dados históricos (depósitos, saques, objetivos) — nesse caso liste normalmente, cada item em sua linha, e encerre com a pergunta em parágrafo separado.\n\nPERGUNTA FINAL — REGRA OBRIGATÓRIA:\nA pergunta de encerramento deve ser sempre sobre um dado concreto que você tem do usuário. Use apenas estes temas: total investido, objetivos e progresso das metas, próxima meta e prazo, últimos depósitos, últimos saques, posição no ranking, liga atual, pontuação. Nunca mencione saldo disponível — ele não é relevante para o usuário. Nunca faça perguntas genéricas, educativas ou sobre como a Purg funciona — apenas sobre os dados reais do usuário.\n\nHISTÓRICO — REGRA OBRIGATÓRIA:\nQuando o usuário perguntar sobre algo que tem histórico (depósitos, saques, objetivos, metas), antes de mostrar os dados pergunte sempre: \"Quer ver o último ou o histórico completo?\" — e aguarde a resposta. Só exiba os dados depois que o usuário escolher. Aplique essa regra a qualquer assunto que tenha mais de um registro no histórico.\n\nSAUDAÇÃO EM SESSÃO ATIVA:\nQuando o usuário enviar uma saudação ('Oi', 'Olá', 'Bom dia', 'Boa tarde', 'Boa noite') durante uma conversa já em andamento, responda sempre usando o apelido do usuário disponível no bloco [Dados do usuário:]: \"Oi {{apelido}}! Como posso te ajudar?\" — substituindo {{apelido}} pelo apelido real. Nunca responda saudações sem usar o apelido.\n\nRESPOSTAS CURTAS — REGRA CRÍTICA:\nQuando o usuário responder com uma palavra curta como \"sim\", \"não\", \"claro\", \"pode\", \"quero\", \"último\", \"completo\" ou similar:\n1. DESCONSIDERE completamente o bloco [Dados do usuário:] que chega junto com a mensagem.\n2. Consulte EXCLUSIVAMENTE o histórico da conversa para identificar qual foi a última pergunta que você fez.\n3. Responda diretamente com a informação correspondente àquela última pergunta.\nNUNCA responda com saudação para uma resposta curta. NUNCA trate respostas curtas como fora do escopo. NUNCA use os dados do bloco [Dados do usuário:] como base para respostas curtas — use apenas o histórico.\n\nDICAS — QUANDO O USUÁRIO NÃO SABE O QUE PERGUNTAR:\nQuando o usuário disser que não sabe o que perguntar, pedir dicas, ou usar expressões como \"não sei\", \"me dá dicas\", \"o que posso perguntar\", \"me ajuda\", responda com esta lista exata:\nClaro! Aqui estão algumas coisas que posso te contar:\n\n- Seus objetivos e o progresso das metas\n- Seus últimos depósitos e saques\n- Sua posição no ranking e pontuação\n- Quanto você já investiu no total\n- Fazer um depósito Pix\n\nQual desses você quer saber?\n\n---\n\nDEPÓSITO — QUANDO O USUÁRIO QUER DEPOSITAR:\nQuando o usuário disser que quer fazer um depósito, escolher a opção de depósito nas dicas, ou usar expressões como \"quero depositar\", \"fazer depósito\", \"depósito Pix\", responda informando o valor restante para atingir a próxima meta e perguntando se quer depositar esse valor. Use o formato:\nPara atingir sua próxima meta você precisa depositar R$ X,XX.\n\nJá quer fazer o depósito?\n\n---\n\n---\n\nESCOPO: Você responde exclusivamente sobre a Purg e educação financeira básica (juros, juros compostos, risco e patrimônio — sempre com exemplos simples e conectados ao contexto do usuário). Qualquer outro assunto deve ser gentilmente recusado: \"Só posso te ajudar com a Purg e educação financeira básica.\"\n\nPerguntas genéricas como \"como funciona?\" devem sempre ser interpretadas e respondidas com base nas funcionalidades da Purg. Nunca invente funcionalidades que não existam.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal. Esse é o valor que o usuário precisará aportar todo mês para atingir o objetivo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (pode ser CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado na conta vinculada em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nÉ uma senha numérica de 4 dígitos criada pelo usuário. Ela é obrigatória para realizar saques e alterar informações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins. Um Pin é a unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento, e os juros variam conforme o risco. A Purg faz a alocação dos Pins automaticamente — o usuário não escolhe onde seu dinheiro é investido.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga do usuário — quanto mais pontos, maior a liga. O ranking permite comparar a evolução com outros usuários, mas nunca exibe valores financeiros — apenas o progresso nas metas. Ninguém no ranking sabe quanto dinheiro você ou outra pessoa tem.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (que aparece no ranking) e pode personalizar seu avatar — são 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix no perfil: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O guardião envia um convite, o dependente aceita, e o guardião passa a acompanhar e operar a conta do dependente pelo app. Menores de idade têm restrições de uso definidas pelo guardião.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg através da área de indicação no app.\n\n10. AUTENTICAÇÃO\nO login pode ser feito com e-mail e senha ou com biometria (como impressão digital ou reconhecimento facial), disponível nos dispositivos que suportam essa tecnologia.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar antes de forma simples.\n\n---\n\nDADOS DO USUÁRIO:\nA cada mensagem você recebe um bloco [Dados do usuário: ...] com as informações atuais da conta: apelido, total investido, objetivos com progresso das metas, últimos depósitos e saques, liga, posição no ranking e pontuação. Use esses dados para responder perguntas diretas sobre a conta. Para respostas curtas ('sim', 'não', etc.), ignore esse bloco e use apenas o histórico da conversa. Nunca diga que não tem acesso às informações — você as tem em cada mensagem. Nunca mencione saldo disponível."
           }
         },
         "id": "node-agent",
@@ -1101,7 +1468,7 @@
         "parameters": {
           "sessionIdType": "customKey",
           "sessionKey": "={{ $json.body.sessionId }}",
-          "contextWindowLength": 10
+          "contextWindowLength": 20
         },
         "id": "node-memory",
         "name": "Window Buffer Memory",
@@ -1222,6 +1589,8 @@
       },
       {
         "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
           "assignments": {
             "assignments": [
               {
@@ -1238,6 +1607,7 @@
               }
             ]
           },
+          "includeOtherFields": false,
           "options": {}
         },
         "id": "node-set-success",
@@ -1245,8 +1615,8 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          1560,
-          280
+          800,
+          340
         ]
       },
       {
@@ -1385,7 +1755,7 @@
         "parameters": {
           "httpMethod": "POST",
           "path": "purg-chat-wa",
-          "responseMode": "onReceived",
+          "responseMode": "responseNode",
           "options": {}
         },
         "id": "node-wa-webhook",
@@ -1401,7 +1771,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const body = $input.first().json.body;\n\nif (!body || body.event !== 'messages.upsert') return [];\n\nconst data = body.data || {};\nconst key = data.key || {};\nconst msg = data.message || {};\n\nif (key.fromMe === true) return [];\nif (!msg.conversation) return [];\nif (key.remoteJid && key.remoteJid.endsWith('@g.us')) return [];\n\nreturn [{ json: {\n  phone: key.remoteJid.replace('@s.whatsapp.net', ''),\n  remoteJid: key.remoteJid,\n  text: msg.conversation\n} }];"
+          "jsCode": "const body = $input.first().json.body;\n\nif (!body || body.event !== 'messages.upsert') return [];\n\nconst data = body.data || {};\nconst key = data.key || {};\nconst msg = data.message || {};\n\nif (key.fromMe === true) return [];\nif (!msg.conversation) return [];\nif (key.remoteJid && key.remoteJid.endsWith('@g.us')) return [];\n\nreturn [{ json: {\n  phone: key.remoteJid.replace('@s.whatsapp.net', '').replace(/^55/, ''),\n  remoteJid: key.remoteJid,\n  text: msg.conversation\n} }];"
         },
         "id": "node-wa-filter",
         "name": "Filtrar Mensagem WA",
@@ -1415,7 +1785,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst sessionId = 'wa_' + phone;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst isNewSession = !sessions[sessionId];\n\nif (isNewSession) {\n  sessions[sessionId] = { createdAt: new Date().toISOString() };\n  staticData.waSessions = sessions;\n}\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession\n} }];"
+          "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst now = new Date();\nconst ONE_HOUR = 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nconst existing = sessions['wa_' + phone];\nconst isExpired = !existing || (now - new Date(existing.lastMessageAt)) > ONE_HOUR;\n\nlet sessionSuffix;\nif (isExpired) {\n  sessionSuffix = Math.floor(now.getTime() / ONE_HOUR) + '_' + Math.random().toString(36).slice(2, 6);\n  sessions['wa_' + phone] = { lastMessageAt: now.toISOString(), sessionSuffix: sessionSuffix };\n} else {\n  sessionSuffix = existing.sessionSuffix;\n  sessions['wa_' + phone].lastMessageAt = now.toISOString();\n}\n\nstaticData.waSessions = sessions;\n\nconst sessionId = 'wa_' + phone + '_' + sessionSuffix;\nconst isNewSession = isExpired;\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession\n} }];"
         },
         "id": "node-wa-extract",
         "name": "Extrair Dados WA",
@@ -1543,7 +1913,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst retornando = objetivos.length > 0 || depositos.length > 0 || saques.length > 0;\n\nconst contexto = '[CONTEXTO DA SESSÃO - USO INTERNO]\\n' +\n  'Apelido: ' + (u.apelido || 'usuário') + '\\n' +\n  'Usuário retornando: ' + (retornando ? 'sim' : 'não') + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Saldo disponível: ' + brl(u.saldo) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Siga as instruções de saudação do sistema. Não mencione este contexto diretamente.';\n\nreturn [{ json: { body: { message: contexto, sessionId } } }];"
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const metasConcluidas = metas.filter(function(m) { return m.objetivo_completo; }).length;\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao + ' | ' + metasConcluidas + '/' + metas.length + ' metas concluídas';\n    if (!obj.primeiro_aporte_feito) {\n      t += ' | Aguardando primeiro aporte';\n    } else if (proximaMeta) {\n      t += ' | Próxima meta: ' + brl(proximaMeta.objetivo_investir) + ' até ' + fmtDate(proximaMeta.data_limite) + ' (investido: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluídas!';\n    }\n    return t;\n  }).join('\\n');\n}\n\nconst ultimosDepositos = depositos.slice(0, 3).map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.slice(0, 3).map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst apelido = u.apelido || 'usuário';\nconst contexto = 'Apelido: ' + apelido + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Total investido: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].contexto = contexto;\n  staticData.waSessions = sessions;\n}\n\nconst retornando = objetivos.length > 0 || depositos.length > 0;\nconst saudacao = retornando\n  ? 'Oi ' + apelido + ', que bom que voltou!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber me avisa que eu dou algumas dicas!'\n  : 'Oi ' + apelido + '! Sou a Purg, bem-vindo!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber me avisa que eu dou algumas dicas!';\n\n\n// Salvar usuarioId e valor da próxima meta para fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (sessions['wa_' + phone] && uid) {\n    sessions['wa_' + phone].usuarioId = uid;\n    // Valor restante para atingir a próxima meta\n    if (objetivos.length > 0) {\n      const obj = objetivos[0];\n      const pendentes = (obj.metas || []).filter(function(m) { return !m.objetivo_completo; });\n      if (pendentes.length > 0 && obj.primeiro_aporte_feito) {\n        const pm = pendentes[0];\n        const resto = parseFloat(pm.objetivo_investir) - parseFloat(pm.saldo_alocado);\n        if (resto > 0) sessions['wa_' + phone].proximaMetaValor = resto.toFixed(2);\n      }\n    }\n    staticData.waSessions = sessions;\n  }\n} catch(e) {}\n\nreturn [{ json: { output: saudacao, sessionId } }];"
         },
         "id": "node-wa-ctx",
         "name": "Montar Contexto WA",
@@ -1557,7 +1927,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nreturn [{ json: { body: {\n  message: waData.text,\n  sessionId: waData.sessionId\n} } }];"
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst text = waData.text;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone];\n\n// Salvar usuarioId para o fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (session && uid) { session.usuarioId = uid; staticData.waSessions = sessions; }\n} catch(e) {}\n\nconst contexto = session && session.contexto ? session.contexto : '';\nconst message = contexto\n  ? '[Dados do usuario:\\n' + contexto + ']\\n\\n' + text\n  : text;\n\nreturn [{ json: { body: { message, sessionId } } }];\n"
         },
         "id": "node-wa-set-msg",
         "name": "Preparar Mensagem WA",
@@ -1583,7 +1953,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: 'Oi! Ainda não encontrei uma conta Purg vinculada a esse número. Baixe o app e comece a investir!' } }}",
+          "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: \"👋 Oi! Eu sou a Purg, muito prazer!\\n\\nEu vi aqui e não encontrei nenhuma conta Purg vinculada a esse número.\\n\\nPara criarmos nosso objetivo e começarmos a nossa jornada se cadastre em:\\n\\nwww.purg.com.br/cadastro\" } }}",
           "options": {}
         },
         "id": "node-wa-nf-send",
@@ -1595,6 +1965,211 @@
           840
         ],
         "onError": "continueErrorOutput"
+      },
+      {
+        "id": "node-fmt-wa",
+        "name": "Formatar WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1450,
+          220
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const item = $input.first().json;\nlet text = (item.output || '').trim();\n\n// Separar frases em parágrafos\ntext = text.replace(/\\.\\s+([A-Z\\u00C0-\\u00DC])/g, '.\\n\\n$1');\n\n// Garantir que termina com pergunta\nif (!text.trim().endsWith('?')) {\n  const lower = text.toLowerCase();\n  const isHistorico = (text.match(/^- /gm) || []).length >= 2;\n  const hasDepositAmount = /depositar r\\$\\s*[\\d.,]+/i.test(text) || /precisa depositar/i.test(text);\n  let pergunta;\n  if (hasDepositAmount) {\n    pergunta = 'J\\u00e1 quer fazer o dep\\u00f3sito?';\n  } else if (isHistorico) {\n    if (lower.includes('dep\\u00f3sito') || lower.includes('deposito')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de saques?';\n    } else if (lower.includes('saque')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de dep\\u00f3sitos?';\n    } else if (lower.includes('meta') || lower.includes('objetivo')) {\n      pergunta = 'Quer ver seus \\u00faltimos dep\\u00f3sitos?';\n    } else {\n      pergunta = 'Posso te ajudar com mais alguma coisa sobre a sua conta?';\n    }\n  } else {\n    if (lower.includes('meta') || lower.includes('objetivo')) {\n      pergunta = 'Quer ver o progresso das outras metas?';\n    } else if (lower.includes('dep\\u00f3sito') || lower.includes('deposito')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de dep\\u00f3sitos?';\n    } else if (lower.includes('saque')) {\n      pergunta = 'Quer ver o hist\\u00f3rico de saques?';\n    } else if (lower.includes('rank') || lower.includes('liga') || lower.includes('ponto')) {\n      pergunta = 'Quer ver seu total investido?';\n    } else if (lower.includes('invest') || lower.includes('patrim')) {\n      pergunta = 'Quer ver o progresso das suas metas?';\n    } else {\n      pergunta = 'Posso te ajudar com mais alguma coisa sobre a sua conta?';\n    }\n  }\n  text = text.trim() + '\\n\\n' + pergunta;\n}\n\n// Detectar se a resposta final pede depósito → ativar fluxo\nif (/j\\u00e1 quer fazer o dep\\u00f3sito\\?/i.test(text) || /quer fazer o dep\\u00f3sito\\?/i.test(text)) {\n  try {\n    const waPhone = $('Extrair Dados WA').first().json.phone;\n    const sd = $getWorkflowStaticData('global');\n    const sess = sd.waSessions || {};\n    if (sess['wa_' + waPhone]) {\n      sess['wa_' + waPhone].depositStep = 'confirm_amount';\n      // Tentar extrair valor do texto\n      const valM = text.match(/depositar R\\$\\s*([\\d.,]+)/i);\n      if (valM) {\n        sess['wa_' + waPhone].depositValue = valM[1].replace(/\\./g,'').replace(',','.');\n      } else if (sess['wa_' + waPhone].proximaMetaValor) {\n        sess['wa_' + waPhone].depositValue = sess['wa_' + waPhone].proximaMetaValor;\n      }\n      sd.waSessions = sess;\n    }\n  } catch(e) {}\n}\n\nreturn [{ json: { output: text } }];\n"
+        }
+      },
+      {
+        "id": "node-wa-verif-dep",
+        "name": "Verificar Depósito WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1730,
+          720
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst text = waData.text.trim();\n\n// Pass-through do body para o AI Agent usar quando isDeposito = false\nconst prepBody = $('Preparar Mensagem WA').first().json.body;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone] || {};\nconst depositStep = session.depositStep || null;\n\nif (!depositStep) {\n  return [{ json: { isDeposito: false, body: prepBody } }];\n}\n\nreturn [{ json: {\n  isDeposito: true,\n  body: prepBody,\n  depositStep,\n  depositValue: session.depositValue || null,\n  usuarioId: session.usuarioId || null,\n  phone,\n  text,\n  sessionId: waData.sessionId\n} }];\n"
+        }
+      },
+      {
+        "id": "node-wa-is-dep",
+        "name": "É Depósito?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1930,
+          720
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "cond-is-dep",
+                "leftValue": "={{ $json.isDeposito }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "node-wa-logica-dep",
+        "name": "Lógica Depósito WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2130,
+          620
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const info = $input.first().json;\nconst { depositStep, depositValue, phone, usuarioId, text, sessionId } = info;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nconst norm = text.trim().toLowerCase();\nconst isSim = /^(1|sim|s|yes|quero|pode|claro|ok|confirmo?|fa[cç]a?)/.test(norm);\nconst isNao = /^(2|n[aã]o|nao|n|nope|outro|outra|diferente|cancela|muda)/.test(norm);\n\nlet output = '';\nlet callPix = false;\nlet pixValue = null;\n\nif (depositStep === 'confirm_amount') {\n  if (isSim) {\n    callPix = true;\n    pixValue = depositValue;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else if (isNao) {\n    sessions['wa_' + phone].depositStep = 'ask_custom';\n    output = 'Tudo bem!\\n\\nQual valor voc\\u00ea quer depositar?';\n  } else {\n    output = 'Quer fazer o dep\\u00f3sito de ' + brl(depositValue) + '?\\n\\nDigite 1 para confirmar ou 2 para escolher outro valor.';\n  }\n} else if (depositStep === 'ask_custom') {\n  const clean = text.replace(/r\\$\\s*/i, '').replace(/\\./g, '').replace(',', '.');\n  const match = clean.match(/(\\d+(?:\\.\\d{1,2})?)/);\n  if (match && parseFloat(match[1]) >= 1) {\n    pixValue = parseFloat(match[1]).toFixed(2);\n    callPix = true;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else {\n    output = 'N\\u00e3o entendi o valor.\\n\\nMe diz quanto quer depositar. Exemplo: 50,00';\n  }\n}\n\nstaticData.waSessions = sessions;\n\nif (callPix) {\n  return [{ json: { callPix: true, pixValue, usuarioId, phone, sessionId } }];\n}\nreturn [{ json: { callPix: false, output, phone, sessionId } }];\n"
+        }
+      },
+      {
+        "id": "node-wa-is-pix",
+        "name": "É Chamar Pix?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          2330,
+          620
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "cond-call-pix",
+                "leftValue": "={{ $json.callPix }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "node-wa-criar-pix",
+        "name": "Criar Pix WA",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2530,
+          520
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/' + $json.usuarioId + '/pix/cobrar' }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { \"valor\": $json.pixValue } }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "node-wa-fmt-pix",
+        "name": "Formatar Pix WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2730,
+          520
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const pix = $input.first().json;\nconst remoteJid = $('Extrair Dados WA').first().json.remoteJid;\n\nif (!pix.pixCopiaECola) {\n  return [{ json: {\n    output: 'Ops! Não consegui gerar o Pix agora.\\n\\nTente novamente em instantes.',\n    pixCode: null, remoteJid\n  } }];\n}\n\nconst brl = (v) => {\n  const p = parseFloat(v).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n};\n\nconst valorStr = pix.pixValue || pix.valor || '';\nconst output = 'Depósito de ' + brl(valorStr) + ' gerado! 💸\\n\\n'\n  + 'Já te mando o código Pix para copiar e colar no seu banco.';\n\nreturn [{ json: { output, pixCode: '```' + pix.pixCopiaECola + '```', remoteJid } }];\n"
+        }
+      },
+      {
+        "id": "node-wa-enviar-codigo-pix",
+        "name": "Enviar Código Pix WA",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2930,
+          520
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: $json.remoteJid, text: $json.pixCode } }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "node-wa-enviar-aviso-pix",
+        "name": "Enviar Aviso Pix WA",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2730,
+          520
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: $json.remoteJid, text: $json.output } }}",
+          "options": {}
+        }
       }
     ],
     "connections": {
@@ -1715,7 +2290,7 @@
         "main": [
           [
             {
-              "node": "Enviar Resposta WA",
+              "node": "Formatar WA",
               "type": "main",
               "index": 0
             }
@@ -1882,7 +2457,7 @@
         "main": [
           [
             {
-              "node": "AI Agent",
+              "node": "Enviar Resposta WA",
               "type": "main",
               "index": 0
             }
@@ -1893,7 +2468,153 @@
         "main": [
           [
             {
+              "node": "Verificar Depósito WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Resposta WA": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Erro WA": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Não Cadastrado": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar WA": {
+        "main": [
+          [
+            {
+              "node": "Enviar Resposta WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar Depósito WA": {
+        "main": [
+          [
+            {
+              "node": "É Depósito?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É Depósito?": {
+        "main": [
+          [
+            {
+              "node": "Lógica Depósito WA",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
               "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Lógica Depósito WA": {
+        "main": [
+          [
+            {
+              "node": "É Chamar Pix?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É Chamar Pix?": {
+        "main": [
+          [
+            {
+              "node": "Criar Pix WA",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Enviar Resposta WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Criar Pix WA": {
+        "main": [
+          [
+            {
+              "node": "Formatar Pix WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar Pix WA": {
+        "main": [
+          [
+            {
+              "node": "Enviar Aviso Pix WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Código Pix WA": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Aviso Pix WA": {
+        "main": [
+          [
+            {
+              "node": "Enviar Código Pix WA",
               "type": "main",
               "index": 0
             }
