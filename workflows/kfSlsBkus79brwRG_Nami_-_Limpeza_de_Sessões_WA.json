@@ -1,0 +1,397 @@
+{
+  "updatedAt": "2026-05-16T14:24:10.905Z",
+  "createdAt": "2026-05-16T14:24:10.905Z",
+  "id": "kfSlsBkus79brwRG",
+  "name": "Nami - Limpeza de Sessões WA",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "node-schedule",
+      "name": "A cada hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-get-wf",
+      "name": "Buscar Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/workflows/0wpPd0SPkQ8y3GUx",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-clean",
+      "name": "Limpar Sessões Expiradas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const wf = $input.first().json;\nconst ONE_HOUR = 60 * 60 * 1000;\nconst now = new Date();\n\nconst sessions = wf.staticData?.global?.waSessions || {};\nconst before = Object.keys(sessions).length;\n\nfor (const key of Object.keys(sessions)) {\n  const last = new Date(sessions[key].lastMessageAt);\n  if ((now - last) > ONE_HOUR) {\n    delete sessions[key];\n  }\n}\n\nconst after = Object.keys(sessions).length;\nconst removed = before - after;\n\nconst payload = {\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  settings: { executionOrder: 'v1' },\n  staticData: wf.staticData,\n};\n\nreturn [{ json: { payload, removed, before, after } }];"
+      }
+    },
+    {
+      "id": "node-put-wf",
+      "name": "Salvar Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        300
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/workflows/0wpPd0SPkQ8y3GUx",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payload }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-log",
+      "name": "Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1160,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "sessoes_removidas",
+              "value": "={{ $('Limpar Sessões Expiradas').first().json.removed }}",
+              "type": "number"
+            },
+            {
+              "id": "f2",
+              "name": "sessoes_antes",
+              "value": "={{ $('Limpar Sessões Expiradas').first().json.before }}",
+              "type": "number"
+            },
+            {
+              "id": "f3",
+              "name": "sessoes_depois",
+              "value": "={{ $('Limpar Sessões Expiradas').first().json.after }}",
+              "type": "number"
+            },
+            {
+              "id": "f4",
+              "name": "executado_em",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "A cada hora": {
+      "main": [
+        [
+          {
+            "node": "Buscar Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Workflow": {
+      "main": [
+        [
+          {
+            "node": "Limpar Sessões Expiradas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar Sessões Expiradas": {
+      "main": [
+        [
+          {
+            "node": "Salvar Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar Workflow": {
+      "main": [
+        [
+          {
+            "node": "Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:A cada hora": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "82a25c7c-824d-499e-8ca6-b8badf25a568",
+  "activeVersionId": "82a25c7c-824d-499e-8ca6-b8badf25a568",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-16T14:24:10.909Z",
+      "createdAt": "2026-05-16T14:24:10.909Z",
+      "role": "workflow:owner",
+      "workflowId": "kfSlsBkus79brwRG",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-16T14:24:10.910Z",
+    "createdAt": "2026-05-16T14:24:10.910Z",
+    "versionId": "82a25c7c-824d-499e-8ca6-b8badf25a568",
+    "workflowId": "kfSlsBkus79brwRG",
+    "nodes": [
+      {
+        "id": "node-schedule",
+        "name": "A cada hora",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          200,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "node-get-wf",
+        "name": "Buscar Workflow",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          440,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/workflows/0wpPd0SPkQ8y3GUx",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "node-clean",
+        "name": "Limpar Sessões Expiradas",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          680,
+          300
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const wf = $input.first().json;\nconst ONE_HOUR = 60 * 60 * 1000;\nconst now = new Date();\n\nconst sessions = wf.staticData?.global?.waSessions || {};\nconst before = Object.keys(sessions).length;\n\nfor (const key of Object.keys(sessions)) {\n  const last = new Date(sessions[key].lastMessageAt);\n  if ((now - last) > ONE_HOUR) {\n    delete sessions[key];\n  }\n}\n\nconst after = Object.keys(sessions).length;\nconst removed = before - after;\n\nconst payload = {\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  settings: { executionOrder: 'v1' },\n  staticData: wf.staticData,\n};\n\nreturn [{ json: { payload, removed, before, after } }];"
+        }
+      },
+      {
+        "id": "node-put-wf",
+        "name": "Salvar Workflow",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          920,
+          300
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/workflows/0wpPd0SPkQ8y3GUx",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.payload }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "node-log",
+        "name": "Log",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1160,
+          300
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "f1",
+                "name": "sessoes_removidas",
+                "value": "={{ $('Limpar Sessões Expiradas').first().json.removed }}",
+                "type": "number"
+              },
+              {
+                "id": "f2",
+                "name": "sessoes_antes",
+                "value": "={{ $('Limpar Sessões Expiradas').first().json.before }}",
+                "type": "number"
+              },
+              {
+                "id": "f3",
+                "name": "sessoes_depois",
+                "value": "={{ $('Limpar Sessões Expiradas').first().json.after }}",
+                "type": "number"
+              },
+              {
+                "id": "f4",
+                "name": "executado_em",
+                "value": "={{ new Date().toISOString() }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "A cada hora": {
+        "main": [
+          [
+            {
+              "node": "Buscar Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Workflow": {
+        "main": [
+          [
+            {
+              "node": "Limpar Sessões Expiradas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Limpar Sessões Expiradas": {
+        "main": [
+          [
+            {
+              "node": "Salvar Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Salvar Workflow": {
+        "main": [
+          [
+            {
+              "node": "Log",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
