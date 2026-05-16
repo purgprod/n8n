@@ -1,0 +1,209 @@
+{
+  "updatedAt": "2026-05-15T19:24:42.899Z",
+  "createdAt": "2026-05-15T18:48:26.684Z",
+  "id": "Ifw6dskdeXTVoVRG",
+  "name": "Servidor Pix - Nami",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "node-pix-wh",
+      "name": "Webhook Pix",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "pix-view-wh",
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "pix-view",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-pix-serve",
+      "name": "Verificar e Servir",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        470,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "\nconst query = $input.first().json.query || {};\n\nfunction brl(val) {\n  const p = parseFloat(val).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n}\n\n// ── Modo registro: gera token curto e armazena ──\nif (query.action === 'reg') {\n  const staticData = $getWorkflowStaticData('global');\n  if (!staticData.tokens) staticData.tokens = {};\n\n  // Limpa tokens expirados\n  const now = Date.now();\n  for (const k of Object.keys(staticData.tokens)) {\n    if (now - staticData.tokens[k].ts > 3600000) delete staticData.tokens[k];\n  }\n\n  // Token curto de 8 chars (evita chars ambíguos 0/O/1/l)\n  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';\n  let token = '';\n  for (let i = 0; i < 8; i++) token += chars[Math.floor(Math.random() * chars.length)];\n\n  staticData.tokens[token] = {\n    pixCode: decodeURIComponent(query.code || ''),\n    valor: decodeURIComponent(query.valor || ''),\n    ts: now\n  };\n\n  const url = 'https://purg.com.br/pix?t=' + token;\n  return [{ json: { html: JSON.stringify({ url }) } }];\n}\n\n// ── Modo visualização: serve o HTML ──\nconst { t } = query;\nconst staticData = $getWorkflowStaticData('global');\nconst tokens = staticData.tokens || {};\nconst entry = tokens[t];\nconst now = Date.now();\nconst expired = !t || !entry || (now - entry.ts) > 3600000;\n\nif (entry && expired) { delete tokens[t]; }\n\nfunction expiredHtml() {\n  return '<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Link Expirado - Purg</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.card{background:white;border-radius:16px;padding:40px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08)}.logo{margin-bottom:28px}.icon{font-size:48px;margin-bottom:16px}h2{color:#1a1a2a;font-size:22px;margin-bottom:12px}p{color:#787887;font-size:15px;line-height:1.6}</style></head><body><div class=\"card\"><div class=\"logo\"><img src=\"https://www.purg.com.br/assets/src/assets/logo.2033a3fd6c7c7bd26bf006ec11311890.png\" style=\"width:90%;max-width:510px\"></div><div class=\"icon\">⏱️</div><h2>Link expirado</h2><p>Este link de pagamento Pix expirou.<br><br>Se precisar, solicite um novo código pelo WhatsApp.</p></div></body></html>';\n}\n\nfunction pixHtml(valor, pixCode) {\n  const vf = brl(valor);\n  return '<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Pix - Purg</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;min-height:100vh;padding:24px 16px}.logo{text-align:center;margin-bottom:24px}.card{background:white;border-radius:16px;padding:28px 20px;max-width:480px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}.lbl{font-size:11px;font-weight:700;color:#787887;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}.lbl-center{text-align:center}.val{font-size:36px;font-weight:800;color:#48C774;margin-bottom:24px;text-align:center}.div{height:1px;background:#e8eaf0;margin-bottom:20px}.code-lbl{font-size:11px;font-weight:700;color:#787887;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}.code{border:1.5px solid #dde0ea;border-radius:10px;padding:16px;word-break:break-all;font-family:\"Courier New\",monospace;font-size:14px;color:#1a1a2a;line-height:1.7;margin-bottom:16px;-webkit-user-select:all;user-select:all}.btn{width:100%;padding:18px;background:#48C774;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}.btn.ok{background:#2d9b52}.tip{text-align:center;color:#a0a3b1;font-size:12px;margin-top:22px}</style></head><body>'\n    + '<div class=\"logo\"><img src=\"https://www.purg.com.br/assets/src/assets/logo.2033a3fd6c7c7bd26bf006ec11311890.png\" style=\"width:90%;max-width:510px\"></div>'\n    + '<div class=\"card\">'\n    + '<div class=\"lbl lbl-center\">Depósito Pix no valor de:</div>'\n    + '<div class=\"val\">' + vf + '</div>'\n    + '<div class=\"div\"></div>'\n    + '<div class=\"code-lbl\">Copie o código abaixo e faça o Pix no seu banco:</div>'\n    + '<div class=\"code\" id=\"code\">' + pixCode + '</div>'\n    + '<button class=\"btn\" id=\"btn\" onclick=\"cp()\">Copiar código Pix</button>'\n    + '<div class=\"tip\" id=\"tip\">Toque no botão para copiar</div>'\n    + '</div>'\n    + '<script>function cp(){var code=document.getElementById(\"code\").innerText,btn=document.getElementById(\"btn\"),tip=document.getElementById(\"tip\");if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(function(){btn.textContent=\"✓ Copiado!\";btn.classList.add(\"ok\");tip.textContent=\"Código copiado! Cole no app do seu banco.\";}).catch(function(){fb(code,btn,tip)});}else{fb(code,btn,tip);}}function fb(code,btn,tip){var ta=document.createElement(\"textarea\");ta.value=code;ta.style.cssText=\"position:fixed;opacity:0\";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand(\"copy\");btn.textContent=\"✓ Copiado!\";btn.classList.add(\"ok\");tip.textContent=\"Código copiado! Cole no app do seu banco.\";}catch(e){tip.textContent=\"Selecione o código acima e copie manualmente.\";}document.body.removeChild(ta);}<\\/script>'\n    + '</body></html>';\n}\n\nconst html = expired ? expiredHtml() : pixHtml(entry.valor, entry.pixCode);\nreturn [{ json: { html } }];\n"
+      }
+    },
+    {
+      "id": "node-pix-respond",
+      "name": "Responder HTML",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        690,
+        300
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "={{ $json.html.startsWith('{') ? 'application/json' : 'text/html' }}; charset=utf-8"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Pix": {
+      "main": [
+        [
+          {
+            "node": "Verificar e Servir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar e Servir": {
+      "main": [
+        [
+          {
+            "node": "Responder HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "tokens": {
+        "SRuvd45x": {
+          "pixCode": "00020101021226830014BR.GOV.BCB.PIX2561qrcodespix.sejaefi.com.br/v2/0d381b3a992d4ee3acce21d6685c5db35204000053039865802BR5905EFISA6008SAOPAULO62070503***63045BB3",
+          "valor": "62.50",
+          "ts": 1778885853853
+        }
+      }
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "800f9950-0b5b-486c-bf33-c28739cdb896",
+  "activeVersionId": "800f9950-0b5b-486c-bf33-c28739cdb896",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-15T18:48:26.688Z",
+      "createdAt": "2026-05-15T18:48:26.688Z",
+      "role": "workflow:owner",
+      "workflowId": "Ifw6dskdeXTVoVRG",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-15T19:24:42.900Z",
+    "createdAt": "2026-05-15T19:24:42.900Z",
+    "versionId": "800f9950-0b5b-486c-bf33-c28739cdb896",
+    "workflowId": "Ifw6dskdeXTVoVRG",
+    "nodes": [
+      {
+        "id": "node-pix-wh",
+        "name": "Webhook Pix",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          250,
+          300
+        ],
+        "webhookId": "pix-view-wh",
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "pix-view",
+          "responseMode": "responseNode",
+          "options": {}
+        }
+      },
+      {
+        "id": "node-pix-serve",
+        "name": "Verificar e Servir",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          470,
+          300
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "\nconst query = $input.first().json.query || {};\n\nfunction brl(val) {\n  const p = parseFloat(val).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n}\n\n// ── Modo registro: gera token curto e armazena ──\nif (query.action === 'reg') {\n  const staticData = $getWorkflowStaticData('global');\n  if (!staticData.tokens) staticData.tokens = {};\n\n  // Limpa tokens expirados\n  const now = Date.now();\n  for (const k of Object.keys(staticData.tokens)) {\n    if (now - staticData.tokens[k].ts > 3600000) delete staticData.tokens[k];\n  }\n\n  // Token curto de 8 chars (evita chars ambíguos 0/O/1/l)\n  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';\n  let token = '';\n  for (let i = 0; i < 8; i++) token += chars[Math.floor(Math.random() * chars.length)];\n\n  staticData.tokens[token] = {\n    pixCode: decodeURIComponent(query.code || ''),\n    valor: decodeURIComponent(query.valor || ''),\n    ts: now\n  };\n\n  const url = 'https://purg.com.br/pix?t=' + token;\n  return [{ json: { html: JSON.stringify({ url }) } }];\n}\n\n// ── Modo visualização: serve o HTML ──\nconst { t } = query;\nconst staticData = $getWorkflowStaticData('global');\nconst tokens = staticData.tokens || {};\nconst entry = tokens[t];\nconst now = Date.now();\nconst expired = !t || !entry || (now - entry.ts) > 3600000;\n\nif (entry && expired) { delete tokens[t]; }\n\nfunction expiredHtml() {\n  return '<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Link Expirado - Purg</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.card{background:white;border-radius:16px;padding:40px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08)}.logo{margin-bottom:28px}.icon{font-size:48px;margin-bottom:16px}h2{color:#1a1a2a;font-size:22px;margin-bottom:12px}p{color:#787887;font-size:15px;line-height:1.6}</style></head><body><div class=\"card\"><div class=\"logo\"><img src=\"https://www.purg.com.br/assets/src/assets/logo.2033a3fd6c7c7bd26bf006ec11311890.png\" style=\"width:90%;max-width:510px\"></div><div class=\"icon\">⏱️</div><h2>Link expirado</h2><p>Este link de pagamento Pix expirou.<br><br>Se precisar, solicite um novo código pelo WhatsApp.</p></div></body></html>';\n}\n\nfunction pixHtml(valor, pixCode) {\n  const vf = brl(valor);\n  return '<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Pix - Purg</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;min-height:100vh;padding:24px 16px}.logo{text-align:center;margin-bottom:24px}.card{background:white;border-radius:16px;padding:28px 20px;max-width:480px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}.lbl{font-size:11px;font-weight:700;color:#787887;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}.lbl-center{text-align:center}.val{font-size:36px;font-weight:800;color:#48C774;margin-bottom:24px;text-align:center}.div{height:1px;background:#e8eaf0;margin-bottom:20px}.code-lbl{font-size:11px;font-weight:700;color:#787887;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}.code{border:1.5px solid #dde0ea;border-radius:10px;padding:16px;word-break:break-all;font-family:\"Courier New\",monospace;font-size:14px;color:#1a1a2a;line-height:1.7;margin-bottom:16px;-webkit-user-select:all;user-select:all}.btn{width:100%;padding:18px;background:#48C774;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}.btn.ok{background:#2d9b52}.tip{text-align:center;color:#a0a3b1;font-size:12px;margin-top:22px}</style></head><body>'\n    + '<div class=\"logo\"><img src=\"https://www.purg.com.br/assets/src/assets/logo.2033a3fd6c7c7bd26bf006ec11311890.png\" style=\"width:90%;max-width:510px\"></div>'\n    + '<div class=\"card\">'\n    + '<div class=\"lbl lbl-center\">Depósito Pix no valor de:</div>'\n    + '<div class=\"val\">' + vf + '</div>'\n    + '<div class=\"div\"></div>'\n    + '<div class=\"code-lbl\">Copie o código abaixo e faça o Pix no seu banco:</div>'\n    + '<div class=\"code\" id=\"code\">' + pixCode + '</div>'\n    + '<button class=\"btn\" id=\"btn\" onclick=\"cp()\">Copiar código Pix</button>'\n    + '<div class=\"tip\" id=\"tip\">Toque no botão para copiar</div>'\n    + '</div>'\n    + '<script>function cp(){var code=document.getElementById(\"code\").innerText,btn=document.getElementById(\"btn\"),tip=document.getElementById(\"tip\");if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(function(){btn.textContent=\"✓ Copiado!\";btn.classList.add(\"ok\");tip.textContent=\"Código copiado! Cole no app do seu banco.\";}).catch(function(){fb(code,btn,tip)});}else{fb(code,btn,tip);}}function fb(code,btn,tip){var ta=document.createElement(\"textarea\");ta.value=code;ta.style.cssText=\"position:fixed;opacity:0\";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand(\"copy\");btn.textContent=\"✓ Copiado!\";btn.classList.add(\"ok\");tip.textContent=\"Código copiado! Cole no app do seu banco.\";}catch(e){tip.textContent=\"Selecione o código acima e copie manualmente.\";}document.body.removeChild(ta);}<\\/script>'\n    + '</body></html>';\n}\n\nconst html = expired ? expiredHtml() : pixHtml(entry.valor, entry.pixCode);\nreturn [{ json: { html } }];\n"
+        }
+      },
+      {
+        "id": "node-pix-respond",
+        "name": "Responder HTML",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          690,
+          300
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ $json.html }}",
+          "options": {
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "={{ $json.html.startsWith('{') ? 'application/json' : 'text/html' }}; charset=utf-8"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook Pix": {
+        "main": [
+          [
+            {
+              "node": "Verificar e Servir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar e Servir": {
+        "main": [
+          [
+            {
+              "node": "Responder HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

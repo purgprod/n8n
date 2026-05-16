@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-15T17:21:43.829Z",
+  "updatedAt": "2026-05-15T20:29:18.463Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -712,7 +712,7 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const info = $input.first().json;\nconst { depositStep, depositValue, phone, usuarioId, text, sessionId } = info;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nconst norm = text.trim().toLowerCase();\nconst isSim = /^(1|sim|s|yes|quero|pode|claro|ok|confirmo?|fa[cç]a?)/.test(norm);\nconst isNao = /^(2|n[aã]o|nao|n|nope|outro|outra|diferente|cancela|muda)/.test(norm);\n\nlet output = '';\nlet callPix = false;\nlet pixValue = null;\n\nif (depositStep === 'confirm_amount') {\n  if (isSim) {\n    callPix = true;\n    pixValue = depositValue;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else if (isNao) {\n    sessions['wa_' + phone].depositStep = 'ask_custom';\n    output = 'Tudo bem!\\n\\nQual valor voc\\u00ea quer depositar?';\n  } else {\n    output = 'Quer fazer o dep\\u00f3sito de ' + brl(depositValue) + '?\\n\\nDigite 1 para confirmar ou 2 para escolher outro valor.';\n  }\n} else if (depositStep === 'ask_custom') {\n  const clean = text.replace(/r\\$\\s*/i, '').replace(/\\./g, '').replace(',', '.');\n  const match = clean.match(/(\\d+(?:\\.\\d{1,2})?)/);\n  if (match && parseFloat(match[1]) >= 1) {\n    pixValue = parseFloat(match[1]).toFixed(2);\n    callPix = true;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else {\n    output = 'N\\u00e3o entendi o valor.\\n\\nMe diz quanto quer depositar. Exemplo: 50,00';\n  }\n}\n\nstaticData.waSessions = sessions;\n\nif (callPix) {\n  return [{ json: { callPix: true, pixValue, usuarioId, phone, sessionId } }];\n}\nreturn [{ json: { callPix: false, output, phone, sessionId } }];\n"
+        "jsCode": "const info = $input.first().json;\nconst { depositStep, depositValue, phone, usuarioId, text, sessionId } = info;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nconst norm = text.trim().toLowerCase();\nconst isSim    = /^(1|sim|s|yes|quero|pode|claro|ok|confirmo?|fa[cç]a?)/.test(norm);\nconst isNao    = /^(2|outro|outra|diferente|muda)/.test(norm);\nconst isCancel = /^(3|cancel|cancelar|sair|parar|desistir|n[aã]o|nao)/.test(norm);\n\nconst confirmMsg = 'Quer fazer o depósito de ' + brl(depositValue) + '?\\n\\nDigite:\\n\\n*1* - para confirmar\\n*2* - para escolher outro valor\\n*3* - para cancelar';\n\nlet output = '';\nlet callPix = false;\nlet pixValue = null;\n\nif (depositStep === 'confirm_amount') {\n  if (isSim) {\n    callPix = true;\n    pixValue = depositValue;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else if (isCancel) {\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n    output = 'Tudo bem, cancelei o depósito.\\n\\nComo mais posso te ajudar?\\n\\n- Seus objetivos e o progresso das metas\\n- Seus últimos depósitos e saques\\n- Sua posição no ranking e pontuação\\n- Quanto você já investiu no total\\n- Fazer um depósito Pix\\n\\nQual desses você quer saber?';\n  } else if (isNao) {\n    sessions['wa_' + phone].depositStep = 'ask_custom';\n    output = 'Tudo bem!\\n\\nQual valor você quer depositar?';\n  } else {\n    output = confirmMsg;\n  }\n} else if (depositStep === 'ask_custom') {\n  if (isCancel) {\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n    output = 'Tudo bem, cancelei o depósito.\\n\\nComo mais posso te ajudar?\\n\\n- Seus objetivos e o progresso das metas\\n- Seus últimos depósitos e saques\\n- Sua posição no ranking e pontuação\\n- Quanto você já investiu no total\\n- Fazer um depósito Pix\\n\\nQual desses você quer saber?';\n  } else {\n    const clean = text.replace(/r\\$\\s*/i, '').replace(/\\./g, '').replace(',', '.');\n    const match = clean.match(/(\\d+(?:\\.\\d{1,2})?)/);\n    if (match && parseFloat(match[1]) >= 1) {\n      pixValue = parseFloat(match[1]).toFixed(2);\n      callPix = true;\n      delete sessions['wa_' + phone].depositStep;\n      delete sessions['wa_' + phone].depositValue;\n    } else {\n      output = 'Não entendi o valor.\\n\\nMe diz quanto quer depositar. Exemplo: 50,00\\n\\nOu digite *3* para cancelar.';\n    }\n  }\n}\n\nstaticData.waSessions = sessions;\n\nif (callPix) {\n  return [{ json: { callPix: true, pixValue, usuarioId, phone, sessionId } }];\n}\nreturn [{ json: { callPix: false, output, phone, sessionId } }];\n"
       }
     },
     {
@@ -787,12 +787,12 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const pix = $input.first().json;\nconst remoteJid = $('Extrair Dados WA').first().json.remoteJid;\n\nif (!pix.pixCopiaECola) {\n  return [{ json: {\n    output: 'Ops! Não consegui gerar o Pix agora.\\n\\nTente novamente em instantes.',\n    pixCode: null, remoteJid\n  } }];\n}\n\nconst brl = (v) => {\n  const p = parseFloat(v).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n};\n\nconst valorStr = pix.pixValue || pix.valor || '';\nconst output = 'Depósito de ' + brl(valorStr) + ' gerado! 💸\\n\\n'\n  + 'Já te mando o código Pix para copiar e colar no seu banco.';\n\nreturn [{ json: { output, pixCode: '```' + pix.pixCopiaECola + '```', remoteJid } }];\n"
+        "jsCode": "\nconst pix = $input.first().json;\nconst remoteJid = $('Extrair Dados WA').first().json.remoteJid;\n\nif (!pix.pixCopiaECola) {\n  return [{ json: {\n    output: 'Ops! Não consegui gerar o Pix agora.\\n\\nTente novamente em instantes.',\n    pixUrl: null, remoteJid\n  } }];\n}\n\nconst brl = (v) => {\n  const p = parseFloat(v).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n};\n\nconst valorStr = $('Lógica Depósito WA').first().json.pixValue || pix.pixValue || pix.valor || '0';\nconst output = 'Depósito de ' + brl(valorStr) + ' gerado! 💸\\n\\nAcesse o link abaixo para copiar o código Pix:';\n\nreturn [{ json: {\n  output,\n  pixCode: pix.pixCopiaECola,\n  valor: valorStr,\n  remoteJid\n} }];\n"
       }
     },
     {
       "id": "node-wa-enviar-codigo-pix",
-      "name": "Enviar Código Pix WA",
+      "name": "Enviar Link Pix WA",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -813,7 +813,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { number: $json.remoteJid, text: $json.pixCode } }}",
+        "jsonBody": "={{ { \"number\": $('Montar Msg Pix').first().json.remoteJid, \"text\": $('Montar Msg Pix').first().json.pixUrl } }}",
         "options": {}
       }
     },
@@ -842,6 +842,35 @@
         "specifyBody": "json",
         "jsonBody": "={{ { number: $json.remoteJid, text: $json.output } }}",
         "options": {}
+      }
+    },
+    {
+      "id": "node-wa-registrar-token",
+      "name": "Registrar Token Pix",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        700
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://purg.com.br/pix?action=reg&code=' + encodeURIComponent($json.pixCode) + '&valor=' + encodeURIComponent($json.valor) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-wa-montar-msg-pix",
+      "name": "Montar Msg Pix",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        700
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "\nconst regResp = $input.first().json;\nconst fmt = $('Formatar Pix WA').first().json;\nreturn [{ json: {\n  output: fmt.output,\n  pixUrl: regResp.url,\n  remoteJid: fmt.remoteJid\n} }];\n"
       }
     }
   ],
@@ -1265,18 +1294,7 @@
       "main": [
         [
           {
-            "node": "Enviar Aviso Pix WA",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Enviar Código Pix WA": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
+            "node": "Registrar Token Pix",
             "type": "main",
             "index": 0
           }
@@ -1287,7 +1305,40 @@
       "main": [
         [
           {
-            "node": "Enviar Código Pix WA",
+            "node": "Enviar Link Pix WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Link Pix WA": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Token Pix": {
+      "main": [
+        [
+          {
+            "node": "Montar Msg Pix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Msg Pix": {
+      "main": [
+        [
+          {
+            "node": "Enviar Aviso Pix WA",
             "type": "main",
             "index": 0
           }
@@ -1304,9 +1355,9 @@
     "global": {
       "waSessions": {
         "wa_11949496342": {
-          "lastMessageAt": "2026-05-15T17:03:42.149Z",
-          "sessionSuffix": "494128_si4c",
-          "contexto": "Apelido: Macacovizk\nLiga: Cobre II | Posição: #3 | Pontos: 110\nTotal investido: R$ 192,11\n\nObjetivos:\n- Patrimônio | 2/9 metas concluídas | Próxima meta: R$ 62,50 até 30/06/2026 (investido: R$ 29,61)\n\nÚltimos depósitos:\n- 12/05/2026: R$ 10,00 (Cancelado)\n- 01/05/2026: R$ 66,66 (Executado)\n- 23/04/2026: R$ 5,00 (Executado)\n\nÚltimos saques:\n- 31/01/2026: R$ 5,00 (Cancelado)",
+          "lastMessageAt": "2026-05-15T22:57:32.532Z",
+          "sessionSuffix": "494134_wq4r",
+          "contexto": "Apelido: Macacovizk\nLiga: Cobre II | Posição: #1 | Pontos: 150\nTotal investido: R$ 254,61\n\nObjetivos:\n- Patrimônio | 3/9 metas concluídas | Próxima meta: R$ 62,50 até 31/07/2026 (investido: R$ 29,61)\n\nÚltimos depósitos:\n- 15/05/2026: R$ 62,50 (Processando)\n- 15/05/2026: R$ 62,50 (Processando)\n- 15/05/2026: R$ 62,50 (Executado)\n\nÚltimos saques:\n- 31/01/2026: R$ 5,00 (Cancelado)",
           "usuarioId": 2,
           "proximaMetaValor": "32.89"
         }
@@ -1315,8 +1366,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "d6eba923-063c-4e74-8a11-fc5344dde81f",
-  "activeVersionId": "d6eba923-063c-4e74-8a11-fc5344dde81f",
+  "versionId": "f991ba30-ef42-4ddb-bd3f-2d7ee7041dae",
+  "activeVersionId": "f991ba30-ef42-4ddb-bd3f-2d7ee7041dae",
   "triggerCount": 2,
   "shared": [
     {
@@ -1328,9 +1379,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-15T17:21:43.830Z",
-    "createdAt": "2026-05-15T17:21:43.830Z",
-    "versionId": "d6eba923-063c-4e74-8a11-fc5344dde81f",
+    "updatedAt": "2026-05-15T20:28:20.630Z",
+    "createdAt": "2026-05-15T20:28:20.630Z",
+    "versionId": "f991ba30-ef42-4ddb-bd3f-2d7ee7041dae",
     "workflowId": "0wpPd0SPkQ8y3GUx",
     "nodes": [
       {
@@ -2039,7 +2090,7 @@
         ],
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const info = $input.first().json;\nconst { depositStep, depositValue, phone, usuarioId, text, sessionId } = info;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nconst norm = text.trim().toLowerCase();\nconst isSim = /^(1|sim|s|yes|quero|pode|claro|ok|confirmo?|fa[cç]a?)/.test(norm);\nconst isNao = /^(2|n[aã]o|nao|n|nope|outro|outra|diferente|cancela|muda)/.test(norm);\n\nlet output = '';\nlet callPix = false;\nlet pixValue = null;\n\nif (depositStep === 'confirm_amount') {\n  if (isSim) {\n    callPix = true;\n    pixValue = depositValue;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else if (isNao) {\n    sessions['wa_' + phone].depositStep = 'ask_custom';\n    output = 'Tudo bem!\\n\\nQual valor voc\\u00ea quer depositar?';\n  } else {\n    output = 'Quer fazer o dep\\u00f3sito de ' + brl(depositValue) + '?\\n\\nDigite 1 para confirmar ou 2 para escolher outro valor.';\n  }\n} else if (depositStep === 'ask_custom') {\n  const clean = text.replace(/r\\$\\s*/i, '').replace(/\\./g, '').replace(',', '.');\n  const match = clean.match(/(\\d+(?:\\.\\d{1,2})?)/);\n  if (match && parseFloat(match[1]) >= 1) {\n    pixValue = parseFloat(match[1]).toFixed(2);\n    callPix = true;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else {\n    output = 'N\\u00e3o entendi o valor.\\n\\nMe diz quanto quer depositar. Exemplo: 50,00';\n  }\n}\n\nstaticData.waSessions = sessions;\n\nif (callPix) {\n  return [{ json: { callPix: true, pixValue, usuarioId, phone, sessionId } }];\n}\nreturn [{ json: { callPix: false, output, phone, sessionId } }];\n"
+          "jsCode": "const info = $input.first().json;\nconst { depositStep, depositValue, phone, usuarioId, text, sessionId } = info;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nconst norm = text.trim().toLowerCase();\nconst isSim    = /^(1|sim|s|yes|quero|pode|claro|ok|confirmo?|fa[cç]a?)/.test(norm);\nconst isNao    = /^(2|outro|outra|diferente|muda)/.test(norm);\nconst isCancel = /^(3|cancel|cancelar|sair|parar|desistir|n[aã]o|nao)/.test(norm);\n\nconst confirmMsg = 'Quer fazer o depósito de ' + brl(depositValue) + '?\\n\\nDigite:\\n\\n*1* - para confirmar\\n*2* - para escolher outro valor\\n*3* - para cancelar';\n\nlet output = '';\nlet callPix = false;\nlet pixValue = null;\n\nif (depositStep === 'confirm_amount') {\n  if (isSim) {\n    callPix = true;\n    pixValue = depositValue;\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n  } else if (isCancel) {\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n    output = 'Tudo bem, cancelei o depósito.\\n\\nComo mais posso te ajudar?\\n\\n- Seus objetivos e o progresso das metas\\n- Seus últimos depósitos e saques\\n- Sua posição no ranking e pontuação\\n- Quanto você já investiu no total\\n- Fazer um depósito Pix\\n\\nQual desses você quer saber?';\n  } else if (isNao) {\n    sessions['wa_' + phone].depositStep = 'ask_custom';\n    output = 'Tudo bem!\\n\\nQual valor você quer depositar?';\n  } else {\n    output = confirmMsg;\n  }\n} else if (depositStep === 'ask_custom') {\n  if (isCancel) {\n    delete sessions['wa_' + phone].depositStep;\n    delete sessions['wa_' + phone].depositValue;\n    output = 'Tudo bem, cancelei o depósito.\\n\\nComo mais posso te ajudar?\\n\\n- Seus objetivos e o progresso das metas\\n- Seus últimos depósitos e saques\\n- Sua posição no ranking e pontuação\\n- Quanto você já investiu no total\\n- Fazer um depósito Pix\\n\\nQual desses você quer saber?';\n  } else {\n    const clean = text.replace(/r\\$\\s*/i, '').replace(/\\./g, '').replace(',', '.');\n    const match = clean.match(/(\\d+(?:\\.\\d{1,2})?)/);\n    if (match && parseFloat(match[1]) >= 1) {\n      pixValue = parseFloat(match[1]).toFixed(2);\n      callPix = true;\n      delete sessions['wa_' + phone].depositStep;\n      delete sessions['wa_' + phone].depositValue;\n    } else {\n      output = 'Não entendi o valor.\\n\\nMe diz quanto quer depositar. Exemplo: 50,00\\n\\nOu digite *3* para cancelar.';\n    }\n  }\n}\n\nstaticData.waSessions = sessions;\n\nif (callPix) {\n  return [{ json: { callPix: true, pixValue, usuarioId, phone, sessionId } }];\n}\nreturn [{ json: { callPix: false, output, phone, sessionId } }];\n"
         }
       },
       {
@@ -2114,12 +2165,12 @@
         ],
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const pix = $input.first().json;\nconst remoteJid = $('Extrair Dados WA').first().json.remoteJid;\n\nif (!pix.pixCopiaECola) {\n  return [{ json: {\n    output: 'Ops! Não consegui gerar o Pix agora.\\n\\nTente novamente em instantes.',\n    pixCode: null, remoteJid\n  } }];\n}\n\nconst brl = (v) => {\n  const p = parseFloat(v).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n};\n\nconst valorStr = pix.pixValue || pix.valor || '';\nconst output = 'Depósito de ' + brl(valorStr) + ' gerado! 💸\\n\\n'\n  + 'Já te mando o código Pix para copiar e colar no seu banco.';\n\nreturn [{ json: { output, pixCode: '```' + pix.pixCopiaECola + '```', remoteJid } }];\n"
+          "jsCode": "\nconst pix = $input.first().json;\nconst remoteJid = $('Extrair Dados WA').first().json.remoteJid;\n\nif (!pix.pixCopiaECola) {\n  return [{ json: {\n    output: 'Ops! Não consegui gerar o Pix agora.\\n\\nTente novamente em instantes.',\n    pixUrl: null, remoteJid\n  } }];\n}\n\nconst brl = (v) => {\n  const p = parseFloat(v).toFixed(2).split('.');\n  p[0] = p[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + p[0] + ',' + p[1];\n};\n\nconst valorStr = $('Lógica Depósito WA').first().json.pixValue || pix.pixValue || pix.valor || '0';\nconst output = 'Depósito de ' + brl(valorStr) + ' gerado! 💸\\n\\nAcesse o link abaixo para copiar o código Pix:';\n\nreturn [{ json: {\n  output,\n  pixCode: pix.pixCopiaECola,\n  valor: valorStr,\n  remoteJid\n} }];\n"
         }
       },
       {
         "id": "node-wa-enviar-codigo-pix",
-        "name": "Enviar Código Pix WA",
+        "name": "Enviar Link Pix WA",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
@@ -2140,7 +2191,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ { number: $json.remoteJid, text: $json.pixCode } }}",
+          "jsonBody": "={{ { \"number\": $('Montar Msg Pix').first().json.remoteJid, \"text\": $('Montar Msg Pix').first().json.pixUrl } }}",
           "options": {}
         }
       },
@@ -2169,6 +2220,35 @@
           "specifyBody": "json",
           "jsonBody": "={{ { number: $json.remoteJid, text: $json.output } }}",
           "options": {}
+        }
+      },
+      {
+        "id": "node-wa-registrar-token",
+        "name": "Registrar Token Pix",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1200,
+          700
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://purg.com.br/pix?action=reg&code=' + encodeURIComponent($json.pixCode) + '&valor=' + encodeURIComponent($json.valor) }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "node-wa-montar-msg-pix",
+        "name": "Montar Msg Pix",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1400,
+          700
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "\nconst regResp = $input.first().json;\nconst fmt = $('Formatar Pix WA').first().json;\nreturn [{ json: {\n  output: fmt.output,\n  pixUrl: regResp.url,\n  remoteJid: fmt.remoteJid\n} }];\n"
         }
       }
     ],
@@ -2592,18 +2672,7 @@
         "main": [
           [
             {
-              "node": "Enviar Aviso Pix WA",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Enviar Código Pix WA": {
-        "main": [
-          [
-            {
-              "node": "Respond to Webhook",
+              "node": "Registrar Token Pix",
               "type": "main",
               "index": 0
             }
@@ -2614,7 +2683,40 @@
         "main": [
           [
             {
-              "node": "Enviar Código Pix WA",
+              "node": "Enviar Link Pix WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar Link Pix WA": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Registrar Token Pix": {
+        "main": [
+          [
+            {
+              "node": "Montar Msg Pix",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Msg Pix": {
+        "main": [
+          [
+            {
+              "node": "Enviar Aviso Pix WA",
               "type": "main",
               "index": 0
             }
