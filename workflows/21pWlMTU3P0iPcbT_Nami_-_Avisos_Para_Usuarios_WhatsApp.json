@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-16T22:24:03.083Z",
+  "updatedAt": "2026-05-18T17:41:57.337Z",
   "createdAt": "2026-05-11T22:41:53.934Z",
   "id": "21pWlMTU3P0iPcbT",
   "name": "Nami - Avisos Para Usuarios WhatsApp",
@@ -67,15 +67,15 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const n = $input.first().json;\nconst payload = n.payload || {};\nconst tipo = n.tipo;\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction num(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction num8(v) {\n  const parts = parseFloat(v).toFixed(8).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nlet mensagem = '';\nif (tipo === 'deposito_confirmado') {\n  mensagem = '🥳 Boa notícia, ' + apelido + '!\\n\\nRecebemos seu depósito de ' + brl(payload.valor) + '.\\n\\nJá estamos trabalhando para atingir nossas metas! 🎯\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_confirmado') {\n  mensagem = '💰 Dinheiro a caminho, ' + apelido + '!\\n\\nSeu pedido de saque de ' + brl(payload.valor) + ' foi processado.\\n\\nEm até 1 dia útil o valor estará disponível na sua conta cadastrada.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_falhou') {\n  mensagem = '⚠️ Ops, ' + apelido + '! Tivemos um problema.\\n\\nNão conseguimos concluir seu saque de ' + brl(payload.valor) + '.\\n\\nMotivo: ' + (payload.motivo || 'erro interno') + '\\n\\nMas não se preocupe! Você pode ajustar isso e tentar novamente na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_atingida') {\n  mensagem = '🎯 Meta batida, ' + apelido + '!\\n\\nEstamos mandando muito bem no nosso objetivo de ' + payload.objetivo_nome + '!!\\n\\n💰 Resumo do Objetivo\\n\\nObjetivo: ' + brl(payload.objetivo_valor_total) + '\\nTotal Investido: ' + brl(payload.investido) + '\\nPercentual Atingido: ' + payload.percentual_atingido + '%\\nMetas Concluídas: ' + payload.metas_concluidas + '/' + payload.metas_totais + '\\n\\nVamos juntos continuar evoluindo seu patrimônio para alcançarmos novos objetivos.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'meta_mensal_incompleta') {\n  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n  const metas = payload.metas || [];\n  const nomeMes = metas.length > 0 ? meses[new Date(metas[0].data_limite).getMonth()] : '';\n  const titulo = metas.length === 1 ? '*Nossa meta mensal:*' : '*Nossas metas mensais:*';\n  const linhas = metas.map(function(m) {\n    const limite = new Date(m.data_limite).toLocaleDateString('pt-BR');\n    return '💰 Esse mês depositamos ' + brl(m.valor_alocado) + ' (' + m.percentual + '% da meta)\\n🎯 A nossa meta esse mês é de ' + brl(m.valor_meta) + '\\n🗓️ Precisamos depositar até ' + limite;\n  });\n  mensagem = '🎯 ' + apelido + ', falta pouco para atingirmos as nossas metas de ' + nomeMes + '!\\n\\n' + titulo + '\\n' + linhas.join('\\n\\n') + '\\n\\nNão deixe nada nos atrapalhar a alcançar o nosso objetivo!\\n\\nQue tal fazer um Pix agora na sua conta?';\n} else if (tipo === 'resumo_semanal') {\n  mensagem = '*📊 Resumo da Semana*\\n\\n' +\n    'Olá, ' + apelido + '! Confira o desempenho da nossa jornada financeira nos últimos 7 dias:\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Patrimônio: ' + brl(payload.saldo_alocado_total) + '\\n' +\n    'Patrimônio x Objetivo (%): ' + payload.objetivo_percentual_alcancado + '%\\n\\n' +\n    '*📈 Performance da Semana*\\n\\n' +\n    'Rendimento: R$ ' + num(payload.rendimento_semana) + '\\n' +\n    'Rendimento (%): ' + payload.rendimento_percentual + '%\\n' +\n    'Depósitos: R$ ' + num(payload.depositos_semana) + '\\n' +\n    'Saques: R$ ' + num(payload.saques_semana) + '\\n\\n' +\n    '*💰 Seu Patrimônio*\\n\\n' +\n    'Total Investido: R$ ' + num(payload.investido) + '\\n' +\n    'Saldo Disponível: R$ ' + num8(payload.saldo) + '\\n' +\n    'Rendimento Total Acumulado: R$ ' + num(payload.rendimento_total) + '\\n\\n' +\n    '*🏆 Rankings e Conquistas*\\n\\n' +\n    'Liga Atual: ' + payload.liga + '\\n' +\n    'Posição no Ranking Global: #' + payload.posicao_ranking + '\\n' +\n    'Pontuação Total: ' + payload.pontos_total + ' pontos\\n\\n' +\n    '*🎯 Rumo ao Objetivo*\\n' +\n    'Meta mensal: ' + brl(payload.proxima_meta_bruta_financeiro) + '\\n' +\n    'Nós já concluímos ' + payload.proxima_meta_percentual + '% dessa meta!\\n\\n' +\n    '*🗓️ Prazo final*\\n' +\n    'Temos até o dia ' + fmtDate(payload.proxima_meta_data) + ' para finalizarmos essa meta.\\n\\n' +\n    'Que tal fazer um novo depósito para atingirmos o nosso objetivo mais rápido?';\n} else if (tipo === 'novo_objetivo') {\n  const parcelas = (payload.metas || []).map(function(v, i) {\n    return 'Parcela ' + (i + 1) + ': ' + brl(v);\n  }).join('\\n');\n  mensagem = '🎉 ' + apelido + ', Meus parabéns!\\n\\n' +\n    'Acabamos de criar um novo objetivo, eu fico muito feliz nessa nova jornada.\\n\\n' +\n    '🎯 Seu Objetivo\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Prazo final: ' + fmtDate(payload.data_limite) + '\\n' +\n    'Aporte inicial: ' + brl(payload.aporte) + '\\n\\n' +\n    '📅 Plano de Metas Mensais\\n\\n' +\n    parcelas + '\\n\\n' +\n    'Não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n}\n} else if (tipo === 'novo_usuario') {\n  mensagem = '🎉 ' + apelido + ', seja bem-vindo(a)!\\n\\n' +\n    'Eu sou a Purg e estou aqui para te acompanhar em cada passo dessa jornada rumo ao seu objetivo. Vamos juntos chegar lá!\\n\\n' +\n    '🎯 Nós sempre trabalharemos com um objetivo\\n\\n' +\n    '📅 E também com um plano de metas mensais\\n\\n' +\n    'Só assim vamos conseguir chegar onde queremos, e não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n\nreturn [{ json: { id: n.id, phone, mensagem } }];"
+        "jsCode": "const n = $input.first().json;\nconst payload = n.payload || {};\nconst tipo = n.tipo;\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction num(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction num8(v) {\n  const parts = parseFloat(v).toFixed(8).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nlet mensagem = '';\nif (tipo === 'deposito_confirmado') {\n  mensagem = '🥳 Boa notícia, ' + apelido + '!\\n\\nRecebemos seu depósito de ' + brl(payload.valor) + '.\\n\\nJá estamos trabalhando para atingir nossas metas! 🎯\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_confirmado') {\n  mensagem = '💰 Dinheiro a caminho, ' + apelido + '!\\n\\nSeu pedido de saque de ' + brl(payload.valor) + ' foi processado.\\n\\nEm até 1 dia útil o valor estará disponível na sua conta cadastrada.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_falhou') {\n  mensagem = '⚠️ Ops, ' + apelido + '! Tivemos um problema.\\n\\nNão conseguimos concluir seu saque de ' + brl(payload.valor) + '.\\n\\nMotivo: ' + (payload.motivo || 'erro interno') + '\\n\\nMas não se preocupe! Você pode ajustar isso e tentar novamente na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_atingida') {\n  mensagem = '🎯 Meta batida, ' + apelido + '!\\n\\nEstamos mandando muito bem no nosso objetivo de ' + payload.objetivo_nome + '!!\\n\\n💰 Resumo do Objetivo\\n\\nObjetivo: ' + brl(payload.objetivo_valor_total) + '\\nTotal Investido: ' + brl(payload.investido) + '\\nPercentual Atingido: ' + payload.percentual_atingido + '%\\nMetas Concluídas: ' + payload.metas_concluidas + '/' + payload.metas_totais + '\\n\\nVamos juntos continuar evoluindo seu patrimônio para alcançarmos novos objetivos.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'meta_mensal_incompleta') {\n  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n  const metas = payload.metas || [];\n  const nomeMes = metas.length > 0 ? meses[new Date(metas[0].data_limite).getMonth()] : '';\n  const titulo = metas.length === 1 ? '_*Nossa meta mensal:*_' : '_*Nossas metas mensais:*_';\n  const linhas = metas.map(function(m) {\n    const limite = new Date(m.data_limite).toLocaleDateString('pt-BR');\n    return '💰 Esse mês depositamos ' + brl(m.valor_alocado) + ' (' + m.percentual + '% da meta)\\n🎯 A nossa meta esse mês é de ' + brl(m.valor_meta) + '\\n🗓️ Precisamos depositar até ' + limite;\n  });\n  mensagem = '🎯 ' + apelido + ', falta pouco para atingirmos as nossas metas de ' + nomeMes + '!\\n\\n' + titulo + '\\n' + linhas.join('\\n\\n') + '\\n\\nNão deixe nada nos atrapalhar a alcançar o nosso objetivo!\\n\\nQue tal fazer um Pix agora na sua conta?';\n} else if (tipo === 'resumo_semanal') {\n  mensagem = '_*📊 Resumo da Semana*_\\n\\n' +\n    'Olá, ' + apelido + '! Confira o desempenho da nossa jornada financeira nos últimos 7 dias:\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Patrimônio: ' + brl(payload.saldo_alocado_total) + '\\n' +\n    'Patrimônio x Objetivo (%): ' + payload.objetivo_percentual_alcancado + '%\\n\\n' +\n    '_*📈 Performance da Semana*_\\n\\n' +\n    'Rendimento: R$ ' + num(payload.rendimento_semana) + '\\n' +\n    'Rendimento (%): ' + payload.rendimento_percentual + '%\\n' +\n    'Depósitos: R$ ' + num(payload.depositos_semana) + '\\n' +\n    'Saques: R$ ' + num(payload.saques_semana) + '\\n\\n' +\n    '_*💰 Seu Patrimônio*_\\n\\n' +\n    'Total Investido: R$ ' + num(payload.investido) + '\\n' +\n    'Saldo Disponível: R$ ' + num8(payload.saldo) + '\\n' +\n    'Rendimento Total Acumulado: R$ ' + num(payload.rendimento_total) + '\\n\\n' +\n    '_*🏆 Rankings e Conquistas*_\\n\\n' +\n    'Liga Atual: ' + payload.liga + '\\n' +\n    'Posição no Ranking Global: #' + payload.posicao_ranking + '\\n' +\n    'Pontuação Total: ' + payload.pontos_total + ' pontos\\n\\n' +\n    '_*🎯 Rumo ao Objetivo*_\\n' +\n    'Meta mensal: ' + brl(payload.proxima_meta_bruta_financeiro) + '\\n' +\n    'Nós já concluímos ' + payload.proxima_meta_percentual + '% dessa meta!\\n\\n' +\n    '_*🗓️ Prazo final*_\\n' +\n    'Temos até o dia ' + fmtDate(payload.proxima_meta_data) + ' para finalizarmos essa meta.\\n\\n' +\n    'Que tal fazer um novo depósito para atingirmos o nosso objetivo mais rápido?';\n} else if (tipo === 'novo_objetivo') {\n  const parcelas = (payload.metas || []).map(function(v, i) {\n    return 'Parcela ' + (i + 1) + ': ' + brl(v);\n  }).join('\\n');\n  mensagem = '🎉 ' + apelido + ', Meus parabéns!\\n\\n' +\n    'Acabamos de criar um novo objetivo, eu fico muito feliz nessa nova jornada.\\n\\n' +\n    '🎯 Seu Objetivo\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Prazo final: ' + fmtDate(payload.data_limite) + '\\n' +\n    'Aporte inicial: ' + brl(payload.aporte) + '\\n\\n' +\n    '📅 Plano de Metas Mensais\\n\\n' +\n    parcelas + '\\n\\n' +\n    'Não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n}\n} else if (tipo === 'novo_usuario') {\n  mensagem = '🎉 ' + apelido + ', seja bem-vindo(a)!\\n\\n' +\n    'Eu sou a Purg e estou aqui para te acompanhar em cada passo dessa jornada rumo ao seu objetivo. Vamos juntos chegar lá!\\n\\n' +\n    '🎯 Nós sempre trabalharemos com um objetivo\\n\\n' +\n    '📅 E também com um plano de metas mensais\\n\\n' +\n    'Só assim vamos conseguir chegar onde queremos, e não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n\n} else if (tipo === 'sem_objetivo') {\n  mensagem = '💡 ' + apelido + ', tudo bem?\\n\\nPercebemos que você ainda não criou nenhum objetivo na Purg.\\n\\nSem um objetivo é difícil saber para onde estamos indo! 🎯\\n\\nQuer criar o seu objetivo agora e por aqui mesmo?';\n}\n\nreturn [{ json: { id: n.id, phone, mensagem } }];"
       },
       "id": "build-msg",
       "name": "Montar Mensagem",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        760,
-        200
+        1200,
+        320
       ]
     },
     {
@@ -101,7 +101,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        980,
+        1420,
         200
       ],
       "onError": "continueErrorOutput"
@@ -134,7 +134,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1200,
+        1640,
         200
       ]
     },
@@ -158,7 +158,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1420,
+        1860,
         100
       ]
     },
@@ -182,7 +182,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1420,
+        1860,
         300
       ]
     },
@@ -303,6 +303,144 @@
           "name": "Purg API Key"
         }
       }
+    },
+    {
+      "id": "check-meta-vencida",
+      "name": "É meta_vencida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        760,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-meta-vencida",
+              "leftValue": "={{ $json.tipo }}",
+              "rightValue": "meta_vencida",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "fetch-metas-vencidas",
+      "name": "Buscar Metas Vencidas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        80
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/' + $json.usuario_id + '/metas-vencidas' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "build-msg-meta-vencida",
+      "name": "Montar Mensagem Meta Vencida",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        80
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const n = $('Split Notificacoes').first().json;\nconst metas = $input.first().json.metas || [];\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nconst linhas = metas.map(function(m) {\n  return '📌 Meta ' + m.meta_numero + '\\n' +\n    'Meta: ' + brl(m.valor_meta) + ' | Depositado: ' + brl(m.valor_alocado) + ' (' + m.percentual + '%)\\n' +\n    'Venceu em: ' + fmtDate(m.data_limite) + ' — há ' + m.dias_atraso + ' dias';\n});\n\nconst mensagem = '⚠️ ' + apelido + ', precisamos conversar.\\n\\n' +\n  'Você tem metas que venceram e ainda não foram concluídas:\\n\\n' +\n  linhas.join('\\n\\n') + '\\n\\n' +\n  'Não deixe isso atrasar o seu objetivo! Quer que eu crie o Pix?';\n\nreturn [{ json: { id: n.id, phone, mensagem } }];"
+      }
+    },
+    {
+      "id": "set-sessao-meta-vencida",
+      "name": "Set Sessão Meta Vencida",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        260
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/webhook/nami-set-sessao-meta-vencida",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { celular: $('Split Notificacoes').first().json.celular, usuario_id: $('Split Notificacoes').first().json.usuario_id, metas: $('Buscar Metas Vencidas').first().json.metas } }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "check-sem-obj",
+      "name": "É sem_objetivo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        460
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('Split Notificacoes').first().json.tipo }}",
+              "rightValue": "sem_objetivo",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "set-sessao-sem-obj",
+      "name": "Set Sessão Sem Objetivo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/webhook/nami-set-sessao-sem-objetivo",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { celular: $('Split Notificacoes').first().json.celular, usuario_id: $('Split Notificacoes').first().json.usuario_id } }}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -332,7 +470,7 @@
       "main": [
         [
           {
-            "node": "Montar Mensagem",
+            "node": "É meta_vencida?",
             "type": "main",
             "index": 0
           }
@@ -344,6 +482,11 @@
         [
           {
             "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "É sem_objetivo?",
             "type": "main",
             "index": 0
           }
@@ -418,6 +561,63 @@
           }
         ]
       ]
+    },
+    "É meta_vencida?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Metas Vencidas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Metas Vencidas": {
+      "main": [
+        [
+          {
+            "node": "Montar Mensagem Meta Vencida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Mensagem Meta Vencida": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Sessão Meta Vencida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É sem_objetivo?": {
+      "main": [
+        [
+          {
+            "node": "Set Sessão Sem Objetivo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "settings": {
@@ -433,8 +633,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "7e576cd4-748e-4baf-9ae5-57d0d7b2e0a2",
-  "activeVersionId": "7e576cd4-748e-4baf-9ae5-57d0d7b2e0a2",
+  "versionId": "7474871c-dd02-4a89-94ec-3948435777a7",
+  "activeVersionId": "7474871c-dd02-4a89-94ec-3948435777a7",
   "triggerCount": 3,
   "shared": [
     {
@@ -446,9 +646,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-16T22:24:03.085Z",
-    "createdAt": "2026-05-16T22:24:03.085Z",
-    "versionId": "7e576cd4-748e-4baf-9ae5-57d0d7b2e0a2",
+    "updatedAt": "2026-05-18T17:41:57.338Z",
+    "createdAt": "2026-05-18T17:41:57.338Z",
+    "versionId": "7474871c-dd02-4a89-94ec-3948435777a7",
     "workflowId": "21pWlMTU3P0iPcbT",
     "nodes": [
       {
@@ -512,15 +712,15 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const n = $input.first().json;\nconst payload = n.payload || {};\nconst tipo = n.tipo;\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction num(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction num8(v) {\n  const parts = parseFloat(v).toFixed(8).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nlet mensagem = '';\nif (tipo === 'deposito_confirmado') {\n  mensagem = '🥳 Boa notícia, ' + apelido + '!\\n\\nRecebemos seu depósito de ' + brl(payload.valor) + '.\\n\\nJá estamos trabalhando para atingir nossas metas! 🎯\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_confirmado') {\n  mensagem = '💰 Dinheiro a caminho, ' + apelido + '!\\n\\nSeu pedido de saque de ' + brl(payload.valor) + ' foi processado.\\n\\nEm até 1 dia útil o valor estará disponível na sua conta cadastrada.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_falhou') {\n  mensagem = '⚠️ Ops, ' + apelido + '! Tivemos um problema.\\n\\nNão conseguimos concluir seu saque de ' + brl(payload.valor) + '.\\n\\nMotivo: ' + (payload.motivo || 'erro interno') + '\\n\\nMas não se preocupe! Você pode ajustar isso e tentar novamente na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_atingida') {\n  mensagem = '🎯 Meta batida, ' + apelido + '!\\n\\nEstamos mandando muito bem no nosso objetivo de ' + payload.objetivo_nome + '!!\\n\\n💰 Resumo do Objetivo\\n\\nObjetivo: ' + brl(payload.objetivo_valor_total) + '\\nTotal Investido: ' + brl(payload.investido) + '\\nPercentual Atingido: ' + payload.percentual_atingido + '%\\nMetas Concluídas: ' + payload.metas_concluidas + '/' + payload.metas_totais + '\\n\\nVamos juntos continuar evoluindo seu patrimônio para alcançarmos novos objetivos.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'meta_mensal_incompleta') {\n  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n  const metas = payload.metas || [];\n  const nomeMes = metas.length > 0 ? meses[new Date(metas[0].data_limite).getMonth()] : '';\n  const titulo = metas.length === 1 ? '*Nossa meta mensal:*' : '*Nossas metas mensais:*';\n  const linhas = metas.map(function(m) {\n    const limite = new Date(m.data_limite).toLocaleDateString('pt-BR');\n    return '💰 Esse mês depositamos ' + brl(m.valor_alocado) + ' (' + m.percentual + '% da meta)\\n🎯 A nossa meta esse mês é de ' + brl(m.valor_meta) + '\\n🗓️ Precisamos depositar até ' + limite;\n  });\n  mensagem = '🎯 ' + apelido + ', falta pouco para atingirmos as nossas metas de ' + nomeMes + '!\\n\\n' + titulo + '\\n' + linhas.join('\\n\\n') + '\\n\\nNão deixe nada nos atrapalhar a alcançar o nosso objetivo!\\n\\nQue tal fazer um Pix agora na sua conta?';\n} else if (tipo === 'resumo_semanal') {\n  mensagem = '*📊 Resumo da Semana*\\n\\n' +\n    'Olá, ' + apelido + '! Confira o desempenho da nossa jornada financeira nos últimos 7 dias:\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Patrimônio: ' + brl(payload.saldo_alocado_total) + '\\n' +\n    'Patrimônio x Objetivo (%): ' + payload.objetivo_percentual_alcancado + '%\\n\\n' +\n    '*📈 Performance da Semana*\\n\\n' +\n    'Rendimento: R$ ' + num(payload.rendimento_semana) + '\\n' +\n    'Rendimento (%): ' + payload.rendimento_percentual + '%\\n' +\n    'Depósitos: R$ ' + num(payload.depositos_semana) + '\\n' +\n    'Saques: R$ ' + num(payload.saques_semana) + '\\n\\n' +\n    '*💰 Seu Patrimônio*\\n\\n' +\n    'Total Investido: R$ ' + num(payload.investido) + '\\n' +\n    'Saldo Disponível: R$ ' + num8(payload.saldo) + '\\n' +\n    'Rendimento Total Acumulado: R$ ' + num(payload.rendimento_total) + '\\n\\n' +\n    '*🏆 Rankings e Conquistas*\\n\\n' +\n    'Liga Atual: ' + payload.liga + '\\n' +\n    'Posição no Ranking Global: #' + payload.posicao_ranking + '\\n' +\n    'Pontuação Total: ' + payload.pontos_total + ' pontos\\n\\n' +\n    '*🎯 Rumo ao Objetivo*\\n' +\n    'Meta mensal: ' + brl(payload.proxima_meta_bruta_financeiro) + '\\n' +\n    'Nós já concluímos ' + payload.proxima_meta_percentual + '% dessa meta!\\n\\n' +\n    '*🗓️ Prazo final*\\n' +\n    'Temos até o dia ' + fmtDate(payload.proxima_meta_data) + ' para finalizarmos essa meta.\\n\\n' +\n    'Que tal fazer um novo depósito para atingirmos o nosso objetivo mais rápido?';\n} else if (tipo === 'novo_objetivo') {\n  const parcelas = (payload.metas || []).map(function(v, i) {\n    return 'Parcela ' + (i + 1) + ': ' + brl(v);\n  }).join('\\n');\n  mensagem = '🎉 ' + apelido + ', Meus parabéns!\\n\\n' +\n    'Acabamos de criar um novo objetivo, eu fico muito feliz nessa nova jornada.\\n\\n' +\n    '🎯 Seu Objetivo\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Prazo final: ' + fmtDate(payload.data_limite) + '\\n' +\n    'Aporte inicial: ' + brl(payload.aporte) + '\\n\\n' +\n    '📅 Plano de Metas Mensais\\n\\n' +\n    parcelas + '\\n\\n' +\n    'Não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n}\n} else if (tipo === 'novo_usuario') {\n  mensagem = '🎉 ' + apelido + ', seja bem-vindo(a)!\\n\\n' +\n    'Eu sou a Purg e estou aqui para te acompanhar em cada passo dessa jornada rumo ao seu objetivo. Vamos juntos chegar lá!\\n\\n' +\n    '🎯 Nós sempre trabalharemos com um objetivo\\n\\n' +\n    '📅 E também com um plano de metas mensais\\n\\n' +\n    'Só assim vamos conseguir chegar onde queremos, e não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n\nreturn [{ json: { id: n.id, phone, mensagem } }];"
+          "jsCode": "const n = $input.first().json;\nconst payload = n.payload || {};\nconst tipo = n.tipo;\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction num(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction num8(v) {\n  const parts = parseFloat(v).toFixed(8).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nlet mensagem = '';\nif (tipo === 'deposito_confirmado') {\n  mensagem = '🥳 Boa notícia, ' + apelido + '!\\n\\nRecebemos seu depósito de ' + brl(payload.valor) + '.\\n\\nJá estamos trabalhando para atingir nossas metas! 🎯\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_confirmado') {\n  mensagem = '💰 Dinheiro a caminho, ' + apelido + '!\\n\\nSeu pedido de saque de ' + brl(payload.valor) + ' foi processado.\\n\\nEm até 1 dia útil o valor estará disponível na sua conta cadastrada.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'saque_falhou') {\n  mensagem = '⚠️ Ops, ' + apelido + '! Tivemos um problema.\\n\\nNão conseguimos concluir seu saque de ' + brl(payload.valor) + '.\\n\\nMotivo: ' + (payload.motivo || 'erro interno') + '\\n\\nMas não se preocupe! Você pode ajustar isso e tentar novamente na sua conta:\\n\\nwww.purg.com.br';\n} else if (tipo === 'meta_atingida') {\n  mensagem = '🎯 Meta batida, ' + apelido + '!\\n\\nEstamos mandando muito bem no nosso objetivo de ' + payload.objetivo_nome + '!!\\n\\n💰 Resumo do Objetivo\\n\\nObjetivo: ' + brl(payload.objetivo_valor_total) + '\\nTotal Investido: ' + brl(payload.investido) + '\\nPercentual Atingido: ' + payload.percentual_atingido + '%\\nMetas Concluídas: ' + payload.metas_concluidas + '/' + payload.metas_totais + '\\n\\nVamos juntos continuar evoluindo seu patrimônio para alcançarmos novos objetivos.\\n\\nPosso te ajudar com mais algo?';\n} else if (tipo === 'meta_mensal_incompleta') {\n  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n  const metas = payload.metas || [];\n  const nomeMes = metas.length > 0 ? meses[new Date(metas[0].data_limite).getMonth()] : '';\n  const titulo = metas.length === 1 ? '_*Nossa meta mensal:*_' : '_*Nossas metas mensais:*_';\n  const linhas = metas.map(function(m) {\n    const limite = new Date(m.data_limite).toLocaleDateString('pt-BR');\n    return '💰 Esse mês depositamos ' + brl(m.valor_alocado) + ' (' + m.percentual + '% da meta)\\n🎯 A nossa meta esse mês é de ' + brl(m.valor_meta) + '\\n🗓️ Precisamos depositar até ' + limite;\n  });\n  mensagem = '🎯 ' + apelido + ', falta pouco para atingirmos as nossas metas de ' + nomeMes + '!\\n\\n' + titulo + '\\n' + linhas.join('\\n\\n') + '\\n\\nNão deixe nada nos atrapalhar a alcançar o nosso objetivo!\\n\\nQue tal fazer um Pix agora na sua conta?';\n} else if (tipo === 'resumo_semanal') {\n  mensagem = '_*📊 Resumo da Semana*_\\n\\n' +\n    'Olá, ' + apelido + '! Confira o desempenho da nossa jornada financeira nos últimos 7 dias:\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Patrimônio: ' + brl(payload.saldo_alocado_total) + '\\n' +\n    'Patrimônio x Objetivo (%): ' + payload.objetivo_percentual_alcancado + '%\\n\\n' +\n    '_*📈 Performance da Semana*_\\n\\n' +\n    'Rendimento: R$ ' + num(payload.rendimento_semana) + '\\n' +\n    'Rendimento (%): ' + payload.rendimento_percentual + '%\\n' +\n    'Depósitos: R$ ' + num(payload.depositos_semana) + '\\n' +\n    'Saques: R$ ' + num(payload.saques_semana) + '\\n\\n' +\n    '_*💰 Seu Patrimônio*_\\n\\n' +\n    'Total Investido: R$ ' + num(payload.investido) + '\\n' +\n    'Saldo Disponível: R$ ' + num8(payload.saldo) + '\\n' +\n    'Rendimento Total Acumulado: R$ ' + num(payload.rendimento_total) + '\\n\\n' +\n    '_*🏆 Rankings e Conquistas*_\\n\\n' +\n    'Liga Atual: ' + payload.liga + '\\n' +\n    'Posição no Ranking Global: #' + payload.posicao_ranking + '\\n' +\n    'Pontuação Total: ' + payload.pontos_total + ' pontos\\n\\n' +\n    '_*🎯 Rumo ao Objetivo*_\\n' +\n    'Meta mensal: ' + brl(payload.proxima_meta_bruta_financeiro) + '\\n' +\n    'Nós já concluímos ' + payload.proxima_meta_percentual + '% dessa meta!\\n\\n' +\n    '_*🗓️ Prazo final*_\\n' +\n    'Temos até o dia ' + fmtDate(payload.proxima_meta_data) + ' para finalizarmos essa meta.\\n\\n' +\n    'Que tal fazer um novo depósito para atingirmos o nosso objetivo mais rápido?';\n} else if (tipo === 'novo_objetivo') {\n  const parcelas = (payload.metas || []).map(function(v, i) {\n    return 'Parcela ' + (i + 1) + ': ' + brl(v);\n  }).join('\\n');\n  mensagem = '🎉 ' + apelido + ', Meus parabéns!\\n\\n' +\n    'Acabamos de criar um novo objetivo, eu fico muito feliz nessa nova jornada.\\n\\n' +\n    '🎯 Seu Objetivo\\n\\n' +\n    'Objetivo: ' + brl(payload.objetivo_valor_total) + '\\n' +\n    'Prazo final: ' + fmtDate(payload.data_limite) + '\\n' +\n    'Aporte inicial: ' + brl(payload.aporte) + '\\n\\n' +\n    '📅 Plano de Metas Mensais\\n\\n' +\n    parcelas + '\\n\\n' +\n    'Não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n}\n} else if (tipo === 'novo_usuario') {\n  mensagem = '🎉 ' + apelido + ', seja bem-vindo(a)!\\n\\n' +\n    'Eu sou a Purg e estou aqui para te acompanhar em cada passo dessa jornada rumo ao seu objetivo. Vamos juntos chegar lá!\\n\\n' +\n    '🎯 Nós sempre trabalharemos com um objetivo\\n\\n' +\n    '📅 E também com um plano de metas mensais\\n\\n' +\n    'Só assim vamos conseguir chegar onde queremos, e não se preocupe que não vou te deixar largado, estarei sempre junto acompanhando e te lembrando.\\n\\nPosso te ajudar com mais algo?';\n\n} else if (tipo === 'sem_objetivo') {\n  mensagem = '💡 ' + apelido + ', tudo bem?\\n\\nPercebemos que você ainda não criou nenhum objetivo na Purg.\\n\\nSem um objetivo é difícil saber para onde estamos indo! 🎯\\n\\nQuer criar o seu objetivo agora e por aqui mesmo?';\n}\n\nreturn [{ json: { id: n.id, phone, mensagem } }];"
         },
         "id": "build-msg",
         "name": "Montar Mensagem",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          760,
-          200
+          1200,
+          320
         ]
       },
       {
@@ -546,7 +746,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          980,
+          1420,
           200
         ],
         "onError": "continueErrorOutput"
@@ -579,7 +779,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          1200,
+          1640,
           200
         ]
       },
@@ -603,7 +803,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          1420,
+          1860,
           100
         ]
       },
@@ -627,7 +827,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          1420,
+          1860,
           300
         ]
       },
@@ -748,6 +948,144 @@
             "name": "Purg API Key"
           }
         }
+      },
+      {
+        "id": "check-meta-vencida",
+        "name": "É meta_vencida?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          760,
+          200
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-meta-vencida",
+                "leftValue": "={{ $json.tipo }}",
+                "rightValue": "meta_vencida",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "fetch-metas-vencidas",
+        "name": "Buscar Metas Vencidas",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          980,
+          80
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/usuarios/' + $json.usuario_id + '/metas-vencidas' }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "build-msg-meta-vencida",
+        "name": "Montar Mensagem Meta Vencida",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          80
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const n = $('Split Notificacoes').first().json;\nconst metas = $input.first().json.metas || [];\nconst phone = '55' + String(n.celular).replace(/\\D/g, '') + '@s.whatsapp.net';\nconst apelido = n.apelido || 'você';\n\nfunction brl(v) {\n  const parts = parseFloat(v).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\n\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return d; }\n}\n\nconst linhas = metas.map(function(m) {\n  return '📌 Meta ' + m.meta_numero + '\\n' +\n    'Meta: ' + brl(m.valor_meta) + ' | Depositado: ' + brl(m.valor_alocado) + ' (' + m.percentual + '%)\\n' +\n    'Venceu em: ' + fmtDate(m.data_limite) + ' — há ' + m.dias_atraso + ' dias';\n});\n\nconst mensagem = '⚠️ ' + apelido + ', precisamos conversar.\\n\\n' +\n  'Você tem metas que venceram e ainda não foram concluídas:\\n\\n' +\n  linhas.join('\\n\\n') + '\\n\\n' +\n  'Não deixe isso atrasar o seu objetivo! Quer que eu crie o Pix?';\n\nreturn [{ json: { id: n.id, phone, mensagem } }];"
+        }
+      },
+      {
+        "id": "set-sessao-meta-vencida",
+        "name": "Set Sessão Meta Vencida",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1200,
+          260
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/webhook/nami-set-sessao-meta-vencida",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { celular: $('Split Notificacoes').first().json.celular, usuario_id: $('Split Notificacoes').first().json.usuario_id, metas: $('Buscar Metas Vencidas').first().json.metas } }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "check-sem-obj",
+        "name": "É sem_objetivo?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1200,
+          460
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $('Split Notificacoes').first().json.tipo }}",
+                "rightValue": "sem_objetivo",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "set-sessao-sem-obj",
+        "name": "Set Sessão Sem Objetivo",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1420,
+          460
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/webhook/nami-set-sessao-sem-objetivo",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { celular: $('Split Notificacoes').first().json.celular, usuario_id: $('Split Notificacoes').first().json.usuario_id } }}",
+          "options": {}
+        }
       }
     ],
     "connections": {
@@ -777,7 +1115,7 @@
         "main": [
           [
             {
-              "node": "Montar Mensagem",
+              "node": "É meta_vencida?",
               "type": "main",
               "index": 0
             }
@@ -789,6 +1127,11 @@
           [
             {
               "node": "Enviar WhatsApp",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "É sem_objetivo?",
               "type": "main",
               "index": 0
             }
@@ -862,6 +1205,63 @@
               "index": 0
             }
           ]
+        ]
+      },
+      "É meta_vencida?": {
+        "main": [
+          [
+            {
+              "node": "Buscar Metas Vencidas",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Montar Mensagem",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Metas Vencidas": {
+        "main": [
+          [
+            {
+              "node": "Montar Mensagem Meta Vencida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Mensagem Meta Vencida": {
+        "main": [
+          [
+            {
+              "node": "Enviar WhatsApp",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Set Sessão Meta Vencida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É sem_objetivo?": {
+        "main": [
+          [
+            {
+              "node": "Set Sessão Sem Objetivo",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
         ]
       }
     },
