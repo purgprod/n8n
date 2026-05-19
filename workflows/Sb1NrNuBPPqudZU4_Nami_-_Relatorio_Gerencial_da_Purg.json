@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-05-18T16:51:23.348Z",
+  "updatedAt": "2026-05-18T19:33:09.384Z",
   "createdAt": "2026-05-11T14:27:56.702Z",
   "id": "Sb1NrNuBPPqudZU4",
   "name": "Nami - Relatorio Gerencial da Purg",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -203,7 +203,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const d1  = $('Buscar Hoje').first().json;\nconst d7  = $('Buscar Semana').first().json;\nconst d30 = $('Buscar 30 dias').first().json;\nconst d90 = $input.first().json;\n\nfunction fmt(s) {\n  const [y, m, d] = s.split('-');\n  return d + '/' + m + '/' + y;\n}\nfunction fmtShort(s) {\n  const [y, m, d] = s.split('-');\n  return d + '/' + m;\n}\nfunction brl(v) {\n  const num = parseFloat(v);\n  const parts = Math.abs(num).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction pct(a, b) {\n  if (!b) return '0,00';\n  return (a / b * 100).toFixed(2).replace('.', ',');\n}\nfunction deltaLabel(v) {\n  return parseFloat(v) >= 0 ? 'um delta positivo de' : 'um delta negativo de';\n}\nfunction finHoje(f) {\n  return 'Hoje foram depositados ' + brl(f.depositos) + ' com ' + brl(f.saques) + ' de saques totalizando ' + deltaLabel(f.delta) + ' ' + brl(f.delta) + '.';\n}\nfunction finPeriodo(f) {\n  return 'Nesse período foram depositados um total de ' + brl(f.depositos) + ' com ' + brl(f.saques) + ' de saques totalizando ' + deltaLabel(f.delta) + ' ' + brl(f.delta) + '.';\n}\n\nconst meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];\nfunction fmtMes(s) {\n  const [y, m] = s.split('-');\n  return meses[parseInt(m, 10) - 1] + '/' + y;\n}\n\nconst u1 = d1.usuarios;\nconst taxaConversao = Math.round(u1.investindo / u1.total * 100);\nconst usuariosHoje = u1.novos > 0\n  ? 'Hoje tivemos ' + u1.novos + ' novos cadastros, totalizando ' + u1.total + ' usuários na plataforma. Destes, ' + u1.investindo + ' são investidores, representando uma taxa de conversão de ' + taxaConversao + '%.'\n  : 'Não houve novos cadastros hoje. A base permanece com ' + u1.total + ' usuários, sendo que ' + u1.investindo + ' estão investindo, representando uma taxa de conversão de ' + taxaConversao + '%.';\n\nfunction usuariosPeriodo(u) {\n  const base = u.total - u.novos;\n  return 'Foram criados ' + u.novos + ' novos usuários nesse período, um aumento de ' + pct(u.novos, base) + '%.';\n}\n\nconst pendentes = d1.financeiro.saques_pendentes || 0;\nconst saquesPendentesLinha = pendentes > 0\n  ? 'Saques pendentes: ' + pendentes\n  : 'Não temos nenhum saque pendente.';\n\nconst projecao = (d1.projecao_6_meses || []).map(function(p) {\n  return fmtMes(p.mes) + ': ' + brl(p.total_previsto);\n}).join('\\n');\n\nconst estrutura = [\n  '_*Resumo Operacional - ' + fmt(d1.data_referencia) + '*_',\n  '',\n  '_*Diário*_',\n  '',\n  usuariosHoje,\n  '',\n  'O valor investido apenas pelos nossos usuários totaliza ' + brl(d1.financeiro.volume_investido) + '.',\n  '',\n  finHoje(d1.financeiro),\n  '',\n  saquesPendentesLinha,\n  '',\n  '_*Últimos 7 dias*_ (' + fmtShort(d7.data_inicio) + ' a ' + fmtShort(d7.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d7.usuarios),\n  '',\n  finPeriodo(d7.financeiro),\n  '',\n  '_*Últimos 30 dias*_ (' + fmtShort(d30.data_inicio) + ' a ' + fmtShort(d30.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d30.usuarios),\n  '',\n  finPeriodo(d30.financeiro),\n  '',\n  '_*Últimos 90 dias*_ (' + fmtShort(d90.data_inicio) + ' a ' + fmtShort(d90.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d90.usuarios),\n  '',\n  finPeriodo(d90.financeiro),\n  '',\n  '_*Projeção das Metas (6 meses)*_',\n  '',\n  projecao || 'Nenhuma meta ativa configurada.',\n].join('\\n');\n\nconst chatInput = [\n  'Voce e um assistente executivo da Purg.',\n  'Com base nos dados abaixo, escreva EXATAMENTE 2 paragrafos curtos e suscintos de analise comparativa.',\n  'Cada paragrafo deve ter no maximo 2 frases. Cubra angulos diferentes: um sobre usuarios, outro sobre financeiro.',\n  'Regras: texto simples, sem asteriscos, sem markdown, sem introducao, sem assinatura.',\n  '',\n  estrutura,\n].join('\\n');\n\nreturn [{ json: { estrutura, chatInput } }];"
+        "jsCode": "const d1  = $('Buscar Hoje').first().json;\nconst d7  = $('Buscar Semana').first().json;\nconst d30 = $('Buscar 30 dias').first().json;\nconst d90 = $input.first().json;\n\nfunction fmt(s) {\n  const [y, m, d] = s.split('-');\n  return d + '/' + m + '/' + y;\n}\nfunction fmtShort(s) {\n  const [y, m, d] = s.split('-');\n  return d + '/' + m;\n}\nfunction brl(v) {\n  const num = parseFloat(v);\n  const parts = Math.abs(num).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction pct(a, b) {\n  if (!b) return '0,00';\n  return (a / b * 100).toFixed(2).replace('.', ',');\n}\nfunction deltaLabel(v) {\n  return parseFloat(v) >= 0 ? 'um delta positivo de' : 'um delta negativo de';\n}\nfunction finHoje(f) {\n  return 'Hoje foram depositados ' + brl(f.depositos) + ' com ' + brl(f.saques) + ' de saques totalizando ' + deltaLabel(f.delta) + ' ' + brl(f.delta) + '.';\n}\nfunction finPeriodo(f) {\n  return 'Nesse período foram depositados um total de ' + brl(f.depositos) + ' com ' + brl(f.saques) + ' de saques totalizando ' + deltaLabel(f.delta) + ' ' + brl(f.delta) + '.';\n}\n\nconst meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];\nfunction fmtMes(s) {\n  const [y, m] = s.split('-');\n  return meses[parseInt(m, 10) - 1] + '/' + y;\n}\n\nconst u1 = d1.usuarios;\nconst taxaConversao = Math.round(u1.investindo / u1.total * 100);\nconst usuariosHoje = u1.novos > 0\n  ? 'Hoje tivemos ' + u1.novos + ' novos cadastros, totalizando ' + u1.total + ' usuários na plataforma. Destes, ' + u1.investindo + ' são investidores, representando uma taxa de conversão de ' + taxaConversao + '%.'\n  : 'Não houve novos cadastros hoje. A base permanece com ' + u1.total + ' usuários, sendo que ' + u1.investindo + ' estão investindo, representando uma taxa de conversão de ' + taxaConversao + '%.';\n\nfunction usuariosPeriodo(u) {\n  const base = u.total - u.novos;\n  return 'Foram criados ' + u.novos + ' novos usuários nesse período, um aumento de ' + pct(u.novos, base) + '%.';\n}\n\nconst pendentes = d1.financeiro.saques_pendentes || 0;\nconst saquesPendentesLinha = pendentes > 0\n  ? 'Saques pendentes: ' + pendentes\n  : 'Não temos nenhum saque pendente.';\n\nconst projecao = (d1.projecao_6_meses || []).map(function(p) {\n  return fmtMes(p.mes) + ': ' + brl(p.total_previsto);\n}).join('\\n');\n\nconst estrutura = [\n  '*_Resumo Operacional - ' + fmt(d1.data_referencia) + '_*',\n  '',\n  '*_Diário_*',\n  '',\n  usuariosHoje,\n  '',\n  'O valor investido apenas pelos nossos usuários totaliza ' + brl(d1.financeiro.volume_investido) + '.',\n  '',\n  finHoje(d1.financeiro),\n  '',\n  saquesPendentesLinha,\n  '',\n  '*_Últimos 7 dias_* (' + fmtShort(d7.data_inicio) + ' a ' + fmtShort(d7.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d7.usuarios),\n  '',\n  finPeriodo(d7.financeiro),\n  '',\n  '*_Últimos 30 dias_* (' + fmtShort(d30.data_inicio) + ' a ' + fmtShort(d30.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d30.usuarios),\n  '',\n  finPeriodo(d30.financeiro),\n  '',\n  '*_Últimos 90 dias_* (' + fmtShort(d90.data_inicio) + ' a ' + fmtShort(d90.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d90.usuarios),\n  '',\n  finPeriodo(d90.financeiro),\n  '',\n  '*_Projeção das Metas (6 meses)_*',\n  '',\n  projecao || 'Nenhuma meta ativa configurada.',\n].join('\\n');\n\nconst chatInput = [\n  'Voce e um assistente executivo da Purg.',\n  'Com base nos dados abaixo, escreva EXATAMENTE 2 paragrafos curtos e suscintos de analise comparativa.',\n  'Cada paragrafo deve ter no maximo 2 frases. Cubra angulos diferentes: um sobre usuarios, outro sobre financeiro.',\n  'Regras: texto simples, sem asteriscos, sem markdown, sem introducao, sem assinatura.',\n  '',\n  estrutura,\n].join('\\n');\n\nreturn [{ json: { estrutura, chatInput } }];"
       },
       "id": "monta-prompt",
       "name": "Monta Prompt",
@@ -225,7 +225,7 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const analise = $input.first().json.text || $input.first().json.output || '';\nconst estrutura = $('Monta Prompt').first().json.estrutura;\nconst texto = estrutura + '\\n\\n_*Análise da Purg*_\\n\\n' + analise + '\\n\\nAtenciosamente,\\nPurg';\nreturn [{ json: { text: texto } }];"
+        "jsCode": "const analise = $input.first().json.text || $input.first().json.output || '';\nconst estrutura = $('Monta Prompt').first().json.estrutura;\nconst texto = estrutura + '\\n\\n*_Análise da Purg_*\\n\\n' + analise + '\\n\\nAtenciosamente,\\nPurg';\nreturn [{ json: { text: texto } }];"
       }
     }
   ],
@@ -351,8 +351,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "8279fd9d-ba13-489c-bc47-b88b73cf9e1c",
-  "activeVersionId": null,
+  "versionId": "d4822fe0-dd4c-4009-b82b-53c9a5c55f38",
+  "activeVersionId": "d4822fe0-dd4c-4009-b82b-53c9a5c55f38",
   "triggerCount": 2,
   "shared": [
     {
@@ -363,6 +363,351 @@
       "projectId": "l16jDOjXVVpFFpWJ"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-05-18T19:33:09.384Z",
+    "createdAt": "2026-05-18T19:33:09.384Z",
+    "versionId": "d4822fe0-dd4c-4009-b82b-53c9a5c55f38",
+    "workflowId": "Sb1NrNuBPPqudZU4",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 20 * * *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-trigger",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=1",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-hoje",
+        "name": "Buscar Hoje",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          100,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=7",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-semana",
+        "name": "Buscar Semana",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          320,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=30",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-report",
+        "name": "Buscar 30 dias",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          540,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/relatorio-gerencial?dias=90",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "http-trimestre",
+        "name": "Buscar Trimestre",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          760,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "auto",
+          "options": {}
+        },
+        "id": "llm-chain",
+        "name": "Gemini Relatorio",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.4,
+        "position": [
+          980,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "modelName": "gemini-2.5-flash-lite",
+          "options": {}
+        },
+        "id": "gemini-model",
+        "name": "Google Gemini",
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          980,
+          480
+        ],
+        "credentials": {
+          "googlePalmApi": {
+            "id": "vW6hLLZSK4uh0bxJ",
+            "name": "Google Gemini - Purg"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { number: \"120363425414158709@g.us\", text: $json.text } }}",
+          "options": {}
+        },
+        "id": "send-whatsapp",
+        "name": "Enviar WhatsApp",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1420,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "purg-relatorio-manual",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "webhook-manual",
+        "name": "Disparo Manual",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          100,
+          500
+        ],
+        "webhookId": "purg-relatorio-manual"
+      },
+      {
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const d1  = $('Buscar Hoje').first().json;\nconst d7  = $('Buscar Semana').first().json;\nconst d30 = $('Buscar 30 dias').first().json;\nconst d90 = $input.first().json;\n\nfunction fmt(s) {\n  const [y, m, d] = s.split('-');\n  return d + '/' + m + '/' + y;\n}\nfunction fmtShort(s) {\n  const [y, m, d] = s.split('-');\n  return d + '/' + m;\n}\nfunction brl(v) {\n  const num = parseFloat(v);\n  const parts = Math.abs(num).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction pct(a, b) {\n  if (!b) return '0,00';\n  return (a / b * 100).toFixed(2).replace('.', ',');\n}\nfunction deltaLabel(v) {\n  return parseFloat(v) >= 0 ? 'um delta positivo de' : 'um delta negativo de';\n}\nfunction finHoje(f) {\n  return 'Hoje foram depositados ' + brl(f.depositos) + ' com ' + brl(f.saques) + ' de saques totalizando ' + deltaLabel(f.delta) + ' ' + brl(f.delta) + '.';\n}\nfunction finPeriodo(f) {\n  return 'Nesse período foram depositados um total de ' + brl(f.depositos) + ' com ' + brl(f.saques) + ' de saques totalizando ' + deltaLabel(f.delta) + ' ' + brl(f.delta) + '.';\n}\n\nconst meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];\nfunction fmtMes(s) {\n  const [y, m] = s.split('-');\n  return meses[parseInt(m, 10) - 1] + '/' + y;\n}\n\nconst u1 = d1.usuarios;\nconst taxaConversao = Math.round(u1.investindo / u1.total * 100);\nconst usuariosHoje = u1.novos > 0\n  ? 'Hoje tivemos ' + u1.novos + ' novos cadastros, totalizando ' + u1.total + ' usuários na plataforma. Destes, ' + u1.investindo + ' são investidores, representando uma taxa de conversão de ' + taxaConversao + '%.'\n  : 'Não houve novos cadastros hoje. A base permanece com ' + u1.total + ' usuários, sendo que ' + u1.investindo + ' estão investindo, representando uma taxa de conversão de ' + taxaConversao + '%.';\n\nfunction usuariosPeriodo(u) {\n  const base = u.total - u.novos;\n  return 'Foram criados ' + u.novos + ' novos usuários nesse período, um aumento de ' + pct(u.novos, base) + '%.';\n}\n\nconst pendentes = d1.financeiro.saques_pendentes || 0;\nconst saquesPendentesLinha = pendentes > 0\n  ? 'Saques pendentes: ' + pendentes\n  : 'Não temos nenhum saque pendente.';\n\nconst projecao = (d1.projecao_6_meses || []).map(function(p) {\n  return fmtMes(p.mes) + ': ' + brl(p.total_previsto);\n}).join('\\n');\n\nconst estrutura = [\n  '*_Resumo Operacional - ' + fmt(d1.data_referencia) + '_*',\n  '',\n  '*_Diário_*',\n  '',\n  usuariosHoje,\n  '',\n  'O valor investido apenas pelos nossos usuários totaliza ' + brl(d1.financeiro.volume_investido) + '.',\n  '',\n  finHoje(d1.financeiro),\n  '',\n  saquesPendentesLinha,\n  '',\n  '*_Últimos 7 dias_* (' + fmtShort(d7.data_inicio) + ' a ' + fmtShort(d7.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d7.usuarios),\n  '',\n  finPeriodo(d7.financeiro),\n  '',\n  '*_Últimos 30 dias_* (' + fmtShort(d30.data_inicio) + ' a ' + fmtShort(d30.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d30.usuarios),\n  '',\n  finPeriodo(d30.financeiro),\n  '',\n  '*_Últimos 90 dias_* (' + fmtShort(d90.data_inicio) + ' a ' + fmtShort(d90.data_referencia) + ')',\n  '',\n  usuariosPeriodo(d90.usuarios),\n  '',\n  finPeriodo(d90.financeiro),\n  '',\n  '*_Projeção das Metas (6 meses)_*',\n  '',\n  projecao || 'Nenhuma meta ativa configurada.',\n].join('\\n');\n\nconst chatInput = [\n  'Voce e um assistente executivo da Purg.',\n  'Com base nos dados abaixo, escreva EXATAMENTE 2 paragrafos curtos e suscintos de analise comparativa.',\n  'Cada paragrafo deve ter no maximo 2 frases. Cubra angulos diferentes: um sobre usuarios, outro sobre financeiro.',\n  'Regras: texto simples, sem asteriscos, sem markdown, sem introducao, sem assinatura.',\n  '',\n  estrutura,\n].join('\\n');\n\nreturn [{ json: { estrutura, chatInput } }];"
+        },
+        "id": "monta-prompt",
+        "name": "Monta Prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          980,
+          300
+        ]
+      },
+      {
+        "id": "monta-final",
+        "name": "Monta Final",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          300
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const analise = $input.first().json.text || $input.first().json.output || '';\nconst estrutura = $('Monta Prompt').first().json.estrutura;\nconst texto = estrutura + '\\n\\n*_Análise da Purg_*\\n\\n' + analise + '\\n\\nAtenciosamente,\\nPurg';\nreturn [{ json: { text: texto } }];"
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Buscar Hoje",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gemini Relatorio": {
+        "main": [
+          [
+            {
+              "node": "Monta Final",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Gemini Relatorio",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Disparo Manual": {
+        "main": [
+          [
+            {
+              "node": "Buscar Hoje",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Monta Prompt": {
+        "main": [
+          [
+            {
+              "node": "Gemini Relatorio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Trimestre": {
+        "main": [
+          [
+            {
+              "node": "Monta Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Hoje": {
+        "main": [
+          [
+            {
+              "node": "Buscar Semana",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Semana": {
+        "main": [
+          [
+            {
+              "node": "Buscar 30 dias",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar 30 dias": {
+        "main": [
+          [
+            {
+              "node": "Buscar Trimestre",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Monta Final": {
+        "main": [
+          [
+            {
+              "node": "Enviar WhatsApp",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
   "tags": []
 }

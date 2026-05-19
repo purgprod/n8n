@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-18T16:50:26.736Z",
+  "updatedAt": "2026-05-18T19:36:54.402Z",
   "createdAt": "2026-05-16T14:24:10.905Z",
   "id": "kfSlsBkus79brwRG",
   "name": "Nami - Limpeza de Sessões WA",
@@ -61,7 +61,7 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const wf = $input.first().json;\nconst ONE_HOUR = 60 _* 60 *_ 1000;\nconst now = new Date();\n\nconst sessions = wf.staticData?.global?.waSessions || {};\nconst before = Object.keys(sessions).length;\n\nfor (const key of Object.keys(sessions)) {\n  const last = new Date(sessions[key].lastMessageAt);\n  if ((now - last) > ONE_HOUR) {\n    delete sessions[key];\n  }\n}\n\nconst after = Object.keys(sessions).length;\nconst removed = before - after;\n\nconst payload = {\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  settings: { executionOrder: 'v1' },\n  staticData: wf.staticData,\n};\n\nreturn [{ json: { payload, removed, before, after } }];"
+        "jsCode": "const wf = $input.first().json;\nconst ONE_HOUR = 60 * 60 * 1000;\nconst now = new Date();\n\nconst sessions = wf.staticData?.global?.waSessions || {};\nconst before = Object.keys(sessions).length;\n\nfor (const key of Object.keys(sessions)) {\n  const last = new Date(sessions[key].lastMessageAt);\n  if ((now - last) > ONE_HOUR) {\n    delete sessions[key];\n  }\n}\n\nconst after = Object.keys(sessions).length;\nconst removed = before - after;\n\nconst payload = {\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  settings: { executionOrder: 'v1' },\n  staticData: wf.staticData,\n};\n\nreturn [{ json: { payload, removed, before, after } }];"
       }
     },
     {
@@ -193,8 +193,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "7262a235-4d8d-48ae-a2f4-63482d8fbdb6",
-  "activeVersionId": "7262a235-4d8d-48ae-a2f4-63482d8fbdb6",
+  "versionId": "b978d6e5-9a14-4bae-9a38-95798742b75b",
+  "activeVersionId": "b978d6e5-9a14-4bae-9a38-95798742b75b",
   "triggerCount": 1,
   "shared": [
     {
@@ -206,9 +206,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-18T16:50:26.737Z",
-    "createdAt": "2026-05-18T16:50:26.737Z",
-    "versionId": "7262a235-4d8d-48ae-a2f4-63482d8fbdb6",
+    "updatedAt": "2026-05-18T19:36:54.403Z",
+    "createdAt": "2026-05-18T19:36:54.403Z",
+    "versionId": "b978d6e5-9a14-4bae-9a38-95798742b75b",
     "workflowId": "kfSlsBkus79brwRG",
     "nodes": [
       {
@@ -266,7 +266,7 @@
         ],
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const wf = $input.first().json;\nconst ONE_HOUR = 60 _* 60 *_ 1000;\nconst now = new Date();\n\nconst sessions = wf.staticData?.global?.waSessions || {};\nconst before = Object.keys(sessions).length;\n\nfor (const key of Object.keys(sessions)) {\n  const last = new Date(sessions[key].lastMessageAt);\n  if ((now - last) > ONE_HOUR) {\n    delete sessions[key];\n  }\n}\n\nconst after = Object.keys(sessions).length;\nconst removed = before - after;\n\nconst payload = {\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  settings: { executionOrder: 'v1' },\n  staticData: wf.staticData,\n};\n\nreturn [{ json: { payload, removed, before, after } }];"
+          "jsCode": "const wf = $input.first().json;\nconst ONE_HOUR = 60 * 60 * 1000;\nconst now = new Date();\n\nconst sessions = wf.staticData?.global?.waSessions || {};\nconst before = Object.keys(sessions).length;\n\nfor (const key of Object.keys(sessions)) {\n  const last = new Date(sessions[key].lastMessageAt);\n  if ((now - last) > ONE_HOUR) {\n    delete sessions[key];\n  }\n}\n\nconst after = Object.keys(sessions).length;\nconst removed = before - after;\n\nconst payload = {\n  name: wf.name,\n  nodes: wf.nodes,\n  connections: wf.connections,\n  settings: { executionOrder: 'v1' },\n  staticData: wf.staticData,\n};\n\nreturn [{ json: { payload, removed, before, after } }];"
         }
       },
       {
