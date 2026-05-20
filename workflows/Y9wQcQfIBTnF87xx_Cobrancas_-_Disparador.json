@@ -1,0 +1,313 @@
+{
+  "updatedAt": "2026-05-19T21:00:22.274Z",
+  "createdAt": "2026-05-19T21:00:22.274Z",
+  "id": "Y9wQcQfIBTnF87xx",
+  "name": "Cobrancas - Disparador",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "sched",
+      "name": "A cada 2 Minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sheet-r",
+      "name": "Buscar Planilha",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1uyCkVi-A03FJgM97wozL82T_4KkHPgY7_5dQbiHnaOA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "filtersUI": {},
+        "options": {}
+      },
+      "credentials": {
+        "googleApi": {
+          "id": "euMLBNL0N55fOduQ",
+          "name": "Google Sheets - Cobrancas"
+        }
+      }
+    },
+    {
+      "id": "select",
+      "name": "Selecionar Contato",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst staticData = $getWorkflowStaticData('global');\n\nconst today = new Date().toISOString().split('T')[0];\nif (!staticData.dailySent) staticData.dailySent = {};\n\n// Limpa dias antigos\nObject.keys(staticData.dailySent).forEach(day => {\n  if (day < today) delete staticData.dailySent[day];\n});\nif (!staticData.dailySent[today]) staticData.dailySent[today] = 0;\n\nconst DAILY_LIMIT = 100; // Aumentar conforme warmup: 100 → 200 → 300 → 500\n\n// Checa limite diário\nif (staticData.dailySent[today] >= DAILY_LIMIT) {\n  return [{ json: { hasContact: false, reason: 'daily_limit_reached', sent: staticData.dailySent[today] } }];\n}\n\n// Health index — últimas 20 mensagens (1 = entregue, 0 = falhou)\nconst health = staticData.healthIndex || [];\nif (health.length >= 20) {\n  const delivered = health.filter(h => h === 1).length;\n  const rate = delivered / health.length;\n  if (rate < 0.3) {\n    return [{ json: { hasContact: false, reason: 'low_health_index', rate: Math.round(rate * 100) + '%' } }];\n  }\n}\n\nconst eligibleStatuses = ['', 'Pendente'];\n\nlet selectedContact = null;\nfor (const item of items) {\n  const row = item.json;\n  const status = (row['Status'] || '').trim();\n  if (!eligibleStatuses.includes(status)) continue;\n\n  // Prioridade: D (Comercial) → E (Telefone) → F (Celular) → G (Aluno Celular)\n  const phoneFields = [\n    row['Titular - Comercial'],\n    row['Titular - Telefone'],\n    row['Titular - Celular'],\n    row['Aluno - Celular']\n  ];\n  const rawPhone = phoneFields.find(p => p && String(p).trim() !== '');\n  if (!rawPhone) continue;\n\n  let phone = String(rawPhone).replace(/\\D/g, '');\n  if (!phone.startsWith('55')) phone = '55' + phone;\n  if (phone.length < 12) continue; // número inválido\n\n  selectedContact = {\n    row_number: row['row_number'],\n    nome: String(row['Titular - Nome'] || '').trim(),\n    instituicao: String(row['INSTITUIÇÃO'] || '').trim(),\n    cidade: String(row['CIDADE'] || '').trim(),\n    phone,\n    rawPhone: String(rawPhone).trim()\n  };\n  break;\n}\n\nif (!selectedContact) {\n  return [{ json: { hasContact: false, reason: 'no_eligible_contacts' } }];\n}\n\nstaticData.dailySent[today]++;\n\nreturn [{ json: { hasContact: true, ...selectedContact } }];"
+      }
+    },
+    {
+      "id": "if-contact",
+      "name": "Tem Contato?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.hasContact }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "montar",
+      "name": "Montar Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const nome = $json.nome.split(' ')[0];\nconst instituicao = $json.instituicao;\nconst message = `Olá, ${nome}! Aqui é da secretaria da ${instituicao}. Tenho um recado sobre a situação da matrícula do aluno. Pode me responder? 😊`;\nreturn [{ json: { ...$json, message } }];"
+      }
+    },
+    {
+      "id": "enviar",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/cobrancas-whatsapp",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "preparar",
+      "name": "Preparar Atualização",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const prev = $('Montar Mensagem').first().json;\nreturn [{ json: { row_number: prev.row_number, Status: 'Enviado' } }];"
+      }
+    },
+    {
+      "id": "sheet-u",
+      "name": "Atualizar Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1540,
+        200
+      ],
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1uyCkVi-A03FJgM97wozL82T_4KkHPgY7_5dQbiHnaOA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleApi": {
+          "id": "euMLBNL0N55fOduQ",
+          "name": "Google Sheets - Cobrancas"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "A cada 2 Minutos": {
+      "main": [
+        [
+          {
+            "node": "Buscar Planilha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Planilha": {
+      "main": [
+        [
+          {
+            "node": "Selecionar Contato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecionar Contato": {
+      "main": [
+        [
+          {
+            "node": "Tem Contato?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Contato?": {
+      "main": [
+        [
+          {
+            "node": "Montar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Montar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Preparar Atualização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Atualização": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "8a74ec6f-7e4e-4fca-942a-b1c52cadc109",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-19T21:00:22.281Z",
+      "createdAt": "2026-05-19T21:00:22.281Z",
+      "role": "workflow:owner",
+      "workflowId": "Y9wQcQfIBTnF87xx",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
