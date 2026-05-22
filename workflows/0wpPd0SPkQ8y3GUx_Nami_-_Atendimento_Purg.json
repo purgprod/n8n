@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-22T10:00:05.024Z",
+  "updatedAt": "2026-05-22T17:00:05.322Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -2127,7 +2127,25 @@
   },
   "staticData": {
     "global": {
-      "waSessions": {}
+      "waSessions": {
+        "wa_11952822635": {
+          "lastMessageAt": "2026-05-22T17:16:42.676Z",
+          "sessionSuffix": "494297_8jbg",
+          "contexto": "Apelido: Laura\nLiga: Cobre I | Posição: #- | Pontos: 0\nTotal investido: R$ 0,00\n\nObjetivos:\nNenhum objetivo criado ainda.\n\nÚltimos depósitos:\nNenhum depósito recente.\n\nÚltimos saques:\nNenhum saque recente.\n\nRendimentos mensais:\nNenhum rendimento registrado ainda.",
+          "apelido": "Laura",
+          "tokens": [],
+          "temObjetivo": false,
+          "depositStep": "obj_confirm",
+          "usuarioId": 12,
+          "objData": {
+            "valor_alvo": 500,
+            "prazo": 7,
+            "prazoDisplay": "31/12/2026",
+            "aporte": 0,
+            "parcela": 71.42857142857143
+          }
+        }
+      }
     }
   },
   "meta": null,
