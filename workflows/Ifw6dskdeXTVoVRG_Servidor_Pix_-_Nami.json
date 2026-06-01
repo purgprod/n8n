@@ -92,10 +92,10 @@
   "staticData": {
     "global": {
       "tokens": {
-        "28ztnpny": {
-          "pixCode": "00020101021226830014BR.GOV.BCB.PIX2561qrcodespix.sejaefi.com.br/v2/d741e5c3e8a04a0c8d6cfcdc4c4095e45204000053039865802BR5905EFISA6008SAOPAULO62070503***6304A444",
-          "valor": "17.05",
-          "ts": 1779562141955
+        "dQGaHD9m": {
+          "pixCode": "00020101021226830014BR.GOV.BCB.PIX2561qrcodespix.sejaefi.com.br/v2/a6df0467e3164c7185e404a1a4114a025204000053039865802BR5905EFISA6008SAOPAULO62070503***6304833C",
+          "valor": "100.00",
+          "ts": 1780315973810
         }
       }
     }
