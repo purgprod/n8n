@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-24T23:05:42.635Z",
+  "updatedAt": "2026-06-11T18:27:19.197Z",
   "createdAt": "2026-05-11T22:41:53.934Z",
   "id": "21pWlMTU3P0iPcbT",
   "name": "Nami - Avisos Para Usuarios WhatsApp",
@@ -141,7 +141,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/enviado' }}",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Split Notificacoes').first().json.id + '/enviado' }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -165,7 +165,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/falhou' }}",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Split Notificacoes').first().json.id + '/falhou' }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -633,8 +633,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "ab99c8d8-0a58-474a-838b-ef95b0f07130",
-  "activeVersionId": "ab99c8d8-0a58-474a-838b-ef95b0f07130",
+  "versionId": "3390f749-d28a-4565-9a0d-c0cd48d1d52d",
+  "activeVersionId": "3390f749-d28a-4565-9a0d-c0cd48d1d52d",
   "triggerCount": 3,
   "shared": [
     {
@@ -646,9 +646,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-24T23:05:42.635Z",
-    "createdAt": "2026-05-24T23:05:42.635Z",
-    "versionId": "ab99c8d8-0a58-474a-838b-ef95b0f07130",
+    "updatedAt": "2026-06-11T18:27:19.201Z",
+    "createdAt": "2026-06-11T18:27:19.201Z",
+    "versionId": "3390f749-d28a-4565-9a0d-c0cd48d1d52d",
     "workflowId": "21pWlMTU3P0iPcbT",
     "nodes": [
       {
@@ -786,7 +786,7 @@
       {
         "parameters": {
           "method": "PUT",
-          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/enviado' }}",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Split Notificacoes').first().json.id + '/enviado' }}",
           "sendHeaders": true,
           "headerParameters": {
             "parameters": [
@@ -810,7 +810,7 @@
       {
         "parameters": {
           "method": "PUT",
-          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Montar Mensagem').item.json.id + '/falhou' }}",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/' + $('Split Notificacoes').first().json.id + '/falhou' }}",
           "sendHeaders": true,
           "headerParameters": {
             "parameters": [
