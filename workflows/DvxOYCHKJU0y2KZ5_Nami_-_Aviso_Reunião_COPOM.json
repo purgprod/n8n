@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-18T18:09:44.029Z",
+  "updatedAt": "2026-06-28T14:37:56.535Z",
   "createdAt": "2026-05-14T19:30:08.039Z",
   "id": "DvxOYCHKJU0y2KZ5",
   "name": "Nami - Aviso Reunião COPOM",
@@ -53,7 +53,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const data = $input.first().json;\nconst reuniao = data.proxima_reuniao_copom;\n\n// Compara apenas a data, ignorando hora — ambas em UTC-3 (Brasília)\nconst hoje = new Date();\nconst hojeStr = hoje.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD\n\nreturn [{ json: { reuniao, hoje: hojeStr, disparar: hojeStr >= reuniao } }];"
+        "jsCode": "const data = $input.first().json;\nconst reuniao = data.proxima_reuniao_copom;\n\n// Compara apenas a data, ignorando hora — ambas em UTC-3 (Brasília)\nconst hoje = new Date();\nconst hojeStr = hoje.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD\n\nreturn [{ json: { reuniao, hoje: hojeStr, disparar: hojeStr === reuniao } }];"
       },
       "id": "verificar-data",
       "name": "Verificar Data",
@@ -207,8 +207,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "c55abe08-8dd3-4411-ae88-3f9a4bf2a2f6",
-  "activeVersionId": "c55abe08-8dd3-4411-ae88-3f9a4bf2a2f6",
+  "versionId": "1a157239-3c44-4aef-8844-f9460cb0b421",
+  "activeVersionId": "1a157239-3c44-4aef-8844-f9460cb0b421",
   "triggerCount": 1,
   "shared": [
     {
@@ -220,9 +220,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-18T18:09:44.030Z",
-    "createdAt": "2026-05-18T18:09:44.030Z",
-    "versionId": "c55abe08-8dd3-4411-ae88-3f9a4bf2a2f6",
+    "updatedAt": "2026-06-28T14:37:56.537Z",
+    "createdAt": "2026-06-28T14:37:56.537Z",
+    "versionId": "1a157239-3c44-4aef-8844-f9460cb0b421",
     "workflowId": "DvxOYCHKJU0y2KZ5",
     "nodes": [
       {
@@ -272,7 +272,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const data = $input.first().json;\nconst reuniao = data.proxima_reuniao_copom;\n\n// Compara apenas a data, ignorando hora — ambas em UTC-3 (Brasília)\nconst hoje = new Date();\nconst hojeStr = hoje.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD\n\nreturn [{ json: { reuniao, hoje: hojeStr, disparar: hojeStr >= reuniao } }];"
+          "jsCode": "const data = $input.first().json;\nconst reuniao = data.proxima_reuniao_copom;\n\n// Compara apenas a data, ignorando hora — ambas em UTC-3 (Brasília)\nconst hoje = new Date();\nconst hojeStr = hoje.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD\n\nreturn [{ json: { reuniao, hoje: hojeStr, disparar: hojeStr === reuniao } }];"
         },
         "id": "verificar-data",
         "name": "Verificar Data",
