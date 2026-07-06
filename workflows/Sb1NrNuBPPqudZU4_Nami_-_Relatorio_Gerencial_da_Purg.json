@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-20T12:43:44.345Z",
+  "updatedAt": "2026-07-05T23:09:59.218Z",
   "createdAt": "2026-05-11T14:27:56.702Z",
   "id": "Sb1NrNuBPPqudZU4",
   "name": "Nami - Relatorio Gerencial da Purg",
@@ -227,6 +227,24 @@
         "language": "javaScript",
         "jsCode": "const analise = $input.first().json.text || $input.first().json.output || '';\nconst estrutura = $('Monta Prompt').first().json.estrutura;\nconst historico = $('Monta Prompt').first().json.historico;\n\nconst texto = [\n  estrutura,\n  '',\n  'Análise da Purg',\n  '',\n  analise,\n  '',\n  'Atenciosamente,',\n  'Purg',\n  '',\n  '_________',\n  '',\n  'Abaixo vou deixar o histórico de 7, 30 e 90 dias',\n  '',\n  '',\n  historico,\n].join('\\n');\n\nreturn [{ json: { text: texto } }];"
       }
+    },
+    {
+      "id": "node-tg-Sb1NrN",
+      "name": "Enviar Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $('Monta Final').first().json.text }) }}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -336,8 +354,18 @@
             "node": "Enviar WhatsApp",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
           }
         ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        []
       ]
     }
   },
@@ -351,8 +379,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "46107591-d5ee-4f22-aaf7-8c54af7e3983",
-  "activeVersionId": "46107591-d5ee-4f22-aaf7-8c54af7e3983",
+  "versionId": "61a3fa2d-df35-4d58-8ab8-3c28d2364bd5",
+  "activeVersionId": "61a3fa2d-df35-4d58-8ab8-3c28d2364bd5",
   "triggerCount": 2,
   "shared": [
     {
@@ -364,9 +392,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-20T12:43:44.345Z",
-    "createdAt": "2026-05-20T12:43:44.345Z",
-    "versionId": "46107591-d5ee-4f22-aaf7-8c54af7e3983",
+    "updatedAt": "2026-07-05T23:09:59.219Z",
+    "createdAt": "2026-07-05T23:09:59.219Z",
+    "versionId": "61a3fa2d-df35-4d58-8ab8-3c28d2364bd5",
     "workflowId": "Sb1NrNuBPPqudZU4",
     "nodes": [
       {
@@ -590,6 +618,24 @@
           "language": "javaScript",
           "jsCode": "const analise = $input.first().json.text || $input.first().json.output || '';\nconst estrutura = $('Monta Prompt').first().json.estrutura;\nconst historico = $('Monta Prompt').first().json.historico;\n\nconst texto = [\n  estrutura,\n  '',\n  'Análise da Purg',\n  '',\n  analise,\n  '',\n  'Atenciosamente,',\n  'Purg',\n  '',\n  '_________',\n  '',\n  'Abaixo vou deixar o histórico de 7, 30 e 90 dias',\n  '',\n  '',\n  historico,\n].join('\\n');\n\nreturn [{ json: { text: texto } }];"
         }
+      },
+      {
+        "id": "node-tg-Sb1NrN",
+        "name": "Enviar Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1660,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $('Monta Final').first().json.text }) }}",
+          "options": {}
+        }
       }
     ],
     "connections": {
@@ -699,8 +745,18 @@
               "node": "Enviar WhatsApp",
               "type": "main",
               "index": 0
+            },
+            {
+              "node": "Enviar Telegram",
+              "type": "main",
+              "index": 0
             }
           ]
+        ]
+      },
+      "Enviar WhatsApp": {
+        "main": [
+          []
         ]
       }
     },

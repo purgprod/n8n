@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-28T14:37:56.535Z",
+  "updatedAt": "2026-07-05T23:09:59.465Z",
   "createdAt": "2026-05-14T19:30:08.039Z",
   "id": "DvxOYCHKJU0y2KZ5",
   "name": "Nami - Aviso Reunião COPOM",
@@ -137,6 +137,24 @@
         100
       ],
       "onError": "continueErrorOutput"
+    },
+    {
+      "id": "node-tg-DvxOYC",
+      "name": "Enviar Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $('Montar Mensagem').first().json.text }) }}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -192,8 +210,18 @@
             "node": "Enviar WhatsApp",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
           }
         ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        []
       ]
     }
   },
@@ -207,8 +235,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "1a157239-3c44-4aef-8844-f9460cb0b421",
-  "activeVersionId": "1a157239-3c44-4aef-8844-f9460cb0b421",
+  "versionId": "38d156ce-3580-4b5e-9ae1-cac6a4032fd7",
+  "activeVersionId": "38d156ce-3580-4b5e-9ae1-cac6a4032fd7",
   "triggerCount": 1,
   "shared": [
     {
@@ -220,9 +248,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-28T14:37:56.537Z",
-    "createdAt": "2026-06-28T14:37:56.537Z",
-    "versionId": "1a157239-3c44-4aef-8844-f9460cb0b421",
+    "updatedAt": "2026-07-05T23:09:59.466Z",
+    "createdAt": "2026-07-05T23:09:59.466Z",
+    "versionId": "38d156ce-3580-4b5e-9ae1-cac6a4032fd7",
     "workflowId": "DvxOYCHKJU0y2KZ5",
     "nodes": [
       {
@@ -356,6 +384,24 @@
           100
         ],
         "onError": "continueErrorOutput"
+      },
+      {
+        "id": "node-tg-DvxOYC",
+        "name": "Enviar Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1440,
+          100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $('Montar Mensagem').first().json.text }) }}",
+          "options": {}
+        }
       }
     ],
     "connections": {
@@ -411,8 +457,18 @@
               "node": "Enviar WhatsApp",
               "type": "main",
               "index": 0
+            },
+            {
+              "node": "Enviar Telegram",
+              "type": "main",
+              "index": 0
             }
           ]
+        ]
+      },
+      "Enviar WhatsApp": {
+        "main": [
+          []
         ]
       }
     },

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T17:00:09.630Z",
+  "updatedAt": "2026-07-05T23:04:15.489Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -539,15 +539,6 @@
             {
               "id": "cond-nova-sessao",
               "leftValue": "={{ $('Extrair Dados WA').first().json.isNewSession }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "cond-is-greeting",
-              "leftValue": "={{ $('Extrair Dados WA').first().json.isGreeting }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -1416,6 +1407,88 @@
         "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: '⏳ Espera um pouquinho, vou buscar seus dados...' } }}",
         "options": {}
       }
+    },
+    {
+      "id": "node-is-conn-update",
+      "name": "É CONNECTION_UPDATE?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        1200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-conn",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "connection.update",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-conn-not-open",
+      "name": "Estado não é open?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        1100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-open",
+              "leftValue": "={{ $json.body.data.state }}",
+              "rightValue": "open",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-tg-conn-alert",
+      "name": "Alerta Telegram Desconexão",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        1000
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: 8617394991, parse_mode: 'HTML', text: '⚠️ <b>WhatsApp Desconectado!</b>\\n\\nInstância: <code>purg-whatsapp</code>\\nStatus: <code>' + $json.body.data.state + '</code>\\n\\n🔗 Reconecte em:\\nhttps://evolution-api-evolution-api.rqkx8g.easypanel.host/manager' }) }}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -1605,7 +1678,7 @@
       "main": [
         [
           {
-            "node": "Filtrar Mensagem WA",
+            "node": "É CONNECTION_UPDATE?",
             "type": "main",
             "index": 0
           }
@@ -2128,6 +2201,36 @@
           }
         ]
       ]
+    },
+    "É CONNECTION_UPDATE?": {
+      "main": [
+        [
+          {
+            "node": "Estado não é open?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filtrar Mensagem WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estado não é open?": {
+      "main": [
+        [
+          {
+            "node": "Alerta Telegram Desconexão",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "settings": {
@@ -2147,8 +2250,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "b3d6e9bd-f9fb-4ba5-ad79-d537d3bc5509",
-  "activeVersionId": "b3d6e9bd-f9fb-4ba5-ad79-d537d3bc5509",
+  "versionId": "816d54f3-42a8-4e6a-a6f9-0fe81c53c8f1",
+  "activeVersionId": "816d54f3-42a8-4e6a-a6f9-0fe81c53c8f1",
   "triggerCount": 4,
   "shared": [
     {
@@ -2160,9 +2263,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-26T19:05:36.386Z",
-    "createdAt": "2026-05-26T19:05:36.386Z",
-    "versionId": "b3d6e9bd-f9fb-4ba5-ad79-d537d3bc5509",
+    "updatedAt": "2026-07-05T23:04:15.546Z",
+    "createdAt": "2026-07-05T23:04:15.546Z",
+    "versionId": "816d54f3-42a8-4e6a-a6f9-0fe81c53c8f1",
     "workflowId": "0wpPd0SPkQ8y3GUx",
     "nodes": [
       {
@@ -2698,15 +2801,6 @@
               {
                 "id": "cond-nova-sessao",
                 "leftValue": "={{ $('Extrair Dados WA').first().json.isNewSession }}",
-                "rightValue": true,
-                "operator": {
-                  "type": "boolean",
-                  "operation": "equals"
-                }
-              },
-              {
-                "id": "cond-is-greeting",
-                "leftValue": "={{ $('Extrair Dados WA').first().json.isGreeting }}",
                 "rightValue": true,
                 "operator": {
                   "type": "boolean",
@@ -3575,6 +3669,88 @@
           "jsonBody": "={{ { number: $('Extrair Dados WA').first().json.remoteJid, text: '⏳ Espera um pouquinho, vou buscar seus dados...' } }}",
           "options": {}
         }
+      },
+      {
+        "id": "node-is-conn-update",
+        "name": "É CONNECTION_UPDATE?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1060,
+          1200
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-conn",
+                "leftValue": "={{ $json.body.event }}",
+                "rightValue": "connection.update",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "node-conn-not-open",
+        "name": "Estado não é open?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1280,
+          1100
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-open",
+                "leftValue": "={{ $json.body.data.state }}",
+                "rightValue": "open",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "node-tg-conn-alert",
+        "name": "Alerta Telegram Desconexão",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1500,
+          1000
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: 8617394991, parse_mode: 'HTML', text: '⚠️ <b>WhatsApp Desconectado!</b>\\n\\nInstância: <code>purg-whatsapp</code>\\nStatus: <code>' + $json.body.data.state + '</code>\\n\\n🔗 Reconecte em:\\nhttps://evolution-api-evolution-api.rqkx8g.easypanel.host/manager' }) }}",
+          "options": {}
+        }
       }
     ],
     "connections": {
@@ -3764,7 +3940,7 @@
         "main": [
           [
             {
-              "node": "Filtrar Mensagem WA",
+              "node": "É CONNECTION_UPDATE?",
               "type": "main",
               "index": 0
             }
@@ -4286,6 +4462,36 @@
               "index": 0
             }
           ]
+        ]
+      },
+      "É CONNECTION_UPDATE?": {
+        "main": [
+          [
+            {
+              "node": "Estado não é open?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Filtrar Mensagem WA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Estado não é open?": {
+        "main": [
+          [
+            {
+              "node": "Alerta Telegram Desconexão",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
         ]
       }
     },

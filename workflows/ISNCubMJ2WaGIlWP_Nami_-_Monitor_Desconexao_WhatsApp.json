@@ -1,0 +1,122 @@
+{
+  "updatedAt": "2026-07-05T18:23:08.954Z",
+  "createdAt": "2026-07-05T18:23:08.954Z",
+  "id": "ISNCubMJ2WaGIlWP",
+  "name": "Nami - Monitor Desconexao WhatsApp",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "node-webhook",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evolution-connection-monitor",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "d33dedbc-dad0-4582-8795-5e5fa5c7a298"
+    },
+    {
+      "id": "node-if",
+      "name": "Desconectou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.body.data.state }}",
+              "rightValue": "open",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-telegram",
+      "name": "Alerta Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"chat_id\": 8617394991, \"parse_mode\": \"HTML\", \"text\": \"Desconectado\"}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Desconectou?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Desconectou?": {
+      "main": [
+        [
+          {
+            "node": "Alerta Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "0e7c66fc-c144-4c3a-8a89-89eb688b0a43",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-07-05T18:23:08.958Z",
+      "createdAt": "2026-07-05T18:23:08.958Z",
+      "role": "workflow:owner",
+      "workflowId": "ISNCubMJ2WaGIlWP",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
