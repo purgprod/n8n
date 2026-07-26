@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T23:09:59.465Z",
+  "updatedAt": "2026-07-26T13:46:23.350Z",
   "createdAt": "2026-05-14T19:30:08.039Z",
   "id": "DvxOYCHKJU0y2KZ5",
   "name": "Nami - Aviso Reunião COPOM",
@@ -111,34 +111,6 @@
       ]
     },
     {
-      "parameters": {
-        "method": "POST",
-        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "apikey",
-              "value": "429683C4C977415CAAFCCE10F7D57E11"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { number: \"120363425414158709@g.us\", text: $json.text } }}",
-        "options": {}
-      },
-      "id": "enviar-whatsapp",
-      "name": "Enviar WhatsApp",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1200,
-        100
-      ],
-      "onError": "continueErrorOutput"
-    },
-    {
       "id": "node-tg-DvxOYC",
       "name": "Enviar Telegram",
       "type": "n8n-nodes-base.httpRequest",
@@ -207,21 +179,11 @@
       "main": [
         [
           {
-            "node": "Enviar WhatsApp",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Enviar Telegram",
             "type": "main",
             "index": 0
           }
         ]
-      ]
-    },
-    "Enviar WhatsApp": {
-      "main": [
-        []
       ]
     }
   },
@@ -235,8 +197,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "38d156ce-3580-4b5e-9ae1-cac6a4032fd7",
-  "activeVersionId": "38d156ce-3580-4b5e-9ae1-cac6a4032fd7",
+  "versionId": "e6fa7ba1-a847-4567-8e55-d976f95ea472",
+  "activeVersionId": "e6fa7ba1-a847-4567-8e55-d976f95ea472",
   "triggerCount": 1,
   "shared": [
     {
@@ -248,9 +210,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-05T23:09:59.466Z",
-    "createdAt": "2026-07-05T23:09:59.466Z",
-    "versionId": "38d156ce-3580-4b5e-9ae1-cac6a4032fd7",
+    "updatedAt": "2026-07-26T13:46:23.354Z",
+    "createdAt": "2026-07-26T13:46:23.354Z",
+    "versionId": "e6fa7ba1-a847-4567-8e55-d976f95ea472",
     "workflowId": "DvxOYCHKJU0y2KZ5",
     "nodes": [
       {
@@ -358,34 +320,6 @@
         ]
       },
       {
-        "parameters": {
-          "method": "POST",
-          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "apikey",
-                "value": "429683C4C977415CAAFCCE10F7D57E11"
-              }
-            ]
-          },
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ { number: \"120363425414158709@g.us\", text: $json.text } }}",
-          "options": {}
-        },
-        "id": "enviar-whatsapp",
-        "name": "Enviar WhatsApp",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          1200,
-          100
-        ],
-        "onError": "continueErrorOutput"
-      },
-      {
         "id": "node-tg-DvxOYC",
         "name": "Enviar Telegram",
         "type": "n8n-nodes-base.httpRequest",
@@ -454,21 +388,11 @@
         "main": [
           [
             {
-              "node": "Enviar WhatsApp",
-              "type": "main",
-              "index": 0
-            },
-            {
               "node": "Enviar Telegram",
               "type": "main",
               "index": 0
             }
           ]
-        ]
-      },
-      "Enviar WhatsApp": {
-        "main": [
-          []
         ]
       }
     },

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-26T10:00:46.089Z",
+  "updatedAt": "2026-07-26T17:00:59.703Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -99,7 +99,7 @@
       "parameters": {
         "agent": "conversationalAgent",
         "promptType": "define",
-        "text": "={{ $('Preparar Mensagem WA').first().json.body.message }}",
+        "text": "={{ $input.first().json.body.message }}",
         "options": {
           "systemMessage": "Você é a Purg — assistente do aplicativo de investimentos Purg. Fale de forma direta, clara e acolhedora, como um amigo que conhece bem as finanças do usuário. Tanto você quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma. Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nFORMATAÇÃO (WhatsApp):\nNunca use formatação markdown (itálico com _, títulos com #, tabelas). Use *_asteriscos_* para destacar valores e palavras importantes. Cada frase em seu próprio parágrafo, com uma linha em branco entre elas. Listas com hífens apenas para dados históricos (depósitos, saques, metas múltiplas). Nunca comece uma resposta com \"Sim, \", \"Claro! \", \"Ok, \", \"Certo! \" ou qualquer confirmação antes da informação — vá direto ao ponto.\n\nNOME DO USUÁRIO:\nO apelido está sempre no bloco [Dados do usuario:] na linha \"Apelido: ...\". Use exclusivamente esse apelido — nunca invente outro. Se não encontrar, use \"você\".\n\nDADOS DO USUÁRIO:\nA cada mensagem você recebe um bloco [Dados do usuario:] com: apelido, patrimônio, objetivos com progresso das metas, últimos depósitos e saques, liga, ranking, pontuação e rendimentos mensais. Use esses dados para responder perguntas sobre a conta. Nunca diga que não tem acesso às informações — você as tem em cada mensagem. Quando o usuário mencionar \"saldo\", \"quanto tenho\", \"quanto está investido\" ou qualquer variação, responda com o patrimônio do bloco [Dados do usuario:].\n\nCOMO INTERPRETAR E RESPONDER:\nEntenda a intenção real da mensagem, não palavras-chave isoladas. Há quatro tipos de situação:\n\n1. CONSULTA DE DADOS — usuário quer saber algo da conta (patrimônio, saldo, metas, depósitos, saques, rendimento, ranking, pins, objetivos). Responda diretamente com os dados do bloco. Seja específico: use valores, datas e percentuais reais.\n\n2. PERGUNTA CONCEITUAL OU HIPOTÉTICA — \"e se eu não depositar?\", \"como funciona o ranking?\", \"o que acontece se...\". Responda completamente a dúvida — use quantas frases forem necessárias. Não redirecione para dados da conta nem para depósito no meio da resposta.\n\n3. AÇÃO — usuário quer fazer algo (depositar, ver histórico). Inicie o fluxo correspondente.\n\n4. NAVEGAÇÃO — usuário não sabe o que perguntar. Mostre o menu de opções (ver seção QUANDO O USUÁRIO NÃO SABE O QUE PERGUNTAR).\n\nRESPOSTAS CURTAS (\"sim\", \"não\", \"quero\", \"pode\", \"último\", \"histórico\"):\nOlhe o histórico da conversa para identificar o contexto — qual foi o último assunto e a última pergunta. Responda com base nisso, usando os dados do bloco quando necessário. Não trate respostas curtas como fora do escopo.\n\nCOMPRIMENTO DAS RESPOSTAS:\nPara consultas simples de dados: seja direto, 1 a 3 frases com os dados concretos.\nPara perguntas conceituais/hipotéticas: responda completamente, sem limite de frases.\nPara listas (depósitos, saques, metas): liste normalmente, um item por linha.\nEncerre com uma pergunta de continuação apenas quando for natural no contexto — não force uma pergunta se a resposta já é completa.\nNunca pergunte se o usuário quer ver algo que você acabou de mostrar na mesma resposta. Se você já exibiu os objetivos, não termine com \"Quer ver seus objetivos?\". Se já mostrou os depósitos, não termine com \"Quer ver o histórico de depósitos?\".\n\nSAUDAÇÃO EM SESSÃO ATIVA:\nQuando o usuário enviar uma saudação (\"oi\", \"olá\", \"bom dia\" etc.) durante uma conversa já em andamento, responda: \"Oi [apelido]! Como posso te ajudar?\"\n\nHISTÓRICO (depósitos, saques, metas):\nSe o usuário não especificou a quantidade, pergunte: \"Quer ver o *_último_* ou o *_histórico completo_*?\" — e aguarde antes de mostrar.\nSe já está claro pela mensagem (\"todos\", \"histórico\", \"completo\", \"me mostra tudo\"), mostre diretamente sem perguntar.\nApós exibir histórico de depósitos: encerre com \"Quer ver o histórico de saques?\"\nApós exibir histórico de saques: exiba este menu exato — sem adicionar \"Quer ver o histórico de saques?\" depois:\n\nComo mais posso te ajudar?\n\n- Seus *_objetivos_*\n- Suas *_metas_*\n- Seus *_depósitos_*\n- Sua posição no *_ranking_*\n- Sua *_pontuação_*\n- Qual o seu *_patrimônio_*\n- Qual o seu *_rendimento_*\n- Seus *_pins_*\n- Fazer um depósito *_pix_*\n\nQual desses você quer saber?\n\nQUANDO O USUÁRIO NÃO SABE O QUE PERGUNTAR:\nSe o usuário pedir dicas, disser que não sabe o que perguntar, ou usar expressões como \"me ajuda\", \"o que posso ver aqui\", \"o que tem\", responda com este menu exato:\n\nAqui estão algumas coisas que posso te contar:\n\n- Seus *_objetivos_*\n- Suas *_metas_*\n- Seus *_depósitos_*\n- Seus *_saques_*\n- Sua posição no *_ranking_*\n- Sua *_pontuação_*\n- Qual o seu *_patrimônio_*\n- Qual o seu *_rendimento_*\n- Seus *_pins_*\n- Fazer um depósito *_pix_*\n\nQual desses você quer saber?\n\nOBJETIVOS — VISÃO GERAL:\nQuando o usuário perguntar sobre seus objetivos (visão geral, \"meu objetivo\", \"como tá meu objetivo\"), exiba para cada objetivo:\n\n📊 *_Seu objetivo_*\n\n🎯 *_[nome do objetivo]_*\n\n💰 *_Valor total:_* R$ X.XXX,XX\n📈 *_Patrimônio:_* R$ X.XXX,XX (XX,X%)\n🏦 *_Aporte inicial:_* R$ X.XXX,XX (feito) — ou — R$ X.XXX,XX (pendente)\n📋 *_Metas mensais:_* X no total — X ✅ concluídas, X ⏳ pendentes\n🔜 *_Próxima meta:_* R$ X,XX até DD/MM/AAAA (alocado: R$ X,XX)\n\nSe todas as metas estiverem concluídas, substitua a última linha por: 🏆 *_Todas as metas concluídas!_*\n\nMETAS — PRÓXIMA META:\nQuando o usuário perguntar sobre metas ou progresso, mostre a próxima meta pendente: valor, quanto já foi alocado e data limite.\n\nRENDIMENTOS:\nQuando perguntar sobre rendimentos, exiba os valores mensais do bloco, mês a mês, e o total acumulado se disponível.\n\nDEPÓSITO:\nQuando o usuário quiser fazer um depósito, informe o valor restante para a próxima meta e use exatamente esta frase para iniciar o fluxo: \"Já quer fazer o depósito?\"\nApós o usuário recusar um depósito (\"não\", \"agora não\", \"depois\"), não mencione depósito novamente nessa interação. Se precisar encerrar, mostre o menu de navegação.\n\nSAQUE VIA WHATSAPP:\nSaques só podem ser realizados pelo aplicativo Purg. Informe isso e pergunte se o usuário quer ver o histórico de saques. O histórico pode ser exibido normalmente quando solicitado.\n\nESCOPO:\nResponda exclusivamente sobre a Purg e educação financeira básica (juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia). Para qualquer outro assunto: \"Só posso te ajudar com a Purg e educação financeira básica.\"\nNunca invente funcionalidades que não existam na Purg.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal.\nQuando uma meta mensal não é atingida, a Purg não recalcula as metas restantes automaticamente. O recálculo só ocorre se o próprio cliente solicitar manualmente pelo aplicativo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nSenha numérica de 4 dígitos. Obrigatória para saques e alterações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins — unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento; os juros variam conforme o risco. A Purg faz a alocação automaticamente — o usuário não escolhe.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga. O ranking compara a evolução com outros usuários, mas nunca exibe valores financeiros — apenas progresso nas metas.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (aparece no ranking) e pode personalizar seu avatar — 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O vínculo pode ser iniciado de duas formas: o guardião convida o dependente, ou o dependente cria a conta e convida o guardião. Em ambos os casos, a outra parte precisa aceitar o convite para o vínculo ser ativado. Após isso, o guardião passa a acompanhar e operar a conta do dependente pelo app.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg pela área de indicação no app.\n\n10. AUTENTICAÇÃO\nLogin com e-mail e senha ou biometria (impressão digital, reconhecimento facial) nos dispositivos que suportam.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar de forma simples."
         }
@@ -140,7 +140,7 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Preparar Mensagem WA').first().json.body.sessionId }}",
+        "sessionKey": "={{ $input.first().json.body.sessionId }}",
         "contextWindowLength": 30
       },
       "id": "node-memory",
@@ -586,7 +586,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\nconst rendimentos = data.rendimentos_mensais || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const totalMetas = metas.length;\n    const valorAporte = metas.length > 0 ? parseFloat(metas[0].objetivo_investir || 0) : 0;\n    const metasMensais = metas.slice(1);\n    const metasMensaisConcluidas = metasMensais.filter(function(m) { return m.objetivo_completo; }).length;\n    const metasMensaisPendentes = metasMensais.length - metasMensaisConcluidas;\n    const valorTotal = metas.reduce(function(acc, m) { return acc + parseFloat(m.objetivo_investir || 0); }, 0);\n    const totalInvestido = metas.reduce(function(acc, m) { return acc + parseFloat(m.saldo_alocado || 0); }, 0);\n    const percentual = valorTotal > 0 ? (totalInvestido / valorTotal * 100).toFixed(1) : '0.0';\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao;\n    t += ' | Valor total: ' + brl(valorTotal);\n    t += ' | Patrimônio: ' + brl(totalInvestido) + ' (' + percentual + '%)';\n    t += ' | Aporte inicial: ' + brl(valorAporte) + (obj.primeiro_aporte_feito ? ' (feito)' : ' (pendente)');\n    t += ' | Metas mensais: ' + metasMensais.length + ' total, ' + metasMensaisConcluidas + ' concluidas, ' + metasMensaisPendentes + ' pendentes';\n    if (proximaMeta) {\n      t += ' | Proxima meta: ' + brl(proximaMeta.objetivo_investir) + ' ate ' + fmtDate(proximaMeta.data_limite) + ' (alocado: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluidas!';\n    }\n    return t;\n  }).join('\\n');\n}\nconst ultimosDepositos = depositos.map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst mesesPT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];\nconst rendimentosStr = rendimentos.length > 0\n  ? rendimentos.map(function(r) {\n      const parts = r.mes.split('-');\n      const mesNome = mesesPT[parseInt(parts[1], 10) - 1];\n      return '- ' + mesNome + '/' + parts[0] + ': ' + brl(r.rendimento_mensal);\n    }).join('\\n')\n  : 'Nenhum rendimento registrado ainda.';\nconst totalRendimento = rendimentos.reduce(function(acc, r) { return acc + parseFloat(r.rendimento_mensal || 0); }, 0);\nconst totalRendimentoStr = rendimentos.length > 0 ? '\\nTotal acumulado: ' + brl(totalRendimento) : '';\n\nconst apelido = u.apelido || 'usuário';\nconst contexto = 'Apelido: ' + apelido + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Patrimônio: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Rendimentos mensais:\\n' + rendimentosStr + totalRendimentoStr;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].contexto = contexto;\n  sessions['wa_' + phone].apelido = apelido;\n  sessions['wa_' + phone].tokens = $input.first().json.tokens || [];\n}\n\n// Salvar status de objetivo na sessão e forçar criação se necessário\nconst temObjetivo = objetivos.length > 0;\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].temObjetivo = temObjetivo;\n  if (!temObjetivo && !sessions['wa_' + phone].depositStep) {\n    sessions['wa_' + phone].depositStep = 'sem_objetivo_confirm';\n  }\n}\nstaticData.waSessions = sessions;\n\nconst retornando = objetivos.length > 0 || depositos.length > 0;\nlet saudacao;\nif (!temObjetivo) {\n  saudacao = 'Oi ' + apelido + '! 👋\\n\\nPara começar a usar a Purg, você precisa criar o seu *_objetivo_* primeiro. 🎯\\n\\nÉ rapidinho! Vamos criar juntos?\\n\\nResponda *_sim_* para começar.';\n} else {\n  saudacao = retornando\n    ? 'Oi ' + apelido + ', que bom que voltou!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!'\n    : 'Oi ' + apelido + '! Sou a Purg, bem-vindo!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!';\n}\n\n// Salvar usuarioId e valor da próxima meta para fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (sessions['wa_' + phone] && uid) {\n    sessions['wa_' + phone].usuarioId = uid;\n    if (objetivos.length > 0) {\n      const obj = objetivos[0];\n      const pendentes = (obj.metas || []).filter(function(m) { return !m.objetivo_completo; });\n      if (pendentes.length > 0 && obj.primeiro_aporte_feito) {\n        const pm = pendentes[0];\n        const resto = parseFloat(pm.objetivo_investir) - parseFloat(pm.saldo_alocado);\n        if (resto > 0) sessions['wa_' + phone].proximaMetaValor = resto.toFixed(2);\n      }\n    }\n    staticData.waSessions = sessions;\n  }\n} catch(e) {}\n\nreturn [{ json: { output: saudacao, sessionId } }];"
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\nconst rendimentos = data.rendimentos_mensais || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const totalMetas = metas.length;\n    const valorAporte = metas.length > 0 ? parseFloat(metas[0].objetivo_investir || 0) : 0;\n    const metasMensais = metas.slice(1);\n    const metasMensaisConcluidas = metasMensais.filter(function(m) { return m.objetivo_completo; }).length;\n    const metasMensaisPendentes = metasMensais.length - metasMensaisConcluidas;\n    const valorTotal = metas.reduce(function(acc, m) { return acc + parseFloat(m.objetivo_investir || 0); }, 0);\n    const totalInvestido = metas.reduce(function(acc, m) { return acc + parseFloat(m.saldo_alocado || 0); }, 0);\n    const percentual = valorTotal > 0 ? (totalInvestido / valorTotal * 100).toFixed(1) : '0.0';\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao;\n    t += ' | Valor total: ' + brl(valorTotal);\n    t += ' | Patrimônio: ' + brl(totalInvestido) + ' (' + percentual + '%)';\n    t += ' | Aporte inicial: ' + brl(valorAporte) + (obj.primeiro_aporte_feito ? ' (feito)' : ' (pendente)');\n    t += ' | Metas mensais: ' + metasMensais.length + ' total, ' + metasMensaisConcluidas + ' concluidas, ' + metasMensaisPendentes + ' pendentes';\n    if (proximaMeta) {\n      t += ' | Proxima meta: ' + brl(proximaMeta.objetivo_investir) + ' ate ' + fmtDate(proximaMeta.data_limite) + ' (alocado: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluidas!';\n    }\n    return t;\n  }).join('\\n');\n}\nconst ultimosDepositos = depositos.map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst mesesPT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];\nconst rendimentosStr = rendimentos.length > 0\n  ? rendimentos.map(function(r) {\n      const parts = r.mes.split('-');\n      const mesNome = mesesPT[parseInt(parts[1], 10) - 1];\n      return '- ' + mesNome + '/' + parts[0] + ': ' + brl(r.rendimento_mensal);\n    }).join('\\n')\n  : 'Nenhum rendimento registrado ainda.';\nconst totalRendimento = rendimentos.reduce(function(acc, r) { return acc + parseFloat(r.rendimento_mensal || 0); }, 0);\nconst totalRendimentoStr = rendimentos.length > 0 ? '\\nTotal acumulado: ' + brl(totalRendimento) : '';\n\nconst apelido = u.apelido || 'usuário';\nconst contexto = 'Apelido: ' + apelido + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Patrimônio: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Rendimentos mensais:\\n' + rendimentosStr + totalRendimentoStr;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].contexto = contexto;\n  sessions['wa_' + phone].apelido = apelido;\n  sessions['wa_' + phone].tokens = $input.first().json.tokens || [];\n}\n\n// Salvar status de objetivo na sessão e forçar criação se necessário\nconst temObjetivo = objetivos.length > 0;\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].temObjetivo = temObjetivo;\n  if (!temObjetivo && !sessions['wa_' + phone].depositStep) {\n    sessions['wa_' + phone].depositStep = 'sem_objetivo_confirm';\n  }\n}\nstaticData.waSessions = sessions;\n\nconst retornando = objetivos.length > 0 || depositos.length > 0;\nlet saudacao;\nif (!temObjetivo) {\n  saudacao = 'Oi ' + apelido + '! 👋\\n\\nPara começar a usar a Purg, você precisa criar o seu *_objetivo_* primeiro. 🎯\\n\\nÉ rapidinho! Vamos criar juntos?\\n\\nResponda *_sim_* para começar.';\n} else {\n  saudacao = retornando\n    ? 'Oi ' + apelido + ', que bom que voltou!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!'\n    : 'Oi ' + apelido + '! Sou a Purg, bem-vindo!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!';\n}\n\n// Salvar usuarioId e valor da próxima meta para fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (sessions['wa_' + phone] && uid) {\n    sessions['wa_' + phone].usuarioId = uid;\n    if (objetivos.length > 0) {\n      const obj = objetivos[0];\n      const pendentes = (obj.metas || []).filter(function(m) { return !m.objetivo_completo; });\n      if (pendentes.length > 0 && obj.primeiro_aporte_feito) {\n        const pm = pendentes[0];\n        const resto = parseFloat(pm.objetivo_investir) - parseFloat(pm.saldo_alocado);\n        if (resto > 0) sessions['wa_' + phone].proximaMetaValor = resto.toFixed(2);\n      }\n    }\n    staticData.waSessions = sessions;\n  }\n} catch(e) {}\n\n\n// Carregar histórico persistente de conversas anteriores\nconst chatHist = staticData.chatHistory || {};\nconst phoneHistory = chatHist[phone] || [];\nconst histText = phoneHistory.slice(-20).map(function(m) {\n  return (m.role === 'user' ? 'Usuário' : 'Purg') + ': ' + m.content;\n}).join('\\n');\nif (sessions['wa_' + phone] && histText) {\n  sessions['wa_' + phone].history = histText;\n}\n\nreturn [{ json: { output: saudacao, sessionId } }];"
       },
       "id": "node-wa-ctx",
       "name": "Montar Contexto WA",
@@ -600,7 +600,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst text = waData.text;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone];\n\n// Salvar usuarioId para o fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (session && uid) { session.usuarioId = uid; staticData.waSessions = sessions; }\n} catch(e) {}\n\nconst contexto = session && session.contexto ? session.contexto : '';\nconst message = contexto\n  ? '[Dados do usuario:\\n' + contexto + ']\\n\\n' + text\n  : text;\n\nreturn [{ json: { body: { message, sessionId } } }];\n"
+        "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst text = waData.text;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone];\n\n// Salvar usuarioId para o fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (session && uid) { session.usuarioId = uid; staticData.waSessions = sessions; }\n} catch(e) {}\n\nconst contexto = session && session.contexto ? session.contexto : '';\nconst history = session && session.history ? session.history : '';\nconst message = (history ? '[Histórico de conversas anteriores:\\n' + history + ']\\n\\n' : '') +\n  (contexto ? '[Dados do usuario:\\n' + contexto + ']\\n\\n' : '') + text;\n\nreturn [{ json: { body: { message, sessionId } } }];\n"
       },
       "id": "node-wa-set-msg",
       "name": "Preparar Mensagem WA",
@@ -945,21 +945,6 @@
       }
     },
     {
-      "id": "node-wa-resp-sessao",
-      "name": "Responder Sessão OK",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [
-        660,
-        1040
-      ],
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { ok: true } }}",
-        "options": {}
-      }
-    },
-    {
       "id": "wh-sem-obj",
       "name": "Webhook Set Sessão Sem Objetivo",
       "type": "n8n-nodes-base.webhook",
@@ -988,21 +973,6 @@
       "parameters": {
         "language": "javaScript",
         "jsCode": "const body = $input.first().json.body;\nconst celular = String(body.celular).replace(/\\D/g, '');\nconst usuarioId = body.usuario_id;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (!sessions['wa_' + celular]) sessions['wa_' + celular] = {};\nsessions['wa_' + celular].depositStep = 'sem_objetivo_confirm';\nsessions['wa_' + celular].usuarioId = usuarioId;\nstaticData.waSessions = sessions;\nreturn [{ json: { ok: true } }];"
-      }
-    },
-    {
-      "id": "resp-sem-obj",
-      "name": "Responder Sessão Sem Objetivo",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [
-        660,
-        1200
-      ],
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { ok: true } }}",
-        "options": {}
       }
     },
     {
@@ -1489,6 +1459,20 @@
         "jsonBody": "={{ JSON.stringify({ chat_id: 8617394991, parse_mode: 'HTML', text: '⚠️ <b>WhatsApp Desconectado!</b>\\n\\nInstância: <code>purg-whatsapp</code>\\nStatus: <code>' + $json.body.data.state + '</code>\\n\\n🔗 Reconecte em:\\nhttps://evolution-api-evolution-api.rqkx8g.easypanel.host/manager' }) }}",
         "options": {}
       }
+    },
+    {
+      "id": "node-save-history",
+      "name": "Salvar Histórico WA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        600
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const phone = $('Extrair Dados WA').first().json.phone;\nconst userMsg = $('Extrair Dados WA').first().json.text || '';\nconst aiResp = $input.first().json.output || '';\n\nif (!phone || !aiResp) return $input.all();\n\nconst sd = $getWorkflowStaticData('global');\nif (!sd.chatHistory) sd.chatHistory = {};\nif (!sd.chatHistory[phone]) sd.chatHistory[phone] = [];\n\nsd.chatHistory[phone].push({ role: 'user', content: userMsg.substring(0, 600) });\nsd.chatHistory[phone].push({ role: 'assistant', content: aiResp.substring(0, 600) });\n\n// Keep last 40 messages (20 exchanges) per user\nif (sd.chatHistory[phone].length > 40) {\n  sd.chatHistory[phone] = sd.chatHistory[phone].slice(-40);\n}\n\nreturn $input.all();"
+      }
     }
   ],
   "connections": {
@@ -1834,6 +1818,11 @@
             "node": "Enviar Resposta WA",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Salvar Histórico WA",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -2011,13 +2000,7 @@
     },
     "Salvar Sessão Meta Vencida": {
       "main": [
-        [
-          {
-            "node": "Responder Sessão OK",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Webhook Set Sessão Sem Objetivo": {
@@ -2033,13 +2016,7 @@
     },
     "Salvar Sessão Sem Objetivo": {
       "main": [
-        [
-          {
-            "node": "Responder Sessão Sem Objetivo",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "É Criar Objetivo?": {
@@ -2239,7 +2216,58 @@
   },
   "staticData": {
     "global": {
-      "waSessions": {},
+      "waSessions": {
+        "wa_11987359426": {
+          "depositStep": "meta_vencida_confirm",
+          "metasVencidas": [
+            {
+              "objetivo_nome": "Patrimônio",
+              "meta_numero": 2,
+              "valor_meta": 7.5,
+              "valor_alocado": 0.27017347,
+              "percentual": 3.6,
+              "data_limite": "2026-06-30T03:00:00.000Z",
+              "dias_atraso": 26
+            }
+          ],
+          "usuarioId": 14
+        },
+        "wa_11964365495": {
+          "depositStep": "meta_vencida_confirm",
+          "metasVencidas": [
+            {
+              "objetivo_nome": "Patrimônio",
+              "meta_numero": 2,
+              "valor_meta": 7.5,
+              "valor_alocado": 0.27017347,
+              "percentual": 3.6,
+              "data_limite": "2026-06-30T03:00:00.000Z",
+              "dias_atraso": 26
+            }
+          ],
+          "usuarioId": 15
+        },
+        "wa_11949496342": {
+          "depositStep": "meta_vencida_confirm",
+          "metasVencidas": [],
+          "usuarioId": 2
+        },
+        "wa_11982314820": {
+          "depositStep": "meta_vencida_confirm",
+          "metasVencidas": [
+            {
+              "objetivo_nome": "Patrimônio",
+              "meta_numero": 2,
+              "valor_meta": 7.5,
+              "valor_alocado": 0.27017347,
+              "percentual": 3.6,
+              "data_limite": "2026-06-30T03:00:00.000Z",
+              "dias_atraso": 26
+            }
+          ],
+          "usuarioId": 16
+        }
+      },
       "waThrottle": {
         "11949496342": 1783378065873,
         "11996542819": 1780315972331,
@@ -2250,8 +2278,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "816d54f3-42a8-4e6a-a6f9-0fe81c53c8f1",
-  "activeVersionId": "816d54f3-42a8-4e6a-a6f9-0fe81c53c8f1",
+  "versionId": "2d353651-0226-492e-bd3a-9332eb9e9d5c",
+  "activeVersionId": "2d353651-0226-492e-bd3a-9332eb9e9d5c",
   "triggerCount": 4,
   "shared": [
     {
@@ -2263,9 +2291,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-05T23:04:15.546Z",
-    "createdAt": "2026-07-05T23:04:15.546Z",
-    "versionId": "816d54f3-42a8-4e6a-a6f9-0fe81c53c8f1",
+    "updatedAt": "2026-07-26T14:31:11.615Z",
+    "createdAt": "2026-07-26T14:31:11.615Z",
+    "versionId": "2d353651-0226-492e-bd3a-9332eb9e9d5c",
     "workflowId": "0wpPd0SPkQ8y3GUx",
     "nodes": [
       {
@@ -2361,7 +2389,7 @@
         "parameters": {
           "agent": "conversationalAgent",
           "promptType": "define",
-          "text": "={{ $('Preparar Mensagem WA').first().json.body.message }}",
+          "text": "={{ $input.first().json.body.message }}",
           "options": {
             "systemMessage": "Você é a Purg — assistente do aplicativo de investimentos Purg. Fale de forma direta, clara e acolhedora, como um amigo que conhece bem as finanças do usuário. Tanto você quanto o aplicativo se chamam Purg e são tratados no feminino. Use sempre \"a Purg\" ao se referir ao aplicativo ou a você mesma. Nunca se identifique como \"assistente financeira\" — use apenas \"assistente\".\n\nFORMATAÇÃO (WhatsApp):\nNunca use formatação markdown (itálico com _, títulos com #, tabelas). Use *_asteriscos_* para destacar valores e palavras importantes. Cada frase em seu próprio parágrafo, com uma linha em branco entre elas. Listas com hífens apenas para dados históricos (depósitos, saques, metas múltiplas). Nunca comece uma resposta com \"Sim, \", \"Claro! \", \"Ok, \", \"Certo! \" ou qualquer confirmação antes da informação — vá direto ao ponto.\n\nNOME DO USUÁRIO:\nO apelido está sempre no bloco [Dados do usuario:] na linha \"Apelido: ...\". Use exclusivamente esse apelido — nunca invente outro. Se não encontrar, use \"você\".\n\nDADOS DO USUÁRIO:\nA cada mensagem você recebe um bloco [Dados do usuario:] com: apelido, patrimônio, objetivos com progresso das metas, últimos depósitos e saques, liga, ranking, pontuação e rendimentos mensais. Use esses dados para responder perguntas sobre a conta. Nunca diga que não tem acesso às informações — você as tem em cada mensagem. Quando o usuário mencionar \"saldo\", \"quanto tenho\", \"quanto está investido\" ou qualquer variação, responda com o patrimônio do bloco [Dados do usuario:].\n\nCOMO INTERPRETAR E RESPONDER:\nEntenda a intenção real da mensagem, não palavras-chave isoladas. Há quatro tipos de situação:\n\n1. CONSULTA DE DADOS — usuário quer saber algo da conta (patrimônio, saldo, metas, depósitos, saques, rendimento, ranking, pins, objetivos). Responda diretamente com os dados do bloco. Seja específico: use valores, datas e percentuais reais.\n\n2. PERGUNTA CONCEITUAL OU HIPOTÉTICA — \"e se eu não depositar?\", \"como funciona o ranking?\", \"o que acontece se...\". Responda completamente a dúvida — use quantas frases forem necessárias. Não redirecione para dados da conta nem para depósito no meio da resposta.\n\n3. AÇÃO — usuário quer fazer algo (depositar, ver histórico). Inicie o fluxo correspondente.\n\n4. NAVEGAÇÃO — usuário não sabe o que perguntar. Mostre o menu de opções (ver seção QUANDO O USUÁRIO NÃO SABE O QUE PERGUNTAR).\n\nRESPOSTAS CURTAS (\"sim\", \"não\", \"quero\", \"pode\", \"último\", \"histórico\"):\nOlhe o histórico da conversa para identificar o contexto — qual foi o último assunto e a última pergunta. Responda com base nisso, usando os dados do bloco quando necessário. Não trate respostas curtas como fora do escopo.\n\nCOMPRIMENTO DAS RESPOSTAS:\nPara consultas simples de dados: seja direto, 1 a 3 frases com os dados concretos.\nPara perguntas conceituais/hipotéticas: responda completamente, sem limite de frases.\nPara listas (depósitos, saques, metas): liste normalmente, um item por linha.\nEncerre com uma pergunta de continuação apenas quando for natural no contexto — não force uma pergunta se a resposta já é completa.\nNunca pergunte se o usuário quer ver algo que você acabou de mostrar na mesma resposta. Se você já exibiu os objetivos, não termine com \"Quer ver seus objetivos?\". Se já mostrou os depósitos, não termine com \"Quer ver o histórico de depósitos?\".\n\nSAUDAÇÃO EM SESSÃO ATIVA:\nQuando o usuário enviar uma saudação (\"oi\", \"olá\", \"bom dia\" etc.) durante uma conversa já em andamento, responda: \"Oi [apelido]! Como posso te ajudar?\"\n\nHISTÓRICO (depósitos, saques, metas):\nSe o usuário não especificou a quantidade, pergunte: \"Quer ver o *_último_* ou o *_histórico completo_*?\" — e aguarde antes de mostrar.\nSe já está claro pela mensagem (\"todos\", \"histórico\", \"completo\", \"me mostra tudo\"), mostre diretamente sem perguntar.\nApós exibir histórico de depósitos: encerre com \"Quer ver o histórico de saques?\"\nApós exibir histórico de saques: exiba este menu exato — sem adicionar \"Quer ver o histórico de saques?\" depois:\n\nComo mais posso te ajudar?\n\n- Seus *_objetivos_*\n- Suas *_metas_*\n- Seus *_depósitos_*\n- Sua posição no *_ranking_*\n- Sua *_pontuação_*\n- Qual o seu *_patrimônio_*\n- Qual o seu *_rendimento_*\n- Seus *_pins_*\n- Fazer um depósito *_pix_*\n\nQual desses você quer saber?\n\nQUANDO O USUÁRIO NÃO SABE O QUE PERGUNTAR:\nSe o usuário pedir dicas, disser que não sabe o que perguntar, ou usar expressões como \"me ajuda\", \"o que posso ver aqui\", \"o que tem\", responda com este menu exato:\n\nAqui estão algumas coisas que posso te contar:\n\n- Seus *_objetivos_*\n- Suas *_metas_*\n- Seus *_depósitos_*\n- Seus *_saques_*\n- Sua posição no *_ranking_*\n- Sua *_pontuação_*\n- Qual o seu *_patrimônio_*\n- Qual o seu *_rendimento_*\n- Seus *_pins_*\n- Fazer um depósito *_pix_*\n\nQual desses você quer saber?\n\nOBJETIVOS — VISÃO GERAL:\nQuando o usuário perguntar sobre seus objetivos (visão geral, \"meu objetivo\", \"como tá meu objetivo\"), exiba para cada objetivo:\n\n📊 *_Seu objetivo_*\n\n🎯 *_[nome do objetivo]_*\n\n💰 *_Valor total:_* R$ X.XXX,XX\n📈 *_Patrimônio:_* R$ X.XXX,XX (XX,X%)\n🏦 *_Aporte inicial:_* R$ X.XXX,XX (feito) — ou — R$ X.XXX,XX (pendente)\n📋 *_Metas mensais:_* X no total — X ✅ concluídas, X ⏳ pendentes\n🔜 *_Próxima meta:_* R$ X,XX até DD/MM/AAAA (alocado: R$ X,XX)\n\nSe todas as metas estiverem concluídas, substitua a última linha por: 🏆 *_Todas as metas concluídas!_*\n\nMETAS — PRÓXIMA META:\nQuando o usuário perguntar sobre metas ou progresso, mostre a próxima meta pendente: valor, quanto já foi alocado e data limite.\n\nRENDIMENTOS:\nQuando perguntar sobre rendimentos, exiba os valores mensais do bloco, mês a mês, e o total acumulado se disponível.\n\nDEPÓSITO:\nQuando o usuário quiser fazer um depósito, informe o valor restante para a próxima meta e use exatamente esta frase para iniciar o fluxo: \"Já quer fazer o depósito?\"\nApós o usuário recusar um depósito (\"não\", \"agora não\", \"depois\"), não mencione depósito novamente nessa interação. Se precisar encerrar, mostre o menu de navegação.\n\nSAQUE VIA WHATSAPP:\nSaques só podem ser realizados pelo aplicativo Purg. Informe isso e pergunte se o usuário quer ver o histórico de saques. O histórico pode ser exibido normalmente quando solicitado.\n\nESCOPO:\nResponda exclusivamente sobre a Purg e educação financeira básica (juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia). Para qualquer outro assunto: \"Só posso te ajudar com a Purg e educação financeira básica.\"\nNunca invente funcionalidades que não existam na Purg.\n\n---\n\nCOMO A PURG FUNCIONA:\n\n1. OBJETIVO\nAntes de qualquer transferência, o usuário cria um objetivo respondendo 3 perguntas: qual valor quer alcançar (mínimo R$ 200,00), quanto tem para o primeiro aporte, e em quanto tempo quer chegar lá. A partir disso, a Purg calcula automaticamente a meta mensal: (valor do objetivo - primeiro aporte) ÷ número de meses = meta mensal.\nQuando uma meta mensal não é atingida, a Purg não recalcula as metas restantes automaticamente. O recálculo só ocorre se o próprio cliente solicitar manualmente pelo aplicativo.\n\n2. DEPÓSITOS\nOs depósitos são feitos exclusivamente via Pix, a partir de uma conta bancária vinculada ao mesmo CPF cadastrado na Purg. Depósitos pendentes podem ser cancelados pelo próprio usuário. O botão de depósito sugere automaticamente o valor da próxima meta mensal para facilitar.\n\n3. SAQUES\nPara sacar, o usuário precisa ter uma chave Pix cadastrada (CPF, e-mail, celular ou chave aleatória) e informar a senha de negociação — uma senha de 4 dígitos criada por ele mesmo no app. O saque é creditado em até 1 dia útil. Não é possível sacar mais do que o saldo disponível.\n\n4. SENHA DE NEGOCIAÇÃO\nSenha numérica de 4 dígitos. Obrigatória para saques e alterações sensíveis do perfil. Regras: exatamente 4 dígitos, não pode ter todos iguais (ex: 1111) e não pode ter o mesmo dígito repetido 3 vezes seguidas (ex: 1333).\n\n5. PINS\nO dinheiro depositado é investido em Pins — unidade de investimento da Purg, com valor nominal de R$ 0,01 cada. Cada Pin tem um nível de risco e uma data de vencimento; os juros variam conforme o risco. A Purg faz a alocação automaticamente — o usuário não escolhe.\n\n6. PONTUAÇÃO, LIGA E RANKING\nCada meta mensal concluída ou aporte inicial equivale a 40 pontos. Metas em andamento acumulam pontos proporcionais ao progresso. Os pontos determinam a liga. O ranking compara a evolução com outros usuários, mas nunca exibe valores financeiros — apenas progresso nas metas.\n\n7. PERFIL E APELIDO\nO usuário escolhe um apelido (aparece no ranking) e pode personalizar seu avatar — 13 opções disponíveis. O apelido não pode conter partes do nome real. É possível cadastrar até 4 tipos de chave Pix: CPF, e-mail, celular e chave aleatória.\n\n8. MODO FAMÍLIA\nUm guardião pode gerenciar a conta de um dependente menor de idade. O vínculo pode ser iniciado de duas formas: o guardião convida o dependente, ou o dependente cria a conta e convida o guardião. Em ambos os casos, a outra parte precisa aceitar o convite para o vínculo ser ativado. Após isso, o guardião passa a acompanhar e operar a conta do dependente pelo app.\n\n9. INDICAÇÃO\nO usuário pode convidar outras pessoas para a Purg pela área de indicação no app.\n\n10. AUTENTICAÇÃO\nLogin com e-mail e senha ou biometria (impressão digital, reconhecimento facial) nos dispositivos que suportam.\n\n---\n\nEDUCAÇÃO FINANCEIRA:\nFale sobre juros simples, juros compostos, risco e patrimônio — sempre com exemplos do dia a dia e conectados ao contexto de quem está começando. Nunca use termos técnicos sem explicar de forma simples."
           }
@@ -2402,7 +2430,7 @@
       {
         "parameters": {
           "sessionIdType": "customKey",
-          "sessionKey": "={{ $('Preparar Mensagem WA').first().json.body.sessionId }}",
+          "sessionKey": "={{ $input.first().json.body.sessionId }}",
           "contextWindowLength": 30
         },
         "id": "node-memory",
@@ -2848,7 +2876,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\nconst rendimentos = data.rendimentos_mensais || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const totalMetas = metas.length;\n    const valorAporte = metas.length > 0 ? parseFloat(metas[0].objetivo_investir || 0) : 0;\n    const metasMensais = metas.slice(1);\n    const metasMensaisConcluidas = metasMensais.filter(function(m) { return m.objetivo_completo; }).length;\n    const metasMensaisPendentes = metasMensais.length - metasMensaisConcluidas;\n    const valorTotal = metas.reduce(function(acc, m) { return acc + parseFloat(m.objetivo_investir || 0); }, 0);\n    const totalInvestido = metas.reduce(function(acc, m) { return acc + parseFloat(m.saldo_alocado || 0); }, 0);\n    const percentual = valorTotal > 0 ? (totalInvestido / valorTotal * 100).toFixed(1) : '0.0';\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao;\n    t += ' | Valor total: ' + brl(valorTotal);\n    t += ' | Patrimônio: ' + brl(totalInvestido) + ' (' + percentual + '%)';\n    t += ' | Aporte inicial: ' + brl(valorAporte) + (obj.primeiro_aporte_feito ? ' (feito)' : ' (pendente)');\n    t += ' | Metas mensais: ' + metasMensais.length + ' total, ' + metasMensaisConcluidas + ' concluidas, ' + metasMensaisPendentes + ' pendentes';\n    if (proximaMeta) {\n      t += ' | Proxima meta: ' + brl(proximaMeta.objetivo_investir) + ' ate ' + fmtDate(proximaMeta.data_limite) + ' (alocado: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluidas!';\n    }\n    return t;\n  }).join('\\n');\n}\nconst ultimosDepositos = depositos.map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst mesesPT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];\nconst rendimentosStr = rendimentos.length > 0\n  ? rendimentos.map(function(r) {\n      const parts = r.mes.split('-');\n      const mesNome = mesesPT[parseInt(parts[1], 10) - 1];\n      return '- ' + mesNome + '/' + parts[0] + ': ' + brl(r.rendimento_mensal);\n    }).join('\\n')\n  : 'Nenhum rendimento registrado ainda.';\nconst totalRendimento = rendimentos.reduce(function(acc, r) { return acc + parseFloat(r.rendimento_mensal || 0); }, 0);\nconst totalRendimentoStr = rendimentos.length > 0 ? '\\nTotal acumulado: ' + brl(totalRendimento) : '';\n\nconst apelido = u.apelido || 'usuário';\nconst contexto = 'Apelido: ' + apelido + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Patrimônio: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Rendimentos mensais:\\n' + rendimentosStr + totalRendimentoStr;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].contexto = contexto;\n  sessions['wa_' + phone].apelido = apelido;\n  sessions['wa_' + phone].tokens = $input.first().json.tokens || [];\n}\n\n// Salvar status de objetivo na sessão e forçar criação se necessário\nconst temObjetivo = objetivos.length > 0;\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].temObjetivo = temObjetivo;\n  if (!temObjetivo && !sessions['wa_' + phone].depositStep) {\n    sessions['wa_' + phone].depositStep = 'sem_objetivo_confirm';\n  }\n}\nstaticData.waSessions = sessions;\n\nconst retornando = objetivos.length > 0 || depositos.length > 0;\nlet saudacao;\nif (!temObjetivo) {\n  saudacao = 'Oi ' + apelido + '! 👋\\n\\nPara começar a usar a Purg, você precisa criar o seu *_objetivo_* primeiro. 🎯\\n\\nÉ rapidinho! Vamos criar juntos?\\n\\nResponda *_sim_* para começar.';\n} else {\n  saudacao = retornando\n    ? 'Oi ' + apelido + ', que bom que voltou!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!'\n    : 'Oi ' + apelido + '! Sou a Purg, bem-vindo!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!';\n}\n\n// Salvar usuarioId e valor da próxima meta para fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (sessions['wa_' + phone] && uid) {\n    sessions['wa_' + phone].usuarioId = uid;\n    if (objetivos.length > 0) {\n      const obj = objetivos[0];\n      const pendentes = (obj.metas || []).filter(function(m) { return !m.objetivo_completo; });\n      if (pendentes.length > 0 && obj.primeiro_aporte_feito) {\n        const pm = pendentes[0];\n        const resto = parseFloat(pm.objetivo_investir) - parseFloat(pm.saldo_alocado);\n        if (resto > 0) sessions['wa_' + phone].proximaMetaValor = resto.toFixed(2);\n      }\n    }\n    staticData.waSessions = sessions;\n  }\n} catch(e) {}\n\nreturn [{ json: { output: saudacao, sessionId } }];"
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst data = $input.first().json;\nconst u = data.usuario || {};\nconst objetivos = data.objetivos || [];\nconst depositos = data.depositos || [];\nconst saques = data.saques || [];\nconst rendimentos = data.rendimentos_mensais || [];\n\nfunction brl(v) {\n  const parts = parseFloat(v || 0).toFixed(2).split('.');\n  parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  return 'R$ ' + parts[0] + ',' + parts[1];\n}\nfunction fmtDate(d) {\n  try { return new Date(d).toLocaleDateString('pt-BR'); } catch(e) { return String(d); }\n}\n\nlet objLines = '';\nif (objetivos.length === 0) {\n  objLines = 'Nenhum objetivo criado ainda.';\n} else {\n  objLines = objetivos.map(function(obj) {\n    const metas = obj.metas || [];\n    const totalMetas = metas.length;\n    const valorAporte = metas.length > 0 ? parseFloat(metas[0].objetivo_investir || 0) : 0;\n    const metasMensais = metas.slice(1);\n    const metasMensaisConcluidas = metasMensais.filter(function(m) { return m.objetivo_completo; }).length;\n    const metasMensaisPendentes = metasMensais.length - metasMensaisConcluidas;\n    const valorTotal = metas.reduce(function(acc, m) { return acc + parseFloat(m.objetivo_investir || 0); }, 0);\n    const totalInvestido = metas.reduce(function(acc, m) { return acc + parseFloat(m.saldo_alocado || 0); }, 0);\n    const percentual = valorTotal > 0 ? (totalInvestido / valorTotal * 100).toFixed(1) : '0.0';\n    const proximaMeta = metas.find(function(m) { return !m.objetivo_completo; });\n    let t = '- ' + obj.objetivo_descricao;\n    t += ' | Valor total: ' + brl(valorTotal);\n    t += ' | Patrimônio: ' + brl(totalInvestido) + ' (' + percentual + '%)';\n    t += ' | Aporte inicial: ' + brl(valorAporte) + (obj.primeiro_aporte_feito ? ' (feito)' : ' (pendente)');\n    t += ' | Metas mensais: ' + metasMensais.length + ' total, ' + metasMensaisConcluidas + ' concluidas, ' + metasMensaisPendentes + ' pendentes';\n    if (proximaMeta) {\n      t += ' | Proxima meta: ' + brl(proximaMeta.objetivo_investir) + ' ate ' + fmtDate(proximaMeta.data_limite) + ' (alocado: ' + brl(proximaMeta.saldo_alocado) + ')';\n    } else {\n      t += ' | Todas as metas concluidas!';\n    }\n    return t;\n  }).join('\\n');\n}\nconst ultimosDepositos = depositos.map(function(d) {\n  return '- ' + fmtDate(d.data_criacao) + ': ' + brl(d.valor_deposito) + ' (' + d.status_deposito + ')';\n}).join('\\n') || 'Nenhum depósito recente.';\n\nconst ultimosSaques = saques.map(function(s) {\n  return '- ' + fmtDate(s.data_criacao) + ': ' + brl(s.valor_saque) + ' (' + s.status_saque + ')';\n}).join('\\n') || 'Nenhum saque recente.';\n\nconst mesesPT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];\nconst rendimentosStr = rendimentos.length > 0\n  ? rendimentos.map(function(r) {\n      const parts = r.mes.split('-');\n      const mesNome = mesesPT[parseInt(parts[1], 10) - 1];\n      return '- ' + mesNome + '/' + parts[0] + ': ' + brl(r.rendimento_mensal);\n    }).join('\\n')\n  : 'Nenhum rendimento registrado ainda.';\nconst totalRendimento = rendimentos.reduce(function(acc, r) { return acc + parseFloat(r.rendimento_mensal || 0); }, 0);\nconst totalRendimentoStr = rendimentos.length > 0 ? '\\nTotal acumulado: ' + brl(totalRendimento) : '';\n\nconst apelido = u.apelido || 'usuário';\nconst contexto = 'Apelido: ' + apelido + '\\n' +\n  'Liga: ' + (u.liga || '-') + ' | Posição: #' + (u.posicao || '-') + ' | Pontos: ' + (u.pontos || 0) + '\\n' +\n  'Patrimônio: ' + brl(u.investido) + '\\n\\n' +\n  'Objetivos:\\n' + objLines + '\\n\\n' +\n  'Últimos depósitos:\\n' + ultimosDepositos + '\\n\\n' +\n  'Últimos saques:\\n' + ultimosSaques + '\\n\\n' +\n  'Rendimentos mensais:\\n' + rendimentosStr + totalRendimentoStr;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].contexto = contexto;\n  sessions['wa_' + phone].apelido = apelido;\n  sessions['wa_' + phone].tokens = $input.first().json.tokens || [];\n}\n\n// Salvar status de objetivo na sessão e forçar criação se necessário\nconst temObjetivo = objetivos.length > 0;\nif (sessions['wa_' + phone]) {\n  sessions['wa_' + phone].temObjetivo = temObjetivo;\n  if (!temObjetivo && !sessions['wa_' + phone].depositStep) {\n    sessions['wa_' + phone].depositStep = 'sem_objetivo_confirm';\n  }\n}\nstaticData.waSessions = sessions;\n\nconst retornando = objetivos.length > 0 || depositos.length > 0;\nlet saudacao;\nif (!temObjetivo) {\n  saudacao = 'Oi ' + apelido + '! 👋\\n\\nPara começar a usar a Purg, você precisa criar o seu *_objetivo_* primeiro. 🎯\\n\\nÉ rapidinho! Vamos criar juntos?\\n\\nResponda *_sim_* para começar.';\n} else {\n  saudacao = retornando\n    ? 'Oi ' + apelido + ', que bom que voltou!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!'\n    : 'Oi ' + apelido + '! Sou a Purg, bem-vindo!\\n\\nJá sabe sobre o que quer falar?\\n\\nSe não souber, me manda *_dicas_* que eu te ajudo!';\n}\n\n// Salvar usuarioId e valor da próxima meta para fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (sessions['wa_' + phone] && uid) {\n    sessions['wa_' + phone].usuarioId = uid;\n    if (objetivos.length > 0) {\n      const obj = objetivos[0];\n      const pendentes = (obj.metas || []).filter(function(m) { return !m.objetivo_completo; });\n      if (pendentes.length > 0 && obj.primeiro_aporte_feito) {\n        const pm = pendentes[0];\n        const resto = parseFloat(pm.objetivo_investir) - parseFloat(pm.saldo_alocado);\n        if (resto > 0) sessions['wa_' + phone].proximaMetaValor = resto.toFixed(2);\n      }\n    }\n    staticData.waSessions = sessions;\n  }\n} catch(e) {}\n\n\n// Carregar histórico persistente de conversas anteriores\nconst chatHist = staticData.chatHistory || {};\nconst phoneHistory = chatHist[phone] || [];\nconst histText = phoneHistory.slice(-20).map(function(m) {\n  return (m.role === 'user' ? 'Usuário' : 'Purg') + ': ' + m.content;\n}).join('\\n');\nif (sessions['wa_' + phone] && histText) {\n  sessions['wa_' + phone].history = histText;\n}\n\nreturn [{ json: { output: saudacao, sessionId } }];"
         },
         "id": "node-wa-ctx",
         "name": "Montar Contexto WA",
@@ -2862,7 +2890,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst text = waData.text;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone];\n\n// Salvar usuarioId para o fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (session && uid) { session.usuarioId = uid; staticData.waSessions = sessions; }\n} catch(e) {}\n\nconst contexto = session && session.contexto ? session.contexto : '';\nconst message = contexto\n  ? '[Dados do usuario:\\n' + contexto + ']\\n\\n' + text\n  : text;\n\nreturn [{ json: { body: { message, sessionId } } }];\n"
+          "jsCode": "const waData = $('Extrair Dados WA').first().json;\nconst phone = waData.phone;\nconst sessionId = waData.sessionId;\nconst text = waData.text;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nconst session = sessions['wa_' + phone];\n\n// Salvar usuarioId para o fluxo de depósito\ntry {\n  const uid = $('Buscar Usuário por Celular').first().json.usuario_id;\n  if (session && uid) { session.usuarioId = uid; staticData.waSessions = sessions; }\n} catch(e) {}\n\nconst contexto = session && session.contexto ? session.contexto : '';\nconst history = session && session.history ? session.history : '';\nconst message = (history ? '[Histórico de conversas anteriores:\\n' + history + ']\\n\\n' : '') +\n  (contexto ? '[Dados do usuario:\\n' + contexto + ']\\n\\n' : '') + text;\n\nreturn [{ json: { body: { message, sessionId } } }];\n"
         },
         "id": "node-wa-set-msg",
         "name": "Preparar Mensagem WA",
@@ -3207,21 +3235,6 @@
         }
       },
       {
-        "id": "node-wa-resp-sessao",
-        "name": "Responder Sessão OK",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1.1,
-        "position": [
-          660,
-          1040
-        ],
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "={{ { ok: true } }}",
-          "options": {}
-        }
-      },
-      {
         "id": "wh-sem-obj",
         "name": "Webhook Set Sessão Sem Objetivo",
         "type": "n8n-nodes-base.webhook",
@@ -3250,21 +3263,6 @@
         "parameters": {
           "language": "javaScript",
           "jsCode": "const body = $input.first().json.body;\nconst celular = String(body.celular).replace(/\\D/g, '');\nconst usuarioId = body.usuario_id;\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\nif (!sessions['wa_' + celular]) sessions['wa_' + celular] = {};\nsessions['wa_' + celular].depositStep = 'sem_objetivo_confirm';\nsessions['wa_' + celular].usuarioId = usuarioId;\nstaticData.waSessions = sessions;\nreturn [{ json: { ok: true } }];"
-        }
-      },
-      {
-        "id": "resp-sem-obj",
-        "name": "Responder Sessão Sem Objetivo",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1.1,
-        "position": [
-          660,
-          1200
-        ],
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "={{ { ok: true } }}",
-          "options": {}
         }
       },
       {
@@ -3751,6 +3749,20 @@
           "jsonBody": "={{ JSON.stringify({ chat_id: 8617394991, parse_mode: 'HTML', text: '⚠️ <b>WhatsApp Desconectado!</b>\\n\\nInstância: <code>purg-whatsapp</code>\\nStatus: <code>' + $json.body.data.state + '</code>\\n\\n🔗 Reconecte em:\\nhttps://evolution-api-evolution-api.rqkx8g.easypanel.host/manager' }) }}",
           "options": {}
         }
+      },
+      {
+        "id": "node-save-history",
+        "name": "Salvar Histórico WA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2800,
+          600
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const phone = $('Extrair Dados WA').first().json.phone;\nconst userMsg = $('Extrair Dados WA').first().json.text || '';\nconst aiResp = $input.first().json.output || '';\n\nif (!phone || !aiResp) return $input.all();\n\nconst sd = $getWorkflowStaticData('global');\nif (!sd.chatHistory) sd.chatHistory = {};\nif (!sd.chatHistory[phone]) sd.chatHistory[phone] = [];\n\nsd.chatHistory[phone].push({ role: 'user', content: userMsg.substring(0, 600) });\nsd.chatHistory[phone].push({ role: 'assistant', content: aiResp.substring(0, 600) });\n\n// Keep last 40 messages (20 exchanges) per user\nif (sd.chatHistory[phone].length > 40) {\n  sd.chatHistory[phone] = sd.chatHistory[phone].slice(-40);\n}\n\nreturn $input.all();"
+        }
       }
     ],
     "connections": {
@@ -4096,6 +4108,11 @@
               "node": "Enviar Resposta WA",
               "type": "main",
               "index": 0
+            },
+            {
+              "node": "Salvar Histórico WA",
+              "type": "main",
+              "index": 0
             }
           ]
         ]
@@ -4273,13 +4290,7 @@
       },
       "Salvar Sessão Meta Vencida": {
         "main": [
-          [
-            {
-              "node": "Responder Sessão OK",
-              "type": "main",
-              "index": 0
-            }
-          ]
+          []
         ]
       },
       "Webhook Set Sessão Sem Objetivo": {
@@ -4295,13 +4306,7 @@
       },
       "Salvar Sessão Sem Objetivo": {
         "main": [
-          [
-            {
-              "node": "Responder Sessão Sem Objetivo",
-              "type": "main",
-              "index": 0
-            }
-          ]
+          []
         ]
       },
       "É Criar Objetivo?": {

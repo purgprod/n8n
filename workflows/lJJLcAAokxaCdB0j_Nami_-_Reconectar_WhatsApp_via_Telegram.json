@@ -1,0 +1,525 @@
+{
+  "updatedAt": "2026-07-26T14:20:47.293Z",
+  "createdAt": "2026-07-26T14:20:47.293Z",
+  "id": "lJJLcAAokxaCdB0j",
+  "name": "Nami - Reconectar WhatsApp via Telegram",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh-tg",
+      "name": "Webhook Telegram",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "purg-telegram-cmd",
+        "responseMode": "onReceived",
+        "responseData": "noData"
+      },
+      "webhookId": "81c1b996-163a-4b4c-90fb-2761221aa7d6"
+    },
+    {
+      "id": "if-cmd",
+      "name": "É Comando?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.body.message.text }}",
+              "rightValue": "/reconectar",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "get-qr",
+      "name": "Buscar QR Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/instance/connect/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "check-qr",
+      "name": "Tem QR Code?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond2",
+              "leftValue": "={{ $json.base64 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "prep-qr",
+      "name": "Preparar QR Binario",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        100
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const base64 = $input.first().json.base64.replace(/^data:image\\/\\w+;base64,/, '');\nconst buffer = Buffer.from(base64, 'base64');\nconst binaryData = await this.helpers.prepareBinaryData(buffer, 'qrcode.png', 'image/png');\nreturn [{\n  json: { caption: '📱 Escaneie para reconectar o WhatsApp da Purg' },\n  binary: { photo: binaryData }\n}];"
+      }
+    },
+    {
+      "id": "send-qr",
+      "name": "Enviar QR para Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendPhoto",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "-5366316204"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.caption }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photo",
+              "inputDataFieldName": "photo"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "msg-ja-conectado",
+      "name": "Já Conectado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        320
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ JSON.stringify({ chat_id: -5366316204, text: '✅ WhatsApp já está conectado! Nenhuma ação necessária.' }) }",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Telegram": {
+      "main": [
+        [
+          {
+            "node": "É Comando?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Comando?": {
+      "main": [
+        [
+          {
+            "node": "Buscar QR Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Buscar QR Code": {
+      "main": [
+        [
+          {
+            "node": "Tem QR Code?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem QR Code?": {
+      "main": [
+        [
+          {
+            "node": "Preparar QR Binario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Já Conectado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar QR Binario": {
+      "main": [
+        [
+          {
+            "node": "Enviar QR para Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "3efbcf42-3ac9-4317-a7e4-89105116a71b",
+  "activeVersionId": "3efbcf42-3ac9-4317-a7e4-89105116a71b",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-07-26T14:20:47.294Z",
+      "createdAt": "2026-07-26T14:20:47.294Z",
+      "role": "workflow:owner",
+      "workflowId": "lJJLcAAokxaCdB0j",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-26T14:20:47.295Z",
+    "createdAt": "2026-07-26T14:20:47.295Z",
+    "versionId": "3efbcf42-3ac9-4317-a7e4-89105116a71b",
+    "workflowId": "lJJLcAAokxaCdB0j",
+    "nodes": [
+      {
+        "id": "wh-tg",
+        "name": "Webhook Telegram",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "purg-telegram-cmd",
+          "responseMode": "onReceived",
+          "responseData": "noData"
+        },
+        "webhookId": "81c1b996-163a-4b4c-90fb-2761221aa7d6"
+      },
+      {
+        "id": "if-cmd",
+        "name": "É Comando?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond1",
+                "leftValue": "={{ $json.body.message.text }}",
+                "rightValue": "/reconectar",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "get-qr",
+        "name": "Buscar QR Code",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          200
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/instance/connect/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 15000,
+            "response": {
+              "response": {
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "check-qr",
+        "name": "Tem QR Code?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          960,
+          200
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond2",
+                "leftValue": "={{ $json.base64 }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "isNotEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "prep-qr",
+        "name": "Preparar QR Binario",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          100
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const base64 = $input.first().json.base64.replace(/^data:image\\/\\w+;base64,/, '');\nconst buffer = Buffer.from(base64, 'base64');\nconst binaryData = await this.helpers.prepareBinaryData(buffer, 'qrcode.png', 'image/png');\nreturn [{\n  json: { caption: '📱 Escaneie para reconectar o WhatsApp da Purg' },\n  binary: { photo: binaryData }\n}];"
+        }
+      },
+      {
+        "id": "send-qr",
+        "name": "Enviar QR para Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1440,
+          100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendPhoto",
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "chat_id",
+                "value": "-5366316204"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $json.caption }}"
+              },
+              {
+                "parameterType": "formBinaryData",
+                "name": "photo",
+                "inputDataFieldName": "photo"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "msg-ja-conectado",
+        "name": "Já Conectado",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1200,
+          320
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={ JSON.stringify({ chat_id: -5366316204, text: '✅ WhatsApp já está conectado! Nenhuma ação necessária.' }) }",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook Telegram": {
+        "main": [
+          [
+            {
+              "node": "É Comando?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É Comando?": {
+        "main": [
+          [
+            {
+              "node": "Buscar QR Code",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Buscar QR Code": {
+        "main": [
+          [
+            {
+              "node": "Tem QR Code?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tem QR Code?": {
+        "main": [
+          [
+            {
+              "node": "Preparar QR Binario",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Já Conectado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar QR Binario": {
+        "main": [
+          [
+            {
+              "node": "Enviar QR para Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

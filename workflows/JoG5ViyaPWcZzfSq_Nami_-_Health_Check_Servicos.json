@@ -1,0 +1,448 @@
+{
+  "updatedAt": "2026-07-26T14:20:08.745Z",
+  "createdAt": "2026-07-26T14:20:08.745Z",
+  "id": "JoG5ViyaPWcZzfSq",
+  "name": "Nami - Health Check Servicos",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule-hc",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "check-evo",
+      "name": "Verificar Evolution API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/instance/connectionState/purg-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "check-backend",
+      "name": "Verificar Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        400
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/nami/pendentes",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "analisar",
+      "name": "Analisar Resultados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const evoData = $('Verificar Evolution API').first().json;\nconst backData = $('Verificar Backend').first().json;\nconst evoStatus = evoData.instance?.state || evoData.state || 'unknown';\nconst evoOk = evoStatus === 'open';\nconst backOk = !backData.error && backData.$response?.status < 500;\n\n// Throttle: only alert once per 30 min per issue type\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst throttleMs = 30 * 60 * 1000;\n\nconst issues = [];\nif (!evoOk) {\n  const lastEvo = sd.lastEvoAlert || 0;\n  if (now - lastEvo > throttleMs) {\n    issues.push('❌ *WhatsApp desconectado* — status: ' + evoStatus);\n    sd.lastEvoAlert = now;\n  }\n}\nif (!backOk) {\n  const lastBack = sd.lastBackAlert || 0;\n  if (now - lastBack > throttleMs) {\n    issues.push('❌ *Backend offline* — status: ' + (backData.$response?.status || 'timeout'));\n    sd.lastBackAlert = now;\n  }\n}\n\nif (issues.length > 0) {\n  const msg = '⚠️ *Health Check — Problema Detectado*\\n\\n' + issues.join('\\n') + '\\n\\nVerifique em: https://n8n-n8n.rqkx8g.easypanel.host';\n  return [{ json: { shouldAlert: true, text: msg } }];\n}\nreturn [{ json: { shouldAlert: false } }];"
+      }
+    },
+    {
+      "id": "if-alert",
+      "name": "Deve Alertar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.shouldAlert }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "tg-hc-alert",
+      "name": "Alerta Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $json.text, parse_mode: 'Markdown' }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Verificar Evolution API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Evolution API": {
+      "main": [
+        [
+          {
+            "node": "Analisar Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Backend": {
+      "main": [
+        [
+          {
+            "node": "Analisar Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisar Resultados": {
+      "main": [
+        [
+          {
+            "node": "Deve Alertar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deve Alertar?": {
+      "main": [
+        [
+          {
+            "node": "Alerta Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "4FLOQewHJGD97lkn"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "6f344e0e-bf7b-4a16-bdcd-ab995856035f",
+  "activeVersionId": "6f344e0e-bf7b-4a16-bdcd-ab995856035f",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-07-26T14:20:08.751Z",
+      "createdAt": "2026-07-26T14:20:08.751Z",
+      "role": "workflow:owner",
+      "workflowId": "JoG5ViyaPWcZzfSq",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-26T14:20:08.753Z",
+    "createdAt": "2026-07-26T14:20:08.753Z",
+    "versionId": "6f344e0e-bf7b-4a16-bdcd-ab995856035f",
+    "workflowId": "JoG5ViyaPWcZzfSq",
+    "nodes": [
+      {
+        "id": "schedule-hc",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 5
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "check-evo",
+        "name": "Verificar Evolution API",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          480,
+          200
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/instance/connectionState/purg-whatsapp",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "429683C4C977415CAAFCCE10F7D57E11"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 10000,
+            "response": {
+              "response": {
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "check-backend",
+        "name": "Verificar Backend",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          480,
+          400
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/nami/pendentes",
+          "options": {
+            "timeout": 10000,
+            "response": {
+              "response": {
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "analisar",
+        "name": "Analisar Resultados",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "language": "javaScript",
+          "jsCode": "const evoData = $('Verificar Evolution API').first().json;\nconst backData = $('Verificar Backend').first().json;\nconst evoStatus = evoData.instance?.state || evoData.state || 'unknown';\nconst evoOk = evoStatus === 'open';\nconst backOk = !backData.error && backData.$response?.status < 500;\n\n// Throttle: only alert once per 30 min per issue type\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst throttleMs = 30 * 60 * 1000;\n\nconst issues = [];\nif (!evoOk) {\n  const lastEvo = sd.lastEvoAlert || 0;\n  if (now - lastEvo > throttleMs) {\n    issues.push('❌ *WhatsApp desconectado* — status: ' + evoStatus);\n    sd.lastEvoAlert = now;\n  }\n}\nif (!backOk) {\n  const lastBack = sd.lastBackAlert || 0;\n  if (now - lastBack > throttleMs) {\n    issues.push('❌ *Backend offline* — status: ' + (backData.$response?.status || 'timeout'));\n    sd.lastBackAlert = now;\n  }\n}\n\nif (issues.length > 0) {\n  const msg = '⚠️ *Health Check — Problema Detectado*\\n\\n' + issues.join('\\n') + '\\n\\nVerifique em: https://n8n-n8n.rqkx8g.easypanel.host';\n  return [{ json: { shouldAlert: true, text: msg } }];\n}\nreturn [{ json: { shouldAlert: false } }];"
+        }
+      },
+      {
+        "id": "if-alert",
+        "name": "Deve Alertar?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          960,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "cond1",
+                "leftValue": "={{ $json.shouldAlert }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "tg-hc-alert",
+        "name": "Alerta Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1200,
+          200
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $json.text, parse_mode: 'Markdown' }) }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Verificar Evolution API",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Verificar Backend",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar Evolution API": {
+        "main": [
+          [
+            {
+              "node": "Analisar Resultados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar Backend": {
+        "main": [
+          [
+            {
+              "node": "Analisar Resultados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analisar Resultados": {
+        "main": [
+          [
+            {
+              "node": "Deve Alertar?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Deve Alertar?": {
+        "main": [
+          [
+            {
+              "node": "Alerta Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

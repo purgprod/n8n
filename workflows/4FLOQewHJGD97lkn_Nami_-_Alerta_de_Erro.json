@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-07-26T13:55:23.977Z",
+  "createdAt": "2026-07-26T13:55:23.977Z",
+  "id": "4FLOQewHJGD97lkn",
+  "name": "Nami - Alerta de Erro",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "error-trigger",
+      "name": "Erro Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "tg-alert-error",
+      "name": "Alerta Telegram Erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: '⚠️ *Erro no Workflow*\\n\\nWorkflow: ' + $json.workflow.name + '\\nNó: ' + ($json.execution.lastNodeExecuted || 'desconhecido') + '\\nErro: ' + ($json.execution.error?.message || 'sem detalhes') + '\\nExecução: ' + $json.execution.id, parse_mode: 'Markdown' }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Erro Trigger": {
+      "main": [
+        [
+          {
+            "node": "Alerta Telegram Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "035e9586-1874-46b0-9279-79410bc4f4d2",
+  "activeVersionId": "035e9586-1874-46b0-9279-79410bc4f4d2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-26T13:55:24.020Z",
+      "createdAt": "2026-07-26T13:55:24.020Z",
+      "role": "workflow:owner",
+      "workflowId": "4FLOQewHJGD97lkn",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-26T13:55:24.045Z",
+    "createdAt": "2026-07-26T13:55:24.045Z",
+    "versionId": "035e9586-1874-46b0-9279-79410bc4f4d2",
+    "workflowId": "4FLOQewHJGD97lkn",
+    "nodes": [
+      {
+        "id": "error-trigger",
+        "name": "Erro Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "tg-alert-error",
+        "name": "Alerta Telegram Erro",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: '⚠️ *Erro no Workflow*\\n\\nWorkflow: ' + $json.workflow.name + '\\nNó: ' + ($json.execution.lastNodeExecuted || 'desconhecido') + '\\nErro: ' + ($json.execution.error?.message || 'sem detalhes') + '\\nExecução: ' + $json.execution.id, parse_mode: 'Markdown' }) }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Erro Trigger": {
+        "main": [
+          [
+            {
+              "node": "Alerta Telegram Erro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

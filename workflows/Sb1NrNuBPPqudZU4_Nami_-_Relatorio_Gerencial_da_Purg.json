@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T23:09:59.218Z",
+  "updatedAt": "2026-07-26T13:58:41.561Z",
   "createdAt": "2026-05-11T14:27:56.702Z",
   "id": "Sb1NrNuBPPqudZU4",
   "name": "Nami - Relatorio Gerencial da Purg",
@@ -134,7 +134,10 @@
       "position": [
         980,
         300
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
     },
     {
       "parameters": {
@@ -154,34 +157,10 @@
           "id": "vW6hLLZSK4uh0bxJ",
           "name": "Google Gemini - Purg"
         }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "apikey",
-              "value": "429683C4C977415CAAFCCE10F7D57E11"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { number: \"120363425414158709@g.us\", text: $json.text } }}",
-        "options": {}
       },
-      "id": "send-whatsapp",
-      "name": "Enviar WhatsApp",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1420,
-        300
-      ]
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
     },
     {
       "parameters": {
@@ -351,26 +330,17 @@
       "main": [
         [
           {
-            "node": "Enviar WhatsApp",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Enviar Telegram",
             "type": "main",
             "index": 0
           }
         ]
       ]
-    },
-    "Enviar WhatsApp": {
-      "main": [
-        []
-      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "errorWorkflow": "4FLOQewHJGD97lkn"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -379,8 +349,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "61a3fa2d-df35-4d58-8ab8-3c28d2364bd5",
-  "activeVersionId": "61a3fa2d-df35-4d58-8ab8-3c28d2364bd5",
+  "versionId": "60f41ffa-73d3-48e7-a4b1-713348799e65",
+  "activeVersionId": "60f41ffa-73d3-48e7-a4b1-713348799e65",
   "triggerCount": 2,
   "shared": [
     {
@@ -392,9 +362,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-05T23:09:59.219Z",
-    "createdAt": "2026-07-05T23:09:59.219Z",
-    "versionId": "61a3fa2d-df35-4d58-8ab8-3c28d2364bd5",
+    "updatedAt": "2026-07-26T13:58:41.563Z",
+    "createdAt": "2026-07-26T13:58:41.563Z",
+    "versionId": "60f41ffa-73d3-48e7-a4b1-713348799e65",
     "workflowId": "Sb1NrNuBPPqudZU4",
     "nodes": [
       {
@@ -525,7 +495,10 @@
         "position": [
           980,
           300
-        ]
+        ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 10000
       },
       {
         "parameters": {
@@ -545,34 +518,10 @@
             "id": "vW6hLLZSK4uh0bxJ",
             "name": "Google Gemini - Purg"
           }
-        }
-      },
-      {
-        "parameters": {
-          "method": "POST",
-          "url": "https://evolution-api-evolution-api.rqkx8g.easypanel.host/message/sendText/purg-whatsapp",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "apikey",
-                "value": "429683C4C977415CAAFCCE10F7D57E11"
-              }
-            ]
-          },
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ { number: \"120363425414158709@g.us\", text: $json.text } }}",
-          "options": {}
         },
-        "id": "send-whatsapp",
-        "name": "Enviar WhatsApp",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          1420,
-          300
-        ]
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 10000
       },
       {
         "parameters": {
@@ -742,21 +691,11 @@
         "main": [
           [
             {
-              "node": "Enviar WhatsApp",
-              "type": "main",
-              "index": 0
-            },
-            {
               "node": "Enviar Telegram",
               "type": "main",
               "index": 0
             }
           ]
-        ]
-      },
-      "Enviar WhatsApp": {
-        "main": [
-          []
         ]
       }
     },
