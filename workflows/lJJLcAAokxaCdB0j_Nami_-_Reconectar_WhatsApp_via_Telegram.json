@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-26T14:20:47.293Z",
+  "updatedAt": "2026-07-26T22:39:24.187Z",
   "createdAt": "2026-07-26T14:20:47.293Z",
   "id": "lJJLcAAokxaCdB0j",
   "name": "Nami - Reconectar WhatsApp via Telegram",
@@ -179,7 +179,7 @@
         "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={ JSON.stringify({ chat_id: -5366316204, text: '✅ WhatsApp já está conectado! Nenhuma ação necessária.' }) }",
+        "jsonBody": "{\"chat_id\": -5366316204, \"text\": \"✅ WhatsApp já está conectado! Nenhuma ação necessária.\"}",
         "options": {}
       }
     }
@@ -255,8 +255,8 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "3efbcf42-3ac9-4317-a7e4-89105116a71b",
-  "activeVersionId": "3efbcf42-3ac9-4317-a7e4-89105116a71b",
+  "versionId": "2c24f942-17c5-4dfd-9227-58591f66e94d",
+  "activeVersionId": "2c24f942-17c5-4dfd-9227-58591f66e94d",
   "triggerCount": 1,
   "shared": [
     {
@@ -268,9 +268,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-26T14:20:47.295Z",
-    "createdAt": "2026-07-26T14:20:47.295Z",
-    "versionId": "3efbcf42-3ac9-4317-a7e4-89105116a71b",
+    "updatedAt": "2026-07-26T22:39:24.188Z",
+    "createdAt": "2026-07-26T22:39:24.188Z",
+    "versionId": "2c24f942-17c5-4dfd-9227-58591f66e94d",
     "workflowId": "lJJLcAAokxaCdB0j",
     "nodes": [
       {
@@ -446,7 +446,7 @@
           "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={ JSON.stringify({ chat_id: -5366316204, text: '✅ WhatsApp já está conectado! Nenhuma ação necessária.' }) }",
+          "jsonBody": "{\"chat_id\": -5366316204, \"text\": \"✅ WhatsApp já está conectado! Nenhuma ação necessária.\"}",
           "options": {}
         }
       }

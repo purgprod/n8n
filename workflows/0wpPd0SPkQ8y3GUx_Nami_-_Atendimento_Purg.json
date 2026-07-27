@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-26T17:00:59.703Z",
+  "updatedAt": "2026-07-26T23:00:59.961Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -458,7 +458,7 @@
     {
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst now = new Date();\nconst ONE_HOUR = 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nconst existing = sessions['wa_' + phone];\nconst isExpired = !existing || (now - new Date(existing.lastMessageAt)) > ONE_HOUR;\n\nlet sessionSuffix;\nif (isExpired) {\n  sessionSuffix = Math.floor(now.getTime() / ONE_HOUR) + '_' + Math.random().toString(36).slice(2, 6);\n  sessions['wa_' + phone] = { lastMessageAt: now.toISOString(), sessionSuffix: sessionSuffix };\n} else {\n  sessionSuffix = existing.sessionSuffix;\n  sessions['wa_' + phone].lastMessageAt = now.toISOString();\n}\n\nstaticData.waSessions = sessions;\n\nconst sessionId = 'wa_' + phone + '_' + sessionSuffix;\nconst isNewSession = isExpired;\n\nconst greetPattern = /^(oi|ol[aá]|bom dia|boa tarde|boa noite|hello|hi|hey|e a[ií]|eai|boa|salve|opa)[\\s!.,?]*$/i;\nconst isGreeting = greetPattern.test(data.text.trim());\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession,\n  isGreeting\n} }];"
+        "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst now = new Date();\nconst ONE_HOUR = 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nconst existing = sessions['wa_' + phone];\nconst isExpired = !existing || !existing.lastMessageAt || !existing.sessionSuffix || (now - new Date(existing.lastMessageAt)) > ONE_HOUR;\n\nlet sessionSuffix;\nif (isExpired) {\n  sessionSuffix = Math.floor(now.getTime() / ONE_HOUR) + '_' + Math.random().toString(36).slice(2, 6);\n  sessions['wa_' + phone] = { lastMessageAt: now.toISOString(), sessionSuffix: sessionSuffix };\n} else {\n  sessionSuffix = existing.sessionSuffix;\n  sessions['wa_' + phone].lastMessageAt = now.toISOString();\n}\n\nstaticData.waSessions = sessions;\n\nconst sessionId = 'wa_' + phone + '_' + sessionSuffix;\nconst isNewSession = isExpired;\n\nconst greetPattern = /^(oi|ol[aá]|bom dia|boa tarde|boa noite|hello|hi|hey|e a[ií]|eai|boa|salve|opa)[\\s!.,?]*$/i;\nconst isGreeting = greetPattern.test(data.text.trim());\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession,\n  isGreeting\n} }];"
       },
       "id": "node-wa-extract",
       "name": "Extrair Dados WA",
@@ -2247,11 +2247,6 @@
           ],
           "usuarioId": 15
         },
-        "wa_11949496342": {
-          "depositStep": "meta_vencida_confirm",
-          "metasVencidas": [],
-          "usuarioId": 2
-        },
         "wa_11982314820": {
           "depositStep": "meta_vencida_confirm",
           "metasVencidas": [
@@ -2269,17 +2264,37 @@
         }
       },
       "waThrottle": {
-        "11949496342": 1783378065873,
+        "11949496342": 1785090139004,
         "11996542819": 1780315972331,
         "11972727946": 1780630530956,
         "11997790345": 1781204507267
+      },
+      "chatHistory": {
+        "11949496342": [
+          {
+            "role": "user",
+            "content": "Dicas"
+          },
+          {
+            "role": "assistant",
+            "content": "Aqui estão algumas coisas que posso te contar:\n\n- Seus *_objetivos_*\n- Suas *_metas_*\n- Seus *_depósitos_*\n- Seus *_saques_*\n- Sua posição no *_ranking_*\n- Sua *_pontuação_*\n- Qual o seu *_patrimônio_*\n- Qual o seu *_rendimento_*\n- Seus *_pins_*\n- Fazer um depósito *_pix_*\n\nQual desses você quer saber?"
+          },
+          {
+            "role": "user",
+            "content": "Objetivo"
+          },
+          {
+            "role": "assistant",
+            "content": "📊 *_Seu objetivo_*\n\n🎯 *Patrimônio*\n\n💰 *_Valor total:_* R$ 600,00\n📈 *_Patrimônio:_* R$ 260,37 (43.4%)\n🏦 *_Aporte inicial:_* R$ 100,00 (feito)\n📋 *_Metas mensais:_* 8 total, 2 concluídas, 6 pendentes\n🔜 *_Próxima meta:_* R$ 62,50 até 31/07/2026 (alocado: R$ 35,37)"
+          }
+        ]
       }
     }
   },
   "meta": null,
   "pinData": {},
-  "versionId": "2d353651-0226-492e-bd3a-9332eb9e9d5c",
-  "activeVersionId": "2d353651-0226-492e-bd3a-9332eb9e9d5c",
+  "versionId": "85b29e5f-e3ab-4afc-a8e9-62e46ef07ce6",
+  "activeVersionId": "85b29e5f-e3ab-4afc-a8e9-62e46ef07ce6",
   "triggerCount": 4,
   "shared": [
     {
@@ -2291,9 +2306,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-26T14:31:11.615Z",
-    "createdAt": "2026-07-26T14:31:11.615Z",
-    "versionId": "2d353651-0226-492e-bd3a-9332eb9e9d5c",
+    "updatedAt": "2026-07-26T18:19:04.903Z",
+    "createdAt": "2026-07-26T18:19:04.903Z",
+    "versionId": "85b29e5f-e3ab-4afc-a8e9-62e46ef07ce6",
     "workflowId": "0wpPd0SPkQ8y3GUx",
     "nodes": [
       {
@@ -2748,7 +2763,7 @@
       {
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst now = new Date();\nconst ONE_HOUR = 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nconst existing = sessions['wa_' + phone];\nconst isExpired = !existing || (now - new Date(existing.lastMessageAt)) > ONE_HOUR;\n\nlet sessionSuffix;\nif (isExpired) {\n  sessionSuffix = Math.floor(now.getTime() / ONE_HOUR) + '_' + Math.random().toString(36).slice(2, 6);\n  sessions['wa_' + phone] = { lastMessageAt: now.toISOString(), sessionSuffix: sessionSuffix };\n} else {\n  sessionSuffix = existing.sessionSuffix;\n  sessions['wa_' + phone].lastMessageAt = now.toISOString();\n}\n\nstaticData.waSessions = sessions;\n\nconst sessionId = 'wa_' + phone + '_' + sessionSuffix;\nconst isNewSession = isExpired;\n\nconst greetPattern = /^(oi|ol[aá]|bom dia|boa tarde|boa noite|hello|hi|hey|e a[ií]|eai|boa|salve|opa)[\\s!.,?]*$/i;\nconst isGreeting = greetPattern.test(data.text.trim());\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession,\n  isGreeting\n} }];"
+          "jsCode": "const data = $input.first().json;\nconst phone = data.phone;\nconst now = new Date();\nconst ONE_HOUR = 60 * 60 * 1000;\n\nconst staticData = $getWorkflowStaticData('global');\nconst sessions = staticData.waSessions || {};\n\nconst existing = sessions['wa_' + phone];\nconst isExpired = !existing || !existing.lastMessageAt || !existing.sessionSuffix || (now - new Date(existing.lastMessageAt)) > ONE_HOUR;\n\nlet sessionSuffix;\nif (isExpired) {\n  sessionSuffix = Math.floor(now.getTime() / ONE_HOUR) + '_' + Math.random().toString(36).slice(2, 6);\n  sessions['wa_' + phone] = { lastMessageAt: now.toISOString(), sessionSuffix: sessionSuffix };\n} else {\n  sessionSuffix = existing.sessionSuffix;\n  sessions['wa_' + phone].lastMessageAt = now.toISOString();\n}\n\nstaticData.waSessions = sessions;\n\nconst sessionId = 'wa_' + phone + '_' + sessionSuffix;\nconst isNewSession = isExpired;\n\nconst greetPattern = /^(oi|ol[aá]|bom dia|boa tarde|boa noite|hello|hi|hey|e a[ií]|eai|boa|salve|opa)[\\s!.,?]*$/i;\nconst isGreeting = greetPattern.test(data.text.trim());\n\nreturn [{ json: {\n  phone,\n  remoteJid: data.remoteJid,\n  text: data.text,\n  sessionId,\n  isNewSession,\n  isGreeting\n} }];"
         },
         "id": "node-wa-extract",
         "name": "Extrair Dados WA",

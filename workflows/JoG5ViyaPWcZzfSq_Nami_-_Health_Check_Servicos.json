@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-26T14:20:08.745Z",
+  "updatedAt": "2026-07-26T22:29:10.601Z",
   "createdAt": "2026-07-26T14:20:08.745Z",
   "id": "JoG5ViyaPWcZzfSq",
   "name": "Nami - Health Check Servicos",
@@ -78,6 +78,15 @@
               "responseFormat": "json"
             }
           }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
         }
       }
     },
@@ -92,7 +101,7 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const evoData = $('Verificar Evolution API').first().json;\nconst backData = $('Verificar Backend').first().json;\nconst evoStatus = evoData.instance?.state || evoData.state || 'unknown';\nconst evoOk = evoStatus === 'open';\nconst backOk = !backData.error && backData.$response?.status < 500;\n\n// Throttle: only alert once per 30 min per issue type\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst throttleMs = 30 * 60 * 1000;\n\nconst issues = [];\nif (!evoOk) {\n  const lastEvo = sd.lastEvoAlert || 0;\n  if (now - lastEvo > throttleMs) {\n    issues.push('❌ *WhatsApp desconectado* — status: ' + evoStatus);\n    sd.lastEvoAlert = now;\n  }\n}\nif (!backOk) {\n  const lastBack = sd.lastBackAlert || 0;\n  if (now - lastBack > throttleMs) {\n    issues.push('❌ *Backend offline* — status: ' + (backData.$response?.status || 'timeout'));\n    sd.lastBackAlert = now;\n  }\n}\n\nif (issues.length > 0) {\n  const msg = '⚠️ *Health Check — Problema Detectado*\\n\\n' + issues.join('\\n') + '\\n\\nVerifique em: https://n8n-n8n.rqkx8g.easypanel.host';\n  return [{ json: { shouldAlert: true, text: msg } }];\n}\nreturn [{ json: { shouldAlert: false } }];"
+        "jsCode": "const evoData = $('Verificar Evolution API').first().json;\nconst backData = $('Verificar Backend').first().json;\n\nconst evoStatus = (evoData.instance && evoData.instance.state) || evoData.state || 'unknown';\nconst evoOk = evoStatus === 'open';\n\n// Backend está DOWN apenas se houve erro de conexão (timeout/refused)\n// Um erro de autenticação (401) significa que o backend ESTÁ respondendo\nconst backError = typeof backData.error === 'string' ? backData.error : '';\nconst backIsConnectionError = backError.includes('ECONNREFUSED') || \n  backError.includes('ETIMEDOUT') || \n  backError.includes('ENOTFOUND') ||\n  backError.includes('socket hang up');\nconst backOk = !backIsConnectionError;\n\n// Throttle: só alerta uma vez a cada 30 min por tipo de problema\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst throttleMs = 30 * 60 * 1000;\n\nconst issues = [];\nif (!evoOk) {\n  const lastEvo = sd.lastEvoAlert || 0;\n  if (now - lastEvo > throttleMs) {\n    issues.push('❌ *WhatsApp desconectado* — status: ' + evoStatus);\n    sd.lastEvoAlert = now;\n  }\n}\nif (!backOk) {\n  const lastBack = sd.lastBackAlert || 0;\n  if (now - lastBack > throttleMs) {\n    issues.push('❌ *Backend offline* — erro: ' + backError.substring(0, 100));\n    sd.lastBackAlert = now;\n  }\n}\n\nif (issues.length > 0) {\n  const msg = '⚠️ *Health Check — Problema Detectado*\\n\\n' + issues.join('\\n') + '\\n\\nVerifique em: https://n8n-n8n.rqkx8g.easypanel.host';\n  return [{ json: { shouldAlert: true, text: msg } }];\n}\nreturn [{ json: { shouldAlert: false } }];"
       }
     },
     {
@@ -153,11 +162,6 @@
             "node": "Verificar Evolution API",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Verificar Backend",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -166,7 +170,7 @@
       "main": [
         [
           {
-            "node": "Analisar Resultados",
+            "node": "Verificar Backend",
             "type": "main",
             "index": 0
           }
@@ -210,17 +214,20 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "errorWorkflow": "4FLOQewHJGD97lkn"
+    "errorWorkflow": ""
   },
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": []
+    },
+    "global": {
+      "lastBackAlert": 1785104751095
     }
   },
   "meta": null,
   "pinData": null,
-  "versionId": "6f344e0e-bf7b-4a16-bdcd-ab995856035f",
-  "activeVersionId": "6f344e0e-bf7b-4a16-bdcd-ab995856035f",
+  "versionId": "f09af74c-e69b-4bce-9ed0-a0eabee7e2e2",
+  "activeVersionId": "f09af74c-e69b-4bce-9ed0-a0eabee7e2e2",
   "triggerCount": 1,
   "shared": [
     {
@@ -232,9 +239,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-26T14:20:08.753Z",
-    "createdAt": "2026-07-26T14:20:08.753Z",
-    "versionId": "6f344e0e-bf7b-4a16-bdcd-ab995856035f",
+    "updatedAt": "2026-07-26T22:29:10.602Z",
+    "createdAt": "2026-07-26T22:29:10.602Z",
+    "versionId": "f09af74c-e69b-4bce-9ed0-a0eabee7e2e2",
     "workflowId": "JoG5ViyaPWcZzfSq",
     "nodes": [
       {
@@ -309,6 +316,15 @@
                 "responseFormat": "json"
               }
             }
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
           }
         }
       },
@@ -323,7 +339,7 @@
         ],
         "parameters": {
           "language": "javaScript",
-          "jsCode": "const evoData = $('Verificar Evolution API').first().json;\nconst backData = $('Verificar Backend').first().json;\nconst evoStatus = evoData.instance?.state || evoData.state || 'unknown';\nconst evoOk = evoStatus === 'open';\nconst backOk = !backData.error && backData.$response?.status < 500;\n\n// Throttle: only alert once per 30 min per issue type\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst throttleMs = 30 * 60 * 1000;\n\nconst issues = [];\nif (!evoOk) {\n  const lastEvo = sd.lastEvoAlert || 0;\n  if (now - lastEvo > throttleMs) {\n    issues.push('❌ *WhatsApp desconectado* — status: ' + evoStatus);\n    sd.lastEvoAlert = now;\n  }\n}\nif (!backOk) {\n  const lastBack = sd.lastBackAlert || 0;\n  if (now - lastBack > throttleMs) {\n    issues.push('❌ *Backend offline* — status: ' + (backData.$response?.status || 'timeout'));\n    sd.lastBackAlert = now;\n  }\n}\n\nif (issues.length > 0) {\n  const msg = '⚠️ *Health Check — Problema Detectado*\\n\\n' + issues.join('\\n') + '\\n\\nVerifique em: https://n8n-n8n.rqkx8g.easypanel.host';\n  return [{ json: { shouldAlert: true, text: msg } }];\n}\nreturn [{ json: { shouldAlert: false } }];"
+          "jsCode": "const evoData = $('Verificar Evolution API').first().json;\nconst backData = $('Verificar Backend').first().json;\n\nconst evoStatus = (evoData.instance && evoData.instance.state) || evoData.state || 'unknown';\nconst evoOk = evoStatus === 'open';\n\n// Backend está DOWN apenas se houve erro de conexão (timeout/refused)\n// Um erro de autenticação (401) significa que o backend ESTÁ respondendo\nconst backError = typeof backData.error === 'string' ? backData.error : '';\nconst backIsConnectionError = backError.includes('ECONNREFUSED') || \n  backError.includes('ETIMEDOUT') || \n  backError.includes('ENOTFOUND') ||\n  backError.includes('socket hang up');\nconst backOk = !backIsConnectionError;\n\n// Throttle: só alerta uma vez a cada 30 min por tipo de problema\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst throttleMs = 30 * 60 * 1000;\n\nconst issues = [];\nif (!evoOk) {\n  const lastEvo = sd.lastEvoAlert || 0;\n  if (now - lastEvo > throttleMs) {\n    issues.push('❌ *WhatsApp desconectado* — status: ' + evoStatus);\n    sd.lastEvoAlert = now;\n  }\n}\nif (!backOk) {\n  const lastBack = sd.lastBackAlert || 0;\n  if (now - lastBack > throttleMs) {\n    issues.push('❌ *Backend offline* — erro: ' + backError.substring(0, 100));\n    sd.lastBackAlert = now;\n  }\n}\n\nif (issues.length > 0) {\n  const msg = '⚠️ *Health Check — Problema Detectado*\\n\\n' + issues.join('\\n') + '\\n\\nVerifique em: https://n8n-n8n.rqkx8g.easypanel.host';\n  return [{ json: { shouldAlert: true, text: msg } }];\n}\nreturn [{ json: { shouldAlert: false } }];"
         }
       },
       {
@@ -384,11 +400,6 @@
               "node": "Verificar Evolution API",
               "type": "main",
               "index": 0
-            },
-            {
-              "node": "Verificar Backend",
-              "type": "main",
-              "index": 0
             }
           ]
         ]
@@ -397,7 +408,7 @@
         "main": [
           [
             {
-              "node": "Analisar Resultados",
+              "node": "Verificar Backend",
               "type": "main",
               "index": 0
             }
