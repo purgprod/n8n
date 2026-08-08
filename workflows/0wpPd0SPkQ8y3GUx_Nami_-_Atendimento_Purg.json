@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-08T11:01:02.965Z",
+  "updatedAt": "2026-08-08T17:01:05.891Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -2264,7 +2264,7 @@
         }
       },
       "waThrottle": {
-        "11949496342": 1785596585678,
+        "11949496342": 1786196193570,
         "11996542819": 1780315972331,
         "11972727946": 1780630530956,
         "11997790345": 1781204507267
@@ -2286,6 +2286,14 @@
           {
             "role": "assistant",
             "content": "📊 *_Seu objetivo_*\n\n🎯 *Patrimônio*\n\n💰 *_Valor total:_* R$ 600,00\n📈 *_Patrimônio:_* R$ 260,37 (43.4%)\n🏦 *_Aporte inicial:_* R$ 100,00 (feito)\n📋 *_Metas mensais:_* 8 total, 2 concluídas, 6 pendentes\n🔜 *_Próxima meta:_* R$ 62,50 até 31/07/2026 (alocado: R$ 35,37)"
+          },
+          {
+            "role": "user",
+            "content": "Dicas"
+          },
+          {
+            "role": "assistant",
+            "content": "Aqui estão algumas coisas que posso te contar:\n\n- Seus *_objetivos_*\n- Suas *_metas_*\n- Seus *_depósitos_*\n- Seus *_saques_*\n- Sua posição no *_ranking_*\n- Sua *_pontuação_*\n- Qual o seu *_patrimônio_*\n- Qual o seu *_rendimento_*\n- Seus *_pins_*\n- Fazer um depósito *_pix_*\n\nQual desses você quer saber?"
           }
         ]
       }
