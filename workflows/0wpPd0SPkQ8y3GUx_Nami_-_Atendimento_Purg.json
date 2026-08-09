@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-09T11:01:08.380Z",
+  "updatedAt": "2026-08-09T17:00:59.441Z",
   "createdAt": "2026-04-28T00:54:08.258Z",
   "id": "0wpPd0SPkQ8y3GUx",
   "name": "Nami - Atendimento Purg",
@@ -53,7 +53,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        430,
+        560,
         304
       ]
     },
@@ -1473,6 +1473,53 @@
         "language": "javaScript",
         "jsCode": "const phone = $('Extrair Dados WA').first().json.phone;\nconst userMsg = $('Extrair Dados WA').first().json.text || '';\nconst aiResp = $input.first().json.output || '';\n\nif (!phone || !aiResp) return $input.all();\n\nconst sd = $getWorkflowStaticData('global');\nif (!sd.chatHistory) sd.chatHistory = {};\nif (!sd.chatHistory[phone]) sd.chatHistory[phone] = [];\n\nsd.chatHistory[phone].push({ role: 'user', content: userMsg.substring(0, 600) });\nsd.chatHistory[phone].push({ role: 'assistant', content: aiResp.substring(0, 600) });\n\n// Keep last 40 messages (20 exchanges) per user\nif (sd.chatHistory[phone].length > 40) {\n  sd.chatHistory[phone] = sd.chatHistory[phone].slice(-40);\n}\n\nreturn $input.all();"
       }
+    },
+    {
+      "id": "validar-secret-node",
+      "name": "Validar Secret",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        380,
+        304
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-secret",
+              "leftValue": "={{ $json.headers['x-purg-chat-secret'] }}",
+              "rightValue": "R8KtfV8Sm91H2armjwfYziL2dIdbp066KbZ8OdEF",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "resposta-negada-node",
+      "name": "Resposta Negada",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        560,
+        500
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\": \"Bad request\"}",
+        "options": {
+          "responseCode": 400
+        }
+      }
     }
   ],
   "connections": {
@@ -1480,7 +1527,7 @@
       "main": [
         [
           {
-            "node": "É iniciar sessão?",
+            "node": "Validar Secret",
             "type": "main",
             "index": 0
           }
@@ -2208,6 +2255,24 @@
         ],
         []
       ]
+    },
+    "Validar Secret": {
+      "main": [
+        [
+          {
+            "node": "É iniciar sessão?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta Negada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -2301,8 +2366,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "85b29e5f-e3ab-4afc-a8e9-62e46ef07ce6",
-  "activeVersionId": "85b29e5f-e3ab-4afc-a8e9-62e46ef07ce6",
+  "versionId": "1c4a872a-1cf7-4f9e-ac3b-9873cb62a740",
+  "activeVersionId": "1c4a872a-1cf7-4f9e-ac3b-9873cb62a740",
   "triggerCount": 4,
   "shared": [
     {
@@ -2314,9 +2379,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-26T18:19:04.903Z",
-    "createdAt": "2026-07-26T18:19:04.903Z",
-    "versionId": "85b29e5f-e3ab-4afc-a8e9-62e46ef07ce6",
+    "updatedAt": "2026-08-09T15:57:38.459Z",
+    "createdAt": "2026-08-09T15:57:38.459Z",
+    "versionId": "1c4a872a-1cf7-4f9e-ac3b-9873cb62a740",
     "workflowId": "0wpPd0SPkQ8y3GUx",
     "nodes": [
       {
@@ -2366,7 +2431,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          430,
+          560,
           304
         ]
       },
@@ -3786,6 +3851,53 @@
           "language": "javaScript",
           "jsCode": "const phone = $('Extrair Dados WA').first().json.phone;\nconst userMsg = $('Extrair Dados WA').first().json.text || '';\nconst aiResp = $input.first().json.output || '';\n\nif (!phone || !aiResp) return $input.all();\n\nconst sd = $getWorkflowStaticData('global');\nif (!sd.chatHistory) sd.chatHistory = {};\nif (!sd.chatHistory[phone]) sd.chatHistory[phone] = [];\n\nsd.chatHistory[phone].push({ role: 'user', content: userMsg.substring(0, 600) });\nsd.chatHistory[phone].push({ role: 'assistant', content: aiResp.substring(0, 600) });\n\n// Keep last 40 messages (20 exchanges) per user\nif (sd.chatHistory[phone].length > 40) {\n  sd.chatHistory[phone] = sd.chatHistory[phone].slice(-40);\n}\n\nreturn $input.all();"
         }
+      },
+      {
+        "id": "validar-secret-node",
+        "name": "Validar Secret",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          380,
+          304
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-secret",
+                "leftValue": "={{ $json.headers['x-purg-chat-secret'] }}",
+                "rightValue": "R8KtfV8Sm91H2armjwfYziL2dIdbp066KbZ8OdEF",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "resposta-negada-node",
+        "name": "Resposta Negada",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          560,
+          500
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "{\"error\": \"Bad request\"}",
+          "options": {
+            "responseCode": 400
+          }
+        }
       }
     ],
     "connections": {
@@ -3793,7 +3905,7 @@
         "main": [
           [
             {
-              "node": "É iniciar sessão?",
+              "node": "Validar Secret",
               "type": "main",
               "index": 0
             }
@@ -4520,6 +4632,24 @@
             }
           ],
           []
+        ]
+      },
+      "Validar Secret": {
+        "main": [
+          [
+            {
+              "node": "É iniciar sessão?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Resposta Negada",
+              "type": "main",
+              "index": 0
+            }
+          ]
         ]
       }
     },
