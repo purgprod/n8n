@@ -1,0 +1,545 @@
+{
+  "updatedAt": "2026-09-06T23:25:53.549Z",
+  "createdAt": "2026-09-06T22:56:25.417Z",
+  "id": "qw3wWSBlBw2SS2Yv",
+  "name": "Nami - Status das Rotinas",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule-node",
+      "name": "Schedule 8h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "buscar-jinx",
+      "name": "Buscar Rotinas Jinx",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/nami/rotinas-status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "buscar-relatorio",
+      "name": "Buscar Relatorio Gerencial",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=Sb1NrNuBPPqudZU4&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "buscar-health",
+      "name": "Buscar Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=JoG5ViyaPWcZzfSq&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "buscar-limpeza",
+      "name": "Buscar Limpeza Sessoes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=kfSlsBkus79brwRG&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "buscar-copom",
+      "name": "Buscar Aviso COPOM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=DvxOYCHKJU0y2KZ5&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "montar-relatorio",
+      "name": "Montar Relatorio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst N13H = 13 * 60 * 60 * 1000;\nconst N10M = 10 * 60 * 1000;\nconst N2H  =  2 * 60 * 60 * 1000;\n\n// JINX: leitura dinâmica via endpoint\nconst jinxData   = $('Buscar Rotinas Jinx').first().json;\nconst jinxRotinas = jinxData.rotinas || [];\n\n// N8N: check via API de execuções\nfunction checkN8n(nodeName, maxAgeMs, label) {\n  const execs = ($( nodeName ).first().json.data || []);\n  if (!execs.length) return { ok: false, label, detail: 'nunca executou' };\n  const e = execs[0];\n  const age = now - new Date(e.startedAt);\n  const tooOld = maxAgeMs ? age > maxAgeMs : false;\n  const ok = e.status === 'success' && !tooOld;\n  const mins = Math.floor(age / 60000);\n  const hrs  = Math.floor(age / 3600000);\n  const days = Math.floor(age / 86400000);\n  let when = mins < 60 ? `há ${mins} min` : hrs < 24 ? `há ${hrs}h` : `há ${days}d`;\n  if (tooOld) when += ' — inativo';\n  return { ok, label, detail: when };\n}\n\nconst n8nRotinas = [\n  checkN8n('Buscar Relatorio Gerencial', N13H, 'Relatório Gerencial'),\n  checkN8n('Buscar Health Check',        N10M, 'Health Check'),\n  checkN8n('Buscar Limpeza Sessoes',     N2H,  'Limpeza de Sessões'),\n  checkN8n('Buscar Aviso COPOM',         null, 'Aviso COPOM'),\n];\n\n// Contagens\nconst okN8n   = n8nRotinas.filter(r => r.ok).length;\nconst failN8n = n8nRotinas.filter(r => !r.ok);\nconst okJinx   = jinxRotinas.filter(r => r.ok).length;\nconst failJinx = jinxRotinas.filter(r => !r.ok);\nconst total    = n8nRotinas.length + jinxRotinas.length;\nconst totalOk  = okN8n + okJinx;\nconst nFail    = total - totalOk;\nconst allOk    = nFail === 0;\n\nconst dateStr = now.toLocaleDateString('pt-BR',  { timeZone: 'America/Sao_Paulo' });\nconst timeStr = now.toLocaleTimeString('pt-BR',  { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });\n\nlet msg = `📊 *Status das Rotinas — ${dateStr} ${timeStr}*\\n`;\nmsg += allOk\n  ? `🟢 Todas as ${total} rotinas OK\\n`\n  : `🔴 *${nFail} falha${nFail > 1 ? 's' : ''} em ${total} rotinas*\\n`;\n\n// Seção N8N\nmsg += `\\n*N8N* (${okN8n}/${n8nRotinas.length})\\n`;\nfor (const r of n8nRotinas) {\n  msg += `${r.ok ? '✅' : '❌'} ${r.label} — ${r.detail}\\n`;\n}\n\n// Seção JINX\nmsg += `\\n*JINX* (${okJinx}/${jinxRotinas.length})\\n`;\nif (failJinx.length === 0) {\n  msg += `✅ Todas as ${jinxRotinas.length} rodaram com sucesso hoje\\n`;\n} else {\n  for (const r of failJinx) {\n    msg += `❌ ${r.descricao || r.nome} — não rodou hoje ou falhou\\n`;\n  }\n  if (okJinx > 0) msg += `✅ ${okJinx} outras rodaram com sucesso\\n`;\n}\n\nreturn [{ json: { text: msg.trim() } }];"
+      }
+    },
+    {
+      "id": "enviar-telegram",
+      "name": "Enviar Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $json.text, parse_mode: 'Markdown' }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule 8h": {
+      "main": [
+        [
+          {
+            "node": "Buscar Rotinas Jinx",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Rotinas Jinx": {
+      "main": [
+        [
+          {
+            "node": "Buscar Relatorio Gerencial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Relatorio Gerencial": {
+      "main": [
+        [
+          {
+            "node": "Buscar Health Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Health Check": {
+      "main": [
+        [
+          {
+            "node": "Buscar Limpeza Sessoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Limpeza Sessoes": {
+      "main": [
+        [
+          {
+            "node": "Buscar Aviso COPOM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Aviso COPOM": {
+      "main": [
+        [
+          {
+            "node": "Montar Relatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Relatorio": {
+      "main": [
+        [
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule 8h": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "ba11ca31-7533-4f5d-a745-97f13df4532e",
+  "activeVersionId": "ba11ca31-7533-4f5d-a745-97f13df4532e",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-09-06T22:56:25.474Z",
+      "createdAt": "2026-09-06T22:56:25.474Z",
+      "role": "workflow:owner",
+      "workflowId": "qw3wWSBlBw2SS2Yv",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-09-06T23:25:53.550Z",
+    "createdAt": "2026-09-06T23:25:53.550Z",
+    "versionId": "ba11ca31-7533-4f5d-a745-97f13df4532e",
+    "workflowId": "qw3wWSBlBw2SS2Yv",
+    "nodes": [
+      {
+        "id": "schedule-node",
+        "name": "Schedule 8h",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 8 * * *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "buscar-jinx",
+        "name": "Buscar Rotinas Jinx",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          300,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/nami/rotinas-status",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "buscar-relatorio",
+        "name": "Buscar Relatorio Gerencial",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          500,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=Sb1NrNuBPPqudZU4&limit=1",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "buscar-health",
+        "name": "Buscar Health Check",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          700,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=JoG5ViyaPWcZzfSq&limit=1",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "buscar-limpeza",
+        "name": "Buscar Limpeza Sessoes",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          900,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=kfSlsBkus79brwRG&limit=1",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "buscar-copom",
+        "name": "Buscar Aviso COPOM",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://n8n-n8n.rqkx8g.easypanel.host/api/v1/executions?workflowId=DvxOYCHKJU0y2KZ5&limit=1",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTFlNTBmYS1hMDE1LTQzZGEtYmFiNS1jODdiMWJlYjNjYjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZTUxMTdiOTktMzcwYy00NDNhLTkwY2UtZmVkYzBjY2Y3NmE2IiwiaWF0IjoxNzc3MzM0NTcwfQ.bOXnKoKvcO2fCHmJoZvD0iF7sZrHABp9y0byNe1uR5g"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "montar-relatorio",
+        "name": "Montar Relatorio",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const now = new Date();\nconst N13H = 13 * 60 * 60 * 1000;\nconst N10M = 10 * 60 * 1000;\nconst N2H  =  2 * 60 * 60 * 1000;\n\n// JINX: leitura dinâmica via endpoint\nconst jinxData   = $('Buscar Rotinas Jinx').first().json;\nconst jinxRotinas = jinxData.rotinas || [];\n\n// N8N: check via API de execuções\nfunction checkN8n(nodeName, maxAgeMs, label) {\n  const execs = ($( nodeName ).first().json.data || []);\n  if (!execs.length) return { ok: false, label, detail: 'nunca executou' };\n  const e = execs[0];\n  const age = now - new Date(e.startedAt);\n  const tooOld = maxAgeMs ? age > maxAgeMs : false;\n  const ok = e.status === 'success' && !tooOld;\n  const mins = Math.floor(age / 60000);\n  const hrs  = Math.floor(age / 3600000);\n  const days = Math.floor(age / 86400000);\n  let when = mins < 60 ? `há ${mins} min` : hrs < 24 ? `há ${hrs}h` : `há ${days}d`;\n  if (tooOld) when += ' — inativo';\n  return { ok, label, detail: when };\n}\n\nconst n8nRotinas = [\n  checkN8n('Buscar Relatorio Gerencial', N13H, 'Relatório Gerencial'),\n  checkN8n('Buscar Health Check',        N10M, 'Health Check'),\n  checkN8n('Buscar Limpeza Sessoes',     N2H,  'Limpeza de Sessões'),\n  checkN8n('Buscar Aviso COPOM',         null, 'Aviso COPOM'),\n];\n\n// Contagens\nconst okN8n   = n8nRotinas.filter(r => r.ok).length;\nconst failN8n = n8nRotinas.filter(r => !r.ok);\nconst okJinx   = jinxRotinas.filter(r => r.ok).length;\nconst failJinx = jinxRotinas.filter(r => !r.ok);\nconst total    = n8nRotinas.length + jinxRotinas.length;\nconst totalOk  = okN8n + okJinx;\nconst nFail    = total - totalOk;\nconst allOk    = nFail === 0;\n\nconst dateStr = now.toLocaleDateString('pt-BR',  { timeZone: 'America/Sao_Paulo' });\nconst timeStr = now.toLocaleTimeString('pt-BR',  { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });\n\nlet msg = `📊 *Status das Rotinas — ${dateStr} ${timeStr}*\\n`;\nmsg += allOk\n  ? `🟢 Todas as ${total} rotinas OK\\n`\n  : `🔴 *${nFail} falha${nFail > 1 ? 's' : ''} em ${total} rotinas*\\n`;\n\n// Seção N8N\nmsg += `\\n*N8N* (${okN8n}/${n8nRotinas.length})\\n`;\nfor (const r of n8nRotinas) {\n  msg += `${r.ok ? '✅' : '❌'} ${r.label} — ${r.detail}\\n`;\n}\n\n// Seção JINX\nmsg += `\\n*JINX* (${okJinx}/${jinxRotinas.length})\\n`;\nif (failJinx.length === 0) {\n  msg += `✅ Todas as ${jinxRotinas.length} rodaram com sucesso hoje\\n`;\n} else {\n  for (const r of failJinx) {\n    msg += `❌ ${r.descricao || r.nome} — não rodou hoje ou falhou\\n`;\n  }\n  if (okJinx > 0) msg += `✅ ${okJinx} outras rodaram com sucesso\\n`;\n}\n\nreturn [{ json: { text: msg.trim() } }];"
+        }
+      },
+      {
+        "id": "enviar-telegram",
+        "name": "Enviar Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1500,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $json.text, parse_mode: 'Markdown' }) }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Schedule 8h": {
+        "main": [
+          [
+            {
+              "node": "Buscar Rotinas Jinx",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Rotinas Jinx": {
+        "main": [
+          [
+            {
+              "node": "Buscar Relatorio Gerencial",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Relatorio Gerencial": {
+        "main": [
+          [
+            {
+              "node": "Buscar Health Check",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Health Check": {
+        "main": [
+          [
+            {
+              "node": "Buscar Limpeza Sessoes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Limpeza Sessoes": {
+        "main": [
+          [
+            {
+              "node": "Buscar Aviso COPOM",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Aviso COPOM": {
+        "main": [
+          [
+            {
+              "node": "Montar Relatorio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Relatorio": {
+        "main": [
+          [
+            {
+              "node": "Enviar Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
