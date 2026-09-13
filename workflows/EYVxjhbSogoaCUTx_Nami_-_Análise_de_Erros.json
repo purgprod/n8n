@@ -271,7 +271,10 @@
       "err_Erro_de_teste_E2E_falha_TOTALMENTE_diferente_api_v1_depositos_25": 1789255092865,
       "err_Erro_de_teste_HTTP_crash_de_tela_simulado_TelaTesteHTTP": 1789255183078,
       "err_Falha_simulada_pra_testar_inje_o_de_ticket_id_teste_500": 1789255199807,
-      "err_Falha_simulada_testando_os_DOIS_overrides_de_res_json_juntos_teste_500": 1789258642775
+      "err_Falha_simulada_testando_os_DOIS_overrides_de_res_json_juntos_teste_500": 1789258642775,
+      "err_Unexpected_token_i_ensagem_invalido_is_not_valid_JSON_api_v1_erros_reportar": 1789320100278,
+      "err_TypeError_Cannot_read_properties_of_undefined_reading_saldo_Objetivos": 1789320157887,
+      "err_Erro_simulado_de_auditoria_teste_do_sistema_de_tickets_api_v1_teste_auditoria": 1789320198638
     }
   },
   "meta": null,
