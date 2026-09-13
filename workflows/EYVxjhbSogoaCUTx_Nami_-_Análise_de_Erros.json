@@ -270,7 +270,8 @@
       "err_ReferenceError_usuario_is_not_defined_api_webhook_nami_usuarios_por_celular": 1789249230773,
       "err_Erro_de_teste_E2E_falha_TOTALMENTE_diferente_api_v1_depositos_25": 1789255092865,
       "err_Erro_de_teste_HTTP_crash_de_tela_simulado_TelaTesteHTTP": 1789255183078,
-      "err_Falha_simulada_pra_testar_inje_o_de_ticket_id_teste_500": 1789255199807
+      "err_Falha_simulada_pra_testar_inje_o_de_ticket_id_teste_500": 1789255199807,
+      "err_Falha_simulada_testando_os_DOIS_overrides_de_res_json_juntos_teste_500": 1789258642775
     }
   },
   "meta": null,
