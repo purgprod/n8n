@@ -1,0 +1,555 @@
+{
+  "updatedAt": "2026-09-12T21:40:12.583Z",
+  "createdAt": "2026-09-12T19:55:00.255Z",
+  "id": "EYVxjhbSogoaCUTx",
+  "name": "Nami - Análise de Erros",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh-erro",
+      "name": "Webhook Erro",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nami-erro-analise",
+        "responseMode": "onReceived",
+        "responseData": "noData"
+      },
+      "webhookId": "nami-erro-analise-001"
+    },
+    {
+      "id": "extrair-path",
+      "name": "Extrair Path",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Deduplicação — ignora o mesmo erro por 5 min\nconst staticData = $getWorkflowStaticData('global');\nconst errKey = 'err_' + (($json.body?.error_message || '').substring(0, 80) + '|' + ($json.body?.route || '')).replace(/\\W+/g, '_');\nconst lastSent = staticData[errKey] || 0;\nif (Date.now() - lastSent < 5 * 60 * 1000) return [];\nstaticData[errKey] = Date.now();\n\n// Extrair caminho do arquivo a partir do stack trace\nconst stack = $json.body?.stack_trace || '';\nlet filePath = null;\nlet lineNumber = null;\nfor (const line of stack.split('\\n')) {\n  const m = line.match(/\\(\\/app\\/(.+?):(\\d+):\\d+\\)/);\n  if (m && !m[1].includes('node_modules')) {\n    filePath = m[1];\n    lineNumber = parseInt(m[2]);\n    break;\n  }\n}\n\nreturn [{ json: {\n  error_message: $json.body?.error_message || 'Erro desconhecido',\n  stack_trace:   $json.body?.stack_trace   || '',\n  route:         $json.body?.route         || '',\n  method:        $json.body?.method        || 'GET',\n  request_body:  $json.body?.request_body  || '{}',\n  timestamp:     $json.body?.timestamp     || new Date().toISOString(),\n  file_path:     filePath,\n  line_number:   lineNumber,\n} }];"
+      }
+    },
+    {
+      "id": "buscar-codigo",
+      "name": "Buscar Código Fonte",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        300
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/arquivo-codigo?path=' + encodeURIComponent($json.file_path || '') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 8000
+        }
+      }
+    },
+    {
+      "id": "buscar-logs",
+      "name": "Buscar Logs Recentes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        300
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "https://jinx.purg.com.br/api/webhook/nami/logs-recentes?limit=80",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 8000
+        }
+      }
+    },
+    {
+      "id": "montar-prompt",
+      "name": "Montar Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const data = $('Extrair Path').first().json;\n\n// Código fonte (pode ter falhado)\nlet sourceCode = 'Código não disponível';\ntry {\n  const cd = $('Buscar Código Fonte').first().json;\n  if (cd.content) sourceCode = cd.content;\n} catch(e) {}\n\n// Logs recentes (pode ter falhado)\nlet logsRecentes = 'Logs não disponíveis';\ntry {\n  const ld = $('Buscar Logs Recentes').first().json;\n  if (ld.logs) logsRecentes = ld.logs;\n} catch(e) {}\n\nconst loc = data.file_path\n  ? `${data.file_path}${data.line_number ? ':' + data.line_number : ''}`\n  : 'arquivo não identificado';\n\nconst chatInput = `Você é um engenheiro sênior de Node.js analisando um erro em produção do backend Jinx (Express.js) da Purg.\n\nERRO DETECTADO:\n- Mensagem: ${data.error_message}\n- Rota: ${data.method} ${data.route}\n- Horário: ${data.timestamp}\n- Localização: ${loc}\n- Body da requisição: ${data.request_body}\n\nSTACK TRACE:\n${data.stack_trace.substring(0, 1500)}\n\nCÓDIGO FONTE (${loc}):\n${sourceCode.substring(0, 3000)}\n\nLOGS RECENTES (últimas 80 linhas):\n${logsRecentes.substring(0, 1500)}\n\nResponda em português com EXATAMENTE estas 3 seções:\n\n🔍 CAUSA RAÍZ\nExplique em 2-3 frases o que causou o erro e por quê.\n\n⚠️ IMPACTO\nQuais funcionalidades ou usuários foram afetados por este erro.\n\n🛠️ CORREÇÃO PARA O CLAUDE\nEscreva um prompt pronto para colar no Claude Code, em português, especificando: arquivo, linha aproximada, e exatamente o que mudar no código. Seja direto e técnico, sem introdução.`;\n\nreturn [{ json: { ...data, chatInput } }];"
+      }
+    },
+    {
+      "id": "gemini-model",
+      "name": "Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        500
+      ],
+      "parameters": {
+        "modelName": "gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vW6hLLZSK4uh0bxJ",
+          "name": "Google Gemini - Purg"
+        }
+      }
+    },
+    {
+      "id": "analisar-ia",
+      "name": "Analisar com IA",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "promptType": "auto",
+        "options": {}
+      }
+    },
+    {
+      "id": "formatar-tg",
+      "name": "Formatar Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const analysis = ($json.text || $json.output || $json.response || 'Análise não disponível').trim();\nconst data = $('Extrair Path').first().json;\n\nconst ts = new Date(data.timestamp).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });\nconst loc = data.file_path\n  ? `\\`${data.file_path}${data.line_number ? ':' + data.line_number : ''}\\``\n  : '';\n\nconst header = [\n  `🚨 *Erro em Produção — Jinx*`,\n  `📅 ${ts}`,\n  `🌐 \\`${data.method} ${data.route}\\``,\n  loc ? `📁 ${loc}` : '',\n].filter(Boolean).join('\\n');\n\nconst footer = '\\n\\n---\\n⚠️ _Análise preliminar gerada pelo Gemini. Cole a sugestão acima no Claude para ele se aprofundar e aplicar a correção._';\n\nconst msg = header + '\\n\\n' + analysis + footer;\nreturn [{ json: { text: msg.substring(0, 4090) } }];"
+      }
+    },
+    {
+      "id": "enviar-tg",
+      "name": "Enviar Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $json.text, parse_mode: 'Markdown' }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Erro": {
+      "main": [
+        [
+          {
+            "node": "Extrair Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Path": {
+      "main": [
+        [
+          {
+            "node": "Buscar Código Fonte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Código Fonte": {
+      "main": [
+        [
+          {
+            "node": "Buscar Logs Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Logs Recentes": {
+      "main": [
+        [
+          {
+            "node": "Montar Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Prompt": {
+      "main": [
+        [
+          {
+            "node": "Analisar com IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisar com IA": {
+      "main": [
+        [
+          {
+            "node": "Formatar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Telegram": {
+      "main": [
+        [
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analisar com IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "err_TypeError_Cannot_read_properties_of_undefined_reading_usuario_id_api_webhook_nami_log_mensagem": 1789246566369,
+      "err_Erro_interno_ao_gerar_cobran_a_PIX_api_webhook_nami_usuarios_42_pix_cobrar": 1789247056997,
+      "err_Access_denied_for_user_localhost_using_password_NO_database_purg_js": 1789248277699,
+      "err_ReferenceError_usuario_is_not_defined_api_webhook_nami_usuarios_por_celular": 1789249230773,
+      "err_Erro_de_teste_E2E_falha_TOTALMENTE_diferente_api_v1_depositos_25": 1789255092865,
+      "err_Erro_de_teste_HTTP_crash_de_tela_simulado_TelaTesteHTTP": 1789255183078,
+      "err_Falha_simulada_pra_testar_inje_o_de_ticket_id_teste_500": 1789255199807
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "9365f317-b858-486f-bfe2-fdf54bca5b3d",
+  "activeVersionId": "9365f317-b858-486f-bfe2-fdf54bca5b3d",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-09-12T19:55:00.264Z",
+      "createdAt": "2026-09-12T19:55:00.264Z",
+      "role": "workflow:owner",
+      "workflowId": "EYVxjhbSogoaCUTx",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-09-12T21:40:12.585Z",
+    "createdAt": "2026-09-12T21:40:12.585Z",
+    "versionId": "9365f317-b858-486f-bfe2-fdf54bca5b3d",
+    "workflowId": "EYVxjhbSogoaCUTx",
+    "nodes": [
+      {
+        "id": "wh-erro",
+        "name": "Webhook Erro",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          100,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "nami-erro-analise",
+          "responseMode": "onReceived",
+          "responseData": "noData"
+        },
+        "webhookId": "nami-erro-analise-001"
+      },
+      {
+        "id": "extrair-path",
+        "name": "Extrair Path",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          300,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// Deduplicação — ignora o mesmo erro por 5 min\nconst staticData = $getWorkflowStaticData('global');\nconst errKey = 'err_' + (($json.body?.error_message || '').substring(0, 80) + '|' + ($json.body?.route || '')).replace(/\\W+/g, '_');\nconst lastSent = staticData[errKey] || 0;\nif (Date.now() - lastSent < 5 * 60 * 1000) return [];\nstaticData[errKey] = Date.now();\n\n// Extrair caminho do arquivo a partir do stack trace\nconst stack = $json.body?.stack_trace || '';\nlet filePath = null;\nlet lineNumber = null;\nfor (const line of stack.split('\\n')) {\n  const m = line.match(/\\(\\/app\\/(.+?):(\\d+):\\d+\\)/);\n  if (m && !m[1].includes('node_modules')) {\n    filePath = m[1];\n    lineNumber = parseInt(m[2]);\n    break;\n  }\n}\n\nreturn [{ json: {\n  error_message: $json.body?.error_message || 'Erro desconhecido',\n  stack_trace:   $json.body?.stack_trace   || '',\n  route:         $json.body?.route         || '',\n  method:        $json.body?.method        || 'GET',\n  request_body:  $json.body?.request_body  || '{}',\n  timestamp:     $json.body?.timestamp     || new Date().toISOString(),\n  file_path:     filePath,\n  line_number:   lineNumber,\n} }];"
+        }
+      },
+      {
+        "id": "buscar-codigo",
+        "name": "Buscar Código Fonte",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          500,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://jinx.purg.com.br/api/webhook/nami/arquivo-codigo?path=' + encodeURIComponent($json.file_path || '') }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 8000
+          }
+        }
+      },
+      {
+        "id": "buscar-logs",
+        "name": "Buscar Logs Recentes",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          700,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "GET",
+          "url": "https://jinx.purg.com.br/api/webhook/nami/logs-recentes?limit=80",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "3ec424b8d22ed1409cd687a7df344b446e6ad2180eb6955996e805d706340126"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 8000
+          }
+        }
+      },
+      {
+        "id": "montar-prompt",
+        "name": "Montar Prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          900,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const data = $('Extrair Path').first().json;\n\n// Código fonte (pode ter falhado)\nlet sourceCode = 'Código não disponível';\ntry {\n  const cd = $('Buscar Código Fonte').first().json;\n  if (cd.content) sourceCode = cd.content;\n} catch(e) {}\n\n// Logs recentes (pode ter falhado)\nlet logsRecentes = 'Logs não disponíveis';\ntry {\n  const ld = $('Buscar Logs Recentes').first().json;\n  if (ld.logs) logsRecentes = ld.logs;\n} catch(e) {}\n\nconst loc = data.file_path\n  ? `${data.file_path}${data.line_number ? ':' + data.line_number : ''}`\n  : 'arquivo não identificado';\n\nconst chatInput = `Você é um engenheiro sênior de Node.js analisando um erro em produção do backend Jinx (Express.js) da Purg.\n\nERRO DETECTADO:\n- Mensagem: ${data.error_message}\n- Rota: ${data.method} ${data.route}\n- Horário: ${data.timestamp}\n- Localização: ${loc}\n- Body da requisição: ${data.request_body}\n\nSTACK TRACE:\n${data.stack_trace.substring(0, 1500)}\n\nCÓDIGO FONTE (${loc}):\n${sourceCode.substring(0, 3000)}\n\nLOGS RECENTES (últimas 80 linhas):\n${logsRecentes.substring(0, 1500)}\n\nResponda em português com EXATAMENTE estas 3 seções:\n\n🔍 CAUSA RAÍZ\nExplique em 2-3 frases o que causou o erro e por quê.\n\n⚠️ IMPACTO\nQuais funcionalidades ou usuários foram afetados por este erro.\n\n🛠️ CORREÇÃO PARA O CLAUDE\nEscreva um prompt pronto para colar no Claude Code, em português, especificando: arquivo, linha aproximada, e exatamente o que mudar no código. Seja direto e técnico, sem introdução.`;\n\nreturn [{ json: { ...data, chatInput } }];"
+        }
+      },
+      {
+        "id": "gemini-model",
+        "name": "Google Gemini",
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          1100,
+          500
+        ],
+        "parameters": {
+          "modelName": "gemini-2.5-flash-lite",
+          "options": {}
+        },
+        "credentials": {
+          "googlePalmApi": {
+            "id": "vW6hLLZSK4uh0bxJ",
+            "name": "Google Gemini - Purg"
+          }
+        }
+      },
+      {
+        "id": "analisar-ia",
+        "name": "Analisar com IA",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.4,
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "promptType": "auto",
+          "options": {}
+        }
+      },
+      {
+        "id": "formatar-tg",
+        "name": "Formatar Telegram",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const analysis = ($json.text || $json.output || $json.response || 'Análise não disponível').trim();\nconst data = $('Extrair Path').first().json;\n\nconst ts = new Date(data.timestamp).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });\nconst loc = data.file_path\n  ? `\\`${data.file_path}${data.line_number ? ':' + data.line_number : ''}\\``\n  : '';\n\nconst header = [\n  `🚨 *Erro em Produção — Jinx*`,\n  `📅 ${ts}`,\n  `🌐 \\`${data.method} ${data.route}\\``,\n  loc ? `📁 ${loc}` : '',\n].filter(Boolean).join('\\n');\n\nconst footer = '\\n\\n---\\n⚠️ _Análise preliminar gerada pelo Gemini. Cole a sugestão acima no Claude para ele se aprofundar e aplicar a correção._';\n\nconst msg = header + '\\n\\n' + analysis + footer;\nreturn [{ json: { text: msg.substring(0, 4090) } }];"
+        }
+      },
+      {
+        "id": "enviar-tg",
+        "name": "Enviar Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1500,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: -5366316204, text: $json.text, parse_mode: 'Markdown' }) }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook Erro": {
+        "main": [
+          [
+            {
+              "node": "Extrair Path",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extrair Path": {
+        "main": [
+          [
+            {
+              "node": "Buscar Código Fonte",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Código Fonte": {
+        "main": [
+          [
+            {
+              "node": "Buscar Logs Recentes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Logs Recentes": {
+        "main": [
+          [
+            {
+              "node": "Montar Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Prompt": {
+        "main": [
+          [
+            {
+              "node": "Analisar com IA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analisar com IA": {
+        "main": [
+          [
+            {
+              "node": "Formatar Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar Telegram": {
+        "main": [
+          [
+            {
+              "node": "Enviar Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Analisar com IA",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
