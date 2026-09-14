@@ -274,7 +274,9 @@
       "err_Falha_simulada_testando_os_DOIS_overrides_de_res_json_juntos_teste_500": 1789258642775,
       "err_Unexpected_token_i_ensagem_invalido_is_not_valid_JSON_api_v1_erros_reportar": 1789320100278,
       "err_TypeError_Cannot_read_properties_of_undefined_reading_saldo_Objetivos": 1789320157887,
-      "err_Erro_simulado_de_auditoria_teste_do_sistema_de_tickets_api_v1_teste_auditoria": 1789320198638
+      "err_Erro_simulado_de_auditoria_teste_do_sistema_de_tickets_api_v1_teste_auditoria": 1789320198638,
+      "err_Erro_ao_processar_dep_sito_de_R_45_20_para_usu_rio_123_Deposit": 1789341785947,
+      "err_Erro_simulado_teste_do_controller_admin_de_erros_api_v1_teste_admin_controller": 1789342124236
     }
   },
   "meta": null,
