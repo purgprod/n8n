@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-10-02T22:36:59.450Z",
+  "createdAt": "2026-10-02T22:36:59.450Z",
+  "id": "lhggpRI8vVMzv7sg",
+  "name": "Purg Video Studio - Alerta de Erro",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "node-error-trigger",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"chat_id\": \"-5517289175\", \"text\": \"🔴 Falha no workflow de tempo real do Telegram (n8n nao conseguiu avisar o Purg Video Studio): \" + $json.execution.error.message } }}",
+        "options": {}
+      },
+      "id": "node-alerta",
+      "name": "Avisa no Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Avisa no Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "456b2577-f927-4fc8-9e67-f71badc86b7c",
+  "activeVersionId": "456b2577-f927-4fc8-9e67-f71badc86b7c",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-10-02T22:36:59.452Z",
+      "createdAt": "2026-10-02T22:36:59.452Z",
+      "role": "workflow:owner",
+      "workflowId": "lhggpRI8vVMzv7sg",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-10-02T22:36:59.453Z",
+    "createdAt": "2026-10-02T22:36:59.453Z",
+    "versionId": "456b2577-f927-4fc8-9e67-f71badc86b7c",
+    "workflowId": "lhggpRI8vVMzv7sg",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "node-error-trigger",
+        "name": "Error Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.telegram.org/bot8921425982:AAGn1SMCs7Az7GTDL__XIXSvtE4w_o7bcKM/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { \"chat_id\": \"-5517289175\", \"text\": \"🔴 Falha no workflow de tempo real do Telegram (n8n nao conseguiu avisar o Purg Video Studio): \" + $json.execution.error.message } }}",
+          "options": {}
+        },
+        "id": "node-alerta",
+        "name": "Avisa no Telegram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          300,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Avisa no Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}

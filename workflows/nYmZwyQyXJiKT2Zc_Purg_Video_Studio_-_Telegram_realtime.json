@@ -1,0 +1,160 @@
+{
+  "updatedAt": "2026-10-02T22:37:16.726Z",
+  "createdAt": "2026-10-02T22:29:22.769Z",
+  "id": "nYmZwyQyXJiKT2Zc",
+  "name": "Purg Video Studio - Telegram realtime",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "purg-video-studio-telegram",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Telegram Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "purg-video-studio-telegram"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jinx-dev.purg.com.br/purg-video-studio-webhook",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "R8KtfV8Sm91H2armjwfYziL2dIdbp066KbZ8OdEF"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "node-http",
+      "name": "Dispara processamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram Webhook": {
+      "main": [
+        [
+          {
+            "node": "Dispara processamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "lhggpRI8vVMzv7sg"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "70f2a031-a5fc-47a2-861e-95d048e9a8f8",
+  "activeVersionId": "70f2a031-a5fc-47a2-861e-95d048e9a8f8",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-10-02T22:29:22.774Z",
+      "createdAt": "2026-10-02T22:29:22.774Z",
+      "role": "workflow:owner",
+      "workflowId": "nYmZwyQyXJiKT2Zc",
+      "projectId": "l16jDOjXVVpFFpWJ"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-10-02T22:37:16.727Z",
+    "createdAt": "2026-10-02T22:37:16.727Z",
+    "versionId": "70f2a031-a5fc-47a2-861e-95d048e9a8f8",
+    "workflowId": "nYmZwyQyXJiKT2Zc",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "purg-video-studio-telegram",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "node-webhook",
+        "name": "Telegram Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "purg-video-studio-telegram"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://jinx-dev.purg.com.br/purg-video-studio-webhook",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-Webhook-Secret",
+                "value": "R8KtfV8Sm91H2armjwfYziL2dIdbp066KbZ8OdEF"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.body }}",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "node-http",
+        "name": "Dispara processamento",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          300,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Telegram Webhook": {
+        "main": [
+          [
+            {
+              "node": "Dispara processamento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Purg TriHold",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
